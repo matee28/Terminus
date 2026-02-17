@@ -12,7 +12,7 @@ class Camera:
         Inicializuje kameru.
 
         Args:
-            position (tuple[float, float]): počáteční pozice kamery (x, y)
+            position (tuple[float, float]): počáteční souřadnice kamery (x, y)
             move_speed (float): rychlost pohybu kamery
             zoom (float): počáteční přiblížení pohledu kamery
             max_zoom (float): maximální přiblížení pohledu kamery
@@ -71,10 +71,10 @@ class Camera:
 
     def set_position(self, position: tuple[float, float]):
         """
-        Přesouvá kameru na zadanou pozici.
+        Přesouvá kameru na zadané souřadnice.
 
         Args:
-            position (tuple[float, float]): nová pozice kamery (x, y)
+            position (tuple[float, float]): nové souřadnice kamery (x, y)
         """
         self.position = position
 
@@ -106,7 +106,7 @@ class Game:
     
     def __floor_tuple(self, tuple: tuple[float, float]):
         """
-        Zaokrouhluje pozici na celá čísla.
+        Zaokrouhluje souřadnice na celá čísla.
 
         Args:
             tuple (tuple[float, float]): tuple s dvěma float hodnotami
@@ -139,10 +139,10 @@ class Game:
 
     def relative_position(self, position: tuple[float, float]):
         """
-        Převádí absolutní souřadnice na relativní souřadnice.
+        Převádí světové souřadnice na relativní souřadnice.
 
         Args:
-            position (tuple[float, float]): absolutní souřadnice (x, y)
+            position (tuple[float, float]): světová souřadnice (x, y)
         """
         return (
             position[0] - self.camera.position[0],
@@ -151,20 +151,34 @@ class Game:
 
     def screen_position(self, position: tuple[float, float]):
         """
-        Převádí absolutní souřadnice na souřadnice na obrazovce.
+        Převádí světové souřadnice na souřadnice na obrazovce.
 
         Args:
-            position (tuple[float, float]): absolutní souřadnice (x, y)
+            position (tuple[float, float]): světová souřadnice (x, y)
         """
         rel_position = self.relative_position(position)
         return (
             rel_position[0] * self.camera.zoom + self.screen.get_width()/2,
             rel_position[1] * self.camera.zoom + self.screen.get_height()/2
         )
+    
+    def world_position(self, screen_position: tuple[float, float]):
+        """
+        Převádí souřadnice na obrazovce na světové souřadnice.
+
+        Args:
+            screen_position (tuple[float, float]): souřadnice na obrazovce (x, y)
+        """
+        rel_x = (screen_position[0] - self.screen.get_width() / 2) / self.camera.zoom
+        rel_y = (screen_position[1] - self.screen.get_height() / 2) / self.camera.zoom
+        return (
+            rel_x + self.camera.position[0],
+            rel_y + self.camera.position[1]
+        )
 
     def calculate_alignment(self, position: tuple[float, float], size: tuple[float, float], x_alignment: str, y_alignment: str):
         """
-        Vypočítává pozici pro zadané zarovnání.
+        Vypočítává souřadnice pro zadané zarovnání.
 
         Args:
             position (tuple[float, float]): souřadnice (x, y)
@@ -203,24 +217,24 @@ class Game:
         image = pygame.image.load(path)
         self.images[name] = image
 
-    def draw_debug_dot(self, absolute_position: tuple[float, float], size=10):
+    def draw_debug_dot(self, world_position: tuple[float, float], size=10):
         """
-        Vykreslí debugovací bod na zadané pozici.
+        Vykreslí debugovací bod na zadané souřadnici.
 
         Args:
-            absolute_position (tuple[float, float]): absolutní pozice bodu (x, y)
+            world_position (tuple[float, float]): světové souřadnice (x, y)
             size (int; default: 10): velikost bodu
         """
-        pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(absolute_position), size*self.camera.zoom)
-        pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(absolute_position), 2)
+        pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(world_position), size*self.camera.zoom)
+        pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(world_position), 2)
 
-    def render_image(self, texture_name: str, absolute_position: tuple[float, float], size: tuple[float, float], rotation: float = 0, x_alignment: str = "center", y_alignment: str = "center", tiled: bool = False):
+    def render_image(self, texture_name: str, world_position: tuple[float, float], size: tuple[float, float], rotation: float = 0, x_alignment: str = "center", y_alignment: str = "center", tiled: bool = False):
         """
         Vykreslí obrázek uložený v paměti.
 
         Args:
             texture_name (str): název obrázku v slovníku
-            absolute_position (tuple[float, float]): absolutní pozice obrázku (x, y)
+            world_position (tuple[float, float]): světové souřadnice obrázku (x, y)
             size (tuple[float, float]): velikost obrázku (výška, šířka)
             rotation (float; default: 0): rotace obrázku ve stupních
             x_alignment (str; default: "center"): zarovnání v ose x (viz funkce calculate_alignment)
@@ -238,7 +252,7 @@ class Game:
             if rotation != 0:
                 texture = pygame.transform.rotate(texture, rotation)
 
-            position = self.__floor_tuple(self.screen_position(absolute_position))
+            position = self.__floor_tuple(self.screen_position(world_position))
 
             position = self.calculate_alignment(position, size, x_alignment, y_alignment)
 

@@ -39,13 +39,15 @@ def event_handler(event: pygame.event.Event):
 def loop():
     game.render_image(
         texture_name="terrain",
-        absolute_position=(0, 0),
+        world_position=(0, 0),
         size=(200, 200),
         tiled=True
     )
     game.draw_debug_dot((0, 0))
     game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
     game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 30))
+
+    game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
 
 
 game.run(
