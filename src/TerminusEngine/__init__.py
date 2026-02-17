@@ -203,15 +203,16 @@ class Game:
         image = pygame.image.load(path)
         self.images[name] = image
 
-    def draw_debug_dot(self, absolute_position: tuple[float, float]):
+    def draw_debug_dot(self, absolute_position: tuple[float, float], size=10):
         """
         Vykreslí debugovací bod na zadané pozici.
 
         Args:
             absolute_position (tuple[float, float]): absolutní pozice bodu (x, y)
+            size (int; default: 10): velikost bodu
         """
-        pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(absolute_position), 20*self.camera.zoom)
-        pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(absolute_position), 5)
+        pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(absolute_position), size*self.camera.zoom)
+        pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(absolute_position), 2)
 
     def render_image(self, texture_name: str, absolute_position: tuple[float, float], size: tuple[float, float], rotation: float = 0, x_alignment: str = "center", y_alignment: str = "center", tiled: bool = False):
         """

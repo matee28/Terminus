@@ -1,9 +1,9 @@
 import pygame
 import TerminusEngine
+from TerminusEngine import World
 
 pygame.font.init()
 font = pygame.font.SysFont("Comic Sans MS", 30)
-
 
 camera = TerminusEngine.Camera(
     position=(0, 0),
