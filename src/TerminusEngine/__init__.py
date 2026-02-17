@@ -162,6 +162,36 @@ class Game:
             rel_position[1] * self.camera.zoom + self.screen.get_height()/2
         )
 
+    def calculate_alignment(self, position: tuple[float, float], size: tuple[float, float], x_alignment: str, y_alignment: str):
+        """
+        Vypočítává pozici pro zadané zarovnání.
+
+        Args:
+            position (tuple[float, float]): souřadnice (x, y)
+            size (tuple[float, float]): velikost objektu (výška, šířka)
+            x_alignment (str): zarovnání v ose x ("left", "center", "right")
+            y_alignment (str): zarovnání v ose y ("top", "center", "bottom")
+        """
+        x_alignment = x_alignment.lower().strip()
+        y_alignment = y_alignment.lower().strip()
+
+        position_x, position_y = position
+        size_x, size_y = size
+
+        if x_alignment == "center":
+            position_x = position_x - size_x/2
+        elif x_alignment == "right":
+            position_x = position_x - size_x
+        # left nic
+        
+        if y_alignment == "center":
+            position_y = position_y - size_y/2
+        elif y_alignment == "bottom":
+            position_y = position_y - size_y
+        # top nic
+
+        return (position_x, position_y)
+
     def load_image(self, name: str, path: str):
         """
         Načítá obrázek a ukládá ho do paměti.
@@ -183,7 +213,7 @@ class Game:
         pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(absolute_position), 20*self.camera.zoom)
         pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(absolute_position), 5)
 
-    def render_image(self, texture_name: str, absolute_position: tuple[float, float], size: tuple[float, float], rotation: float = 0, tiled: bool = False):
+    def render_image(self, texture_name: str, absolute_position: tuple[float, float], size: tuple[float, float], rotation: float = 0, x_alignment: str = "center", y_alignment: str = "center", tiled: bool = False):
         """
         Vykreslí obrázek uložený v paměti.
 
@@ -191,8 +221,10 @@ class Game:
             texture_name (str): název obrázku v slovníku
             absolute_position (tuple[float, float]): absolutní pozice obrázku (x, y)
             size (tuple[float, float]): velikost obrázku (výška, šířka)
-            rotation (float): rotace obrázku ve stupních
-            tiled (bool): zda se má obrázek vykreslit jako dlaždice
+            rotation (float; default: 0): rotace obrázku ve stupních
+            x_alignment (str; default: "center"): zarovnání v ose x (viz funkce calculate_alignment)
+            y_alignment (str; default: "center"): zarovnání v ose y (viz funkce calculate_alignment)
+            tiled (bool; default: False): zda se má obrázek vykreslit jako dlaždice
         """
         if texture_name in self.images:
 
@@ -206,6 +238,8 @@ class Game:
                 texture = pygame.transform.rotate(texture, rotation)
 
             position = self.__floor_tuple(self.screen_position(absolute_position))
+
+            position = self.calculate_alignment(position, size, x_alignment, y_alignment)
 
             position_x, position_y = position
             size_x, size_y = size    
