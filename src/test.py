@@ -1,6 +1,6 @@
 import pygame
 import TerminusEngine
-from TerminusEngine import World
+from TerminusEngine import World, Vehicles
 
 pygame.font.init()
 font = pygame.font.SysFont("Comic Sans MS", 30)

@@ -20,7 +20,7 @@ class Station:
     """
     Reprezentuje stanici.
     """
-    def __init__(self, city: City, name: str, position: tuple[float, float], capacity: int, tracks: int):
+    def __init__(self, city: City, name: str, position: tuple[float, float], passenger_capacity: int, cargo_capacity: float, tracks: int):
         """
         Inicializuje stanici.
 
@@ -28,13 +28,30 @@ class Station:
             city (City): město, ve kterém se stanice nachází
             name (str): název
             position (tuple[float, float]): pozice (x, y)
-            capacity (int): kapacita stanice
-            tracks (int): počet kolejí ve stanici
+            passenger_capacity (int): kapacita stanice pro osoby
+            cargo_capacity (float): kapacita stanice pro nákladní
+            tracks (int): počet kolejí ve stanici = počet vlaků, které mohou být ve stanici současně
         """
         self.city = city
         self.name = name
         self.position = position
-        self.capacity = capacity
+        self.passenger_capacity = passenger_capacity
+        self.cargo_capacity = cargo_capacity
         self.tracks = tracks
         
         self.city.stations.append(self)
+
+class Railway:
+    """
+    Reprezentuje železniční trať.
+    """
+    def __init__(self, name: str, stations: list[Station]):
+        """
+        Inicializuje železniční trať.
+
+        Args:
+            name (str): název
+            stations (list[Station]): seznam stanic, kterými trať prochází
+        """
+        self.name = name
+        self.stations = stations
