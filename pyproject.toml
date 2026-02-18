@@ -1,6 +1,5 @@
 [project]
 name = "Terminus"
-version = "0.0.1"
 authors = [
   { name="Matěj Šindelář", email="102618601+matee28@users.noreply.github.com" },
 ]
@@ -18,10 +17,11 @@ license-files = [
     "LICENSE",
 ]
 
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "version"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+version = {file = "VERSION"}
 
 
 [project.scripts]
