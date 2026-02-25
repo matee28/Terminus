@@ -12,7 +12,7 @@ def main():
         position=(0, 0),
         move_speed=1.0,
         zoom=1.0,
-        max_zoom=10.0,
+        max_zoom=2.5,
         min_zoom=0.1,
         zoom_speed=1.5
     )
@@ -24,7 +24,8 @@ def main():
     )
 
 
-    game.load_image("terrain", "src/assets/terrain/rocky_terrain_02_diff_1k.png")
+    game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
+    game.load_image("rail_tile", "assets/rails/rail_tile_1.png")
 
 
     def event_handler(event: pygame.event.Event):
@@ -46,9 +47,11 @@ def main():
             size=(200, 200),
             tiled=True
         )
+
         game.draw_debug_dot((0, 0))
         game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
         game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 30))
+        game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 60))
 
         game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
 
