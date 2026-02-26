@@ -25,7 +25,7 @@ def main():
 
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
-    game.load_image("rail_tile", "assets/rails/rail_tile_1.png")
+    game.load_image("rail_tile", "assets/rails/rail_tile_1_small.png", rotation=90)
 
 
     def event_handler(event: pygame.event.Event):
@@ -51,12 +51,19 @@ def main():
             tiled=True
         )
 
+        game.render_image_path(
+            texture_name="rail_tile",
+            distance=10,
+            path=[(0, 0), (-100, 100), (200, 330)]
+        )
+
         game.draw_debug_dot((0, 0))
         game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
         game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
         game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
 
         game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
+        game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
 
     game.run(
