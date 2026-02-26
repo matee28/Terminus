@@ -173,7 +173,7 @@ class Game:
         """
         return (
             position[0] - self.camera.position[0],
-            position[1] - self.camera.position[1] # +, protože pygame má obráceně osu y
+            position[1] - self.camera.position[1]
         )
 
     def screen_position(self, position: tuple[float, float]):
@@ -186,7 +186,7 @@ class Game:
         rel_position = self.relative_position(position)
         return (
             rel_position[0] * self.camera.zoom + self.screen.get_width()/2,
-            rel_position[1] * self.camera.zoom + self.screen.get_height()/2
+            -rel_position[1] * self.camera.zoom + self.screen.get_height()/2
         )
     
     def world_position(self, screen_position: tuple[float, float]):
@@ -200,7 +200,7 @@ class Game:
         rel_y = (screen_position[1] - self.screen.get_height() / 2) / self.camera.zoom
         return (
             rel_x + self.camera.position[0],
-            rel_y + self.camera.position[1]
+            -rel_y + self.camera.position[1]
         )
 
     def calculate_alignment(self, position: tuple[float, float], size: tuple[float, float], x_alignment: str, y_alignment: str):
