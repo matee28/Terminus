@@ -1,10 +1,11 @@
 # Terminus
 
 ## Instalace
+
 ```
 git clone https://github.com/matee28/Terminus
 cd Terminus
-pip install .
+pip install -e .
 ```
 Po instalaci lze hru (zatím pouze testovací verzi) spustit příkazem:
 ```

@@ -1,13 +1,12 @@
 [project]
 name = "Terminus"
-version = "0.0.1"
 authors = [
   { name="Matěj Šindelář", email="102618601+matee28@users.noreply.github.com" },
 ]
 
 description = "Pygame simulátor železničního magnáta"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -18,10 +17,11 @@ license-files = [
     "LICENSE",
 ]
 
-dynamic = ["dependencies"]
+dynamic = ["dependencies", "version"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+version = {file = "VERSION"}
 
 
 [project.scripts]
