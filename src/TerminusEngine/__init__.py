@@ -426,5 +426,5 @@ class Game:
             #         self.render_image(texture_name, position, size, deg, x_alignment="right", y_alignment="center", tiled=False)
             for position, heading in points:
                 self.render_image(texture_name, position, size, rotation + heading, x_alignment="right", y_alignment="center", tiled=False)
-            for position, _ in points:
-                self.draw_debug_dot(position, 2)
+            # for position, _ in points:
+                # self.draw_debug_dot(position, 2)

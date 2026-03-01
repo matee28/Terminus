@@ -54,7 +54,7 @@ def main():
         game.render_image_path(
             texture_name="rail_tile",
             distance=10,
-            path=[(0, 0), (-100, 100), (200, 330)]
+            path=[(0, 0), (-100, 100), (-200, 330), (-300, 1000)]
         )
 
         game.draw_debug_dot((0, 0))
