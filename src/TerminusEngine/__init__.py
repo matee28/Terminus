@@ -119,6 +119,9 @@ class Game:
         self.images = {}
         self.texture_cache = {}
         self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
+
+        self.path_cache = {}
+        
         self.camera = camera
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -431,7 +434,13 @@ class Game:
             rotation (float; default: 0): rotace obrázku ve stupních
         """
         if texture_name in self.images:
-            points = self.__points_on_path(path, distance)
+            path_key = (tuple(path), distance)
+            if path_key in self.path_cache:
+                points = self.path_cache[path_key]
+            else:
+                points = self.__points_on_path(path, distance)
+                self.path_cache[path_key] = points
+
             # for position, _ in points:
             #     for deg in range(0, 360, 30):
             #         self.render_image(texture_name, position, size, deg, x_alignment="right", y_alignment="center", tiled=False)
