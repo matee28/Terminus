@@ -1,3 +1,18 @@
+WORLD_SCALE_M_PX = 8 # kolik px je 1 metr
+
+class WorldGenerator:
+    """
+    Generuje svět.
+    """
+    def __init__(self, boundary_radius: float, ):
+        """
+        Inicializuje generátor světa.
+
+        Args:
+            boundary_radius (float): poloměr hranice světa v metrech
+        """
+        self.boundary_radius = boundary_radius
+
 class City:
     """
     Reprezentuje město.
