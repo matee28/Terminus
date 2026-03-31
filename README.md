@@ -46,4 +46,7 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 ## Poznámky
 
 ### Měřítko
-Velikost pixelu ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
+Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
+
+### Seznam měst s železničními stanicemi
+Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=34462).
