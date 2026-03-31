@@ -141,14 +141,14 @@ class Game:
         """
         return os.path.join(self.src_path, relative_path)
     
-    def __floor_tuple(self, tuple: tuple[float, float]):
+    def __ceil_tuple(self, tuple: tuple[float, float]):
         """
-        Zaokrouhluje souřadnice na celá čísla.
+        Zaokrouhluje souřadnice nahoru na celá čísla.
 
         Args:
             tuple (tuple[float, float]): tuple s dvěma float hodnotami
         """
-        return (math.floor(tuple[0]), math.floor(tuple[1]))
+        return (math.ceil(tuple[0]), math.ceil(tuple[1]))
 
     def run(self, loop: callable, event_handler: callable):
         """
@@ -315,7 +315,7 @@ class Game:
             if size[1] == 0:
                 size = (size[0], texture.get_size()[1])
 
-            size = self.__floor_tuple((size[0] * self.camera.zoom, size[1] * self.camera.zoom))
+            size = self.__ceil_tuple((size[0] * self.camera.zoom, size[1] * self.camera.zoom))
 
             texture_cache_key = (texture_name, size, rotation)
             if texture_cache_key in self.texture_cache:
