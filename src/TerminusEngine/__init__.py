@@ -117,6 +117,8 @@ class Game:
         """
 
         self.images = {}
+        self.texture_cache = {}
+        self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
         self.camera = camera
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -311,7 +313,18 @@ class Game:
                 size = (size[0], texture.get_size()[1])
 
             size = self.__floor_tuple((size[0] * self.camera.zoom, size[1] * self.camera.zoom))
-            texture = pygame.transform.scale(texture, size)
+
+            texture_cache_key = (texture_name, size, rotation)
+            if texture_cache_key in self.texture_cache:
+                texture = self.texture_cache[texture_cache_key]
+            else:
+                texture = pygame.transform.scale(texture, size)
+                texture = self.rotate_image(texture, rotation)
+                self.texture_cache[texture_cache_key] = texture
+                
+                if len(self.texture_cache) > self.max_texture_cache_size: # cache přesahuje max velikost
+                    oldest_key = list(self.texture_cache.keys())[0]
+                    del self.texture_cache[oldest_key]
 
 
 
@@ -338,8 +351,6 @@ class Game:
             rotated_vec = vec
             if rotation != 0:
                 rotated_vec = vec.rotate(-rotation)
-
-            texture = self.rotate_image(texture, rotation)
 
             pos = self.screen_position(world_position)
             final_center_x = pos[0] - rotated_vec.x
