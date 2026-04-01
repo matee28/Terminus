@@ -9,6 +9,13 @@ from shapely.geometry import LineString, Point
 # systém souřadnic enginu: +y je nahoru; +x je doprava
 
 
+def read_src(path):
+    """
+    Vrací obsah souboru (string) ve složce src/.
+    """
+    return open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", path)), "r", encoding="utf-8").read()
+
+
 class Camera:
     """
     Inicializuje a uchovává atributy kamery.

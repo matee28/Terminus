@@ -78,6 +78,9 @@ class World:
         """
         self.cities = cities
 
+    def __str__(self):
+        return f"Města:\n" + "\n".join([f"\t{city.name} (populace: {city.population}, pozice: {city.position}, stanice: {', '.join([station.name for station in city.stations])})" for city in self.cities])
+
 
 # TODO: stále jsou hardcoded hodnoty jako kapacita stanic a počet kolejí
 def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city_max_population: int, large_city_max_population: int, max_stations_per_city: int, passenger_station_names: list[str], cargo_station_names: list[str]):
@@ -136,10 +139,10 @@ def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city
                 # rozhodnutí, zda je stanice nákladní nebo osobní
                 is_cargo = random.choice([True, False])
                 if is_cargo:
-                    station_name = f"{city_name} - {city_cargo_names[i]}"
+                    station_name = f"{city_name}-{city_cargo_names[i]}"
                     Station(city=city, name=station_name, position=position, passenger_capacity=0, cargo_capacity=random.uniform(500, 5000), tracks=random.randint(1, 4))
                 else:
-                    station_name = f"{city_name} - {city_pass_names[i]}"
+                    station_name = f"{city_name}-{city_pass_names[i]}"
                     Station(city=city, name=station_name, position=position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
 
         else: # malé město
