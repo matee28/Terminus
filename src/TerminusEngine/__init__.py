@@ -8,6 +8,8 @@ from shapely.geometry import LineString, Point
 
 # systém souřadnic enginu: +y je nahoru; +x je doprava
 
+pygame.font.init()
+
 
 def read_src(path):
     """
@@ -113,7 +115,7 @@ class Game:
     """
     # https://www.geeksforgeeks.org/python/pygame-tutorial/
 
-    def __init__(self, camera: Camera, width: int, height: int):
+    def __init__(self, camera: Camera, width: int, height: int, font: pygame.font.Font = pygame.font.SysFont("Comic Sans MS", 20)):
         """
         Inicializuje herní okno.
 
@@ -121,6 +123,7 @@ class Game:
             camera (Camera): kamera
             width (int): šířka okna
             height (int): výška okna
+            font (pygame.font.Font): font pro vykreslování textu
         """
 
         self.images = {}
@@ -130,6 +133,7 @@ class Game:
         self.path_cache = {}
         
         self.camera = camera
+        self.font = font
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -264,16 +268,21 @@ class Game:
 
     #     return (position_x, position_y)
     
-    def draw_debug_dot(self, world_position: tuple[float, float], size=10):
+    def draw_debug_dot(self, world_position: tuple[float, float], size=10, text: str = ""):
         """
-        Vykreslí debugovací bod na zadané souřadnici.
+        Vykreslí debugovací bod s textem na zadané souřadnici.
 
         Args:
             world_position (tuple[float, float]): světové souřadnice (x, y)
             size (int; default: 10): velikost bodu
+            text (str; default: ""): text, který se zobrazí u bodu
         """
-        pygame.draw.circle(self.screen, (0, 255, 0), self.screen_position(world_position), size*self.camera.zoom)
-        pygame.draw.circle(self.screen, (255, 0, 0), self.screen_position(world_position), 2)
+        pos = self.screen_position(world_position)
+        pygame.draw.circle(self.screen, (0, 255, 0), pos, size*self.camera.zoom)
+        pygame.draw.circle(self.screen, (255, 0, 0), pos, 2)
+        if text != "":
+            text_surface = self.font.render(text, True, (255, 255, 255))
+            self.screen.blit(text_surface, pos)
 
     def load_image(self, name: str, path: str, rotation: float = 0):
         """

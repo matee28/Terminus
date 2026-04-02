@@ -3,6 +3,8 @@ import TerminusEngine
 import TerminusEngine.World
 import os
 
+# TODO: ať engine bere všechno v metrech
+
 
 def main():
 
@@ -15,7 +17,7 @@ def main():
         move_speed=1.0,
         zoom=1.0,
         max_zoom=2.5,
-        min_zoom=0.1,
+        min_zoom=0.01,
         zoom_speed=1.5
     )
 
@@ -31,12 +33,12 @@ def main():
 
 
     world = TerminusEngine.World.WorldGenerator(
-        world_boundary=10000,
+        world_boundary=1000,
         city_names=TerminusEngine.read_src("assets/names/CITIES").splitlines(),
         cities=10,
         small_city_max_population=5000,
         large_city_max_population=500000,
-        max_city_boundary=1000,
+        max_city_boundary=100,
         max_stations_per_city=3,
         passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
         cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()
@@ -81,6 +83,11 @@ def main():
 
         game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
         game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
+
+        for city in world.cities:
+            game.draw_debug_dot(city.position, size=100, text=city.name)
+            for station in city.stations:
+                game.draw_debug_dot(station.position, size=50, text=station.name)
 
 
     game.run(
