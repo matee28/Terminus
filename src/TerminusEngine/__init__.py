@@ -22,12 +22,22 @@ class Camera:
     """
     Inicializuje a uchovává atributy kamery.
     """
-    def __init__(self, position: tuple[float, float], move_speed: float, zoom: float, max_zoom: float, min_zoom: float, zoom_speed: float):
+    def __init__(
+            self,
+            position: tuple[float, float],
+            max_distance: float,
+            move_speed: float,
+            zoom: float, max_zoom: float,
+            min_zoom: float,
+            zoom_speed: float
+        ):
+
         """
         Inicializuje kameru.
 
         Args:
             position (tuple[float, float]): počáteční souřadnice kamery (x, y)
+            max_distance (float): maximální vzdálenost kamery od středu světa (0, 0)
             move_speed (float): rychlost pohybu kamery
             zoom (float): počáteční přiblížení pohledu kamery
             max_zoom (float): maximální přiblížení pohledu kamery
@@ -35,6 +45,7 @@ class Camera:
             zoom_speed (float): rychlost přiblížování pohledu kamery
         """
         self.position = position
+        self.max_distance = max_distance
         self.move_speed = move_speed
         self.zoom = zoom
         self.max_zoom = max_zoom
@@ -97,7 +108,9 @@ class Camera:
             d (tuple[float, float]): vzdálenost posunu kamery (x, y)
         """
         dx, dy = d
-        self.position = (self.position[0] + dx/self.zoom*self.move_speed, self.position[1] + dy/self.zoom*self.move_speed)
+        new_position = (self.position[0] + dx/self.zoom*self.move_speed, self.position[1] + dy/self.zoom*self.move_speed)
+        self.set_position(new_position)
+
 
     def set_position(self, position: tuple[float, float]):
         """
@@ -106,6 +119,16 @@ class Camera:
         Args:
             position (tuple[float, float]): nové souřadnice kamery (x, y)
         """
+        if position[0] > self.max_distance:
+            position = (self.max_distance, position[1])
+        elif position[0] < -self.max_distance:
+            position = (-self.max_distance, position[1])
+
+        if position[1] > self.max_distance:
+            position = (position[0], self.max_distance)
+        elif position[1] < -self.max_distance:
+            position = (position[0], -self.max_distance)
+
         self.position = position
 
 

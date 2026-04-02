@@ -8,12 +8,30 @@ import os
 
 def main():
 
+    world_boundary = 1000
+
+    world = TerminusEngine.World.WorldGenerator(
+        world_boundary=world_boundary,
+        city_names=TerminusEngine.read_src("assets/names/CITIES").splitlines(),
+        cities=10,
+        small_city_max_population=5000,
+        large_city_max_population=500000,
+        max_city_boundary=100,
+        max_stations_per_city=3,
+        passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
+        cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()
+    )
+
+    print(world)
+
+
     pygame.font.init()
     font = pygame.font.SysFont("Comic Sans MS", 20)
 
 
     camera = TerminusEngine.Camera(
         position=(0, 0),
+        max_distance=world_boundary,
         move_speed=1.0,
         zoom=1.0,
         max_zoom=2.5,
@@ -30,21 +48,6 @@ def main():
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1_small.png", rotation=90)
-
-
-    world = TerminusEngine.World.WorldGenerator(
-        world_boundary=1000,
-        city_names=TerminusEngine.read_src("assets/names/CITIES").splitlines(),
-        cities=10,
-        small_city_max_population=5000,
-        large_city_max_population=500000,
-        max_city_boundary=100,
-        max_stations_per_city=3,
-        passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
-        cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()
-    )
-
-    print(world)
 
 
     def event_handler(event: pygame.event.Event):
