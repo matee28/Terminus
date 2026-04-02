@@ -31,11 +31,12 @@ def main():
 
 
     world = TerminusEngine.World.WorldGenerator(
-        boundary=10000,
+        world_boundary=10000,
         city_names=TerminusEngine.read_src("assets/names/CITIES").splitlines(),
         cities=10,
         small_city_max_population=5000,
         large_city_max_population=500000,
+        max_city_boundary=1000,
         max_stations_per_city=3,
         passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
         cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()

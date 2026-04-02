@@ -79,20 +79,39 @@ class World:
         self.cities = cities
 
     def __str__(self):
-        return f"Města:\n" + "\n".join([f"\t{city.name} (populace: {city.population}, pozice: {city.position}, stanice: {', '.join([station.name for station in city.stations])})" for city in self.cities])
+        return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
+            city.name, 
+            city.population, 
+            city.position, 
+            '\n\t\t'.join([f'{s.name} {s.position}' for s in city.stations])
+        ) for city in self.cities])
 
 
 # TODO: stále jsou hardcoded hodnoty jako kapacita stanic a počet kolejí
-def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city_max_population: int, large_city_max_population: int, max_stations_per_city: int, passenger_station_names: list[str], cargo_station_names: list[str]):
+def WorldGenerator(
+        world_boundary: int,
+
+        city_names: list[str],
+        cities: int,
+        small_city_max_population: int,
+        large_city_max_population: int,
+        max_city_boundary: int,
+
+        max_stations_per_city: int,
+        passenger_station_names: list[str],
+        cargo_station_names: list[str]
+    ):
+
     """
     Generuje svět.
 
     Args:
-        boundary (int): velikost hranice světa v metrech (pro generování měst atd.)
+        world_boundary (int): velikost hranice světa v metrech (pro generování měst atd.)
         city_names (list[str]): seznam názvů pro města
         cities (int): počet měst, které se mají vygenerovat
         small_city_max_population (int): maximální počet obyvatel v malém městě
         large_city_max_population (int): maximální počet obyvatel v velkém městě
+        max_city_boundary (int): maximální velikost města v metrech (pro generování stanic atd.)
         max_stations_per_city (int): maximální počet stanic, které mohou být v jednom městě
         passenger_station_names (list[str]): seznam názvů pro osobní stanice
         cargo_station_names (list[str]): seznam názvů pro nákladní stanice
@@ -110,7 +129,11 @@ def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city
     if max_stations_per_city < 1:
         raise ValueError("Maximální počet stanic v městě musí být alespoň 1.")
     
-    pixel_boundary = boundary * WORLD_SCALE_M_PX
+    pixel_world_boundary = world_boundary * WORLD_SCALE_M_PX
+    pixel_max_city_boundary = max_city_boundary * WORLD_SCALE_M_PX
+
+    def generate_station_position(position: tuple[float, float]):
+        return (position[0] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary), position[1] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary))
 
     # výběr náhodných měst
     selected_city_names = random.sample(city_names, cities)
@@ -118,7 +141,7 @@ def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city
     generated_cities = []
     for city_name in selected_city_names:
 
-        position = (random.randint(-pixel_boundary, pixel_boundary), random.randint(-pixel_boundary, pixel_boundary))
+        position = (random.randint(-pixel_world_boundary, pixel_world_boundary), random.randint(-pixel_world_boundary, pixel_world_boundary))
         
         # rozhodnutí, zda je město velké nebo malé
         is_large = random.choice([True, False])
@@ -138,17 +161,20 @@ def WorldGenerator(boundary: int, city_names: list[str], cities: int, small_city
             for i in range(num_stations):
                 # rozhodnutí, zda je stanice nákladní nebo osobní
                 is_cargo = random.choice([True, False])
+                
+                station_position = generate_station_position(city.position)
+
                 if is_cargo:
-                    station_name = f"{city_name}-{city_cargo_names[i]}"
-                    Station(city=city, name=station_name, position=position, passenger_capacity=0, cargo_capacity=random.uniform(500, 5000), tracks=random.randint(1, 4))
+                    station_name = f"{city_name}-{city_cargo_names[i].capitalize()}"
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=0, cargo_capacity=random.uniform(500, 5000), tracks=random.randint(1, 4))
                 else:
-                    station_name = f"{city_name}-{city_pass_names[i]}"
-                    Station(city=city, name=station_name, position=position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
+                    station_name = f"{city_name}-{city_pass_names[i].capitalize()}"
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
 
         else: # malé město
             population = random.randint(1, small_city_max_population)
             city = City(name=city_name, position=position, population=population)
-            Station(city=city, name=city_name, position=position, passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
+            Station(city=city, name=city_name, position=generate_station_position(city.position), passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
             
         generated_cities.append(city)
 
