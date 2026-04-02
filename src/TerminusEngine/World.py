@@ -1,9 +1,6 @@
 import random
 import math
 
-WORLD_SCALE_M_PX = 8 # kolik px je 1 metr
-
-
 
 class City:
     """
@@ -130,16 +127,13 @@ def WorldGenerator(
     
     if max_stations_per_city < 1:
         raise ValueError("Maximální počet stanic v městě musí být alespoň 1.")
-    
-    pixel_world_boundary = world_boundary * WORLD_SCALE_M_PX
-    pixel_max_city_boundary = max_city_boundary * WORLD_SCALE_M_PX
 
     def generate_station_position(position: tuple[float, float]):
-        return (position[0] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary), position[1] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary))
+        return (position[0] + random.randint(-max_city_boundary, max_city_boundary), position[1] + random.randint(-max_city_boundary, max_city_boundary))
 
     # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
     grid_size = math.ceil(math.sqrt(cities))
-    cell_size = (2 * pixel_world_boundary) / grid_size
+    cell_size = (2 * world_boundary) / grid_size
     available_cells = [(x, y) for x in range(grid_size) for y in range(grid_size)]
     random.shuffle(available_cells)
 
@@ -158,17 +152,16 @@ def WorldGenerator(
             population = random.randint(1, small_city_max_population)
 
         city_radius = population / large_city_max_population * max_city_boundary
-        pixel_city_radius = city_radius * WORLD_SCALE_M_PX
 
         # získání nezabrané buňky z mřížky
         cell_x, cell_y = available_cells[i]
         
         # střed buňky
-        center_x = -pixel_world_boundary + cell_x * cell_size + cell_size / 2
-        center_y = -pixel_world_boundary + cell_y * cell_size + cell_size / 2
+        center_x = -world_boundary + cell_x * cell_size + cell_size / 2
+        center_y = -world_boundary + cell_y * cell_size + cell_size / 2
         
         # o kolik se město může náhodně odchýlit od středu, aby nezasáhlo do sousední buňky
-        jitter = max(0.0, (cell_size / 2) - pixel_city_radius)
+        jitter = max(0.0, (cell_size / 2) - city_radius)
         
         position = (
             center_x + random.uniform(-jitter, jitter),

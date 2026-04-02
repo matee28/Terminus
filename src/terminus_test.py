@@ -3,7 +3,6 @@ import TerminusEngine
 import TerminusEngine.World
 import os
 
-# TODO: ať engine bere všechno v metrech
 
 
 def main():
@@ -75,7 +74,7 @@ def main():
 
         game.render_image_path(
             texture_name="rail_tile",
-            distance=10,
+            distance=11/8, # velikost textury / METERS_TO_PIXELS
             path=[(0, 0), (-100, 100), (-200, 330), (-300, 1000)]
         )
 
@@ -90,7 +89,7 @@ def main():
         for city in world.cities:
             game.draw_debug_dot(city.position, size=100, text=city.name)
             for station in city.stations:
-                game.draw_debug_dot(station.position, size=50, text=station.name)
+                game.draw_debug_dot(station.position, size=0, text=station.name)
 
 
     game.run(

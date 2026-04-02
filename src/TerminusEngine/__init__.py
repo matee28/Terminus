@@ -10,6 +10,27 @@ from shapely.geometry import LineString, Point
 
 pygame.font.init()
 
+# poměr metrů na pixely dle rozlišení textur/ortofot
+METERS_TO_PIXELS = 8 # (1 metr = 8 pixelů)
+
+def m2px(value: float):
+    """
+    Převádí metry na pixely.
+
+    Args:
+        value (float): hodnota v metrech
+    """
+    return value * METERS_TO_PIXELS
+
+def px2m(value: float):
+    """
+    Převádí pixely na metry.
+
+    Args:
+        value (float): hodnota v pixelech
+    """
+    return value / METERS_TO_PIXELS
+
 
 def read_src(path):
     """
@@ -105,10 +126,11 @@ class Camera:
         Posouvá kameru.
 
         Args:
-            d (tuple[float, float]): vzdálenost posunu kamery (x, y)
+            d (tuple[float, float]): vzdálenost posunu kamery z myši v px na obrazovce (x, y)
         """
         dx, dy = d
-        new_position = (self.position[0] + dx/self.zoom*self.move_speed, self.position[1] + dy/self.zoom*self.move_speed)
+        # dx, dy je v px -> převod na m
+        new_position = (self.position[0] + px2m(dx)/self.zoom*self.move_speed, self.position[1] + px2m(dy)/self.zoom*self.move_speed)
         self.set_position(new_position)
 
 
@@ -222,26 +244,26 @@ class Game:
 
     def screen_position(self, position: tuple[float, float]):
         """
-        Převádí světové souřadnice na souřadnice na obrazovce.
+        Převádí světové souřadnice (v metrech) na souřadnice na obrazovce (v pixelech).
 
         Args:
-            position (tuple[float, float]): světová souřadnice (x, y)
+            position (tuple[float, float]): světová souřadnice v metrech (x, y)
         """
         rel_position = self.relative_position(position)
         return (
-            rel_position[0] * self.camera.zoom + self.screen.get_width()/2,
-            -rel_position[1] * self.camera.zoom + self.screen.get_height()/2
+            m2px(rel_position[0]) * self.camera.zoom + self.screen.get_width() / 2,
+            -m2px(rel_position[1]) * self.camera.zoom + self.screen.get_height() / 2
         )
     
     def world_position(self, screen_position: tuple[float, float]):
         """
-        Převádí souřadnice na obrazovce na světové souřadnice.
+        Převádí souřadnice na obrazovce (v pixelech) na světové souřadnice (v metrech).
 
         Args:
             screen_position (tuple[float, float]): souřadnice na obrazovce (x, y)
         """
-        rel_x = (screen_position[0] - self.screen.get_width() / 2) / self.camera.zoom
-        rel_y = (screen_position[1] - self.screen.get_height() / 2) / self.camera.zoom
+        rel_x = (screen_position[0] - self.screen.get_width() / 2) / (self.camera.zoom * METERS_TO_PIXELS)
+        rel_y = (screen_position[1] - self.screen.get_height() / 2) / (self.camera.zoom * METERS_TO_PIXELS)
         return (
             rel_x + self.camera.position[0],
             -rel_y + self.camera.position[1]
@@ -296,12 +318,12 @@ class Game:
         Vykreslí debugovací bod s textem na zadané souřadnici.
 
         Args:
-            world_position (tuple[float, float]): světové souřadnice (x, y)
-            size (int; default: 10): velikost bodu
+            world_position (tuple[float, float]): světové souřadnice v metrech (x, y)
+            size (float; default: 10): velikost bodu v metrech
             text (str; default: ""): text, který se zobrazí u bodu
         """
         pos = self.screen_position(world_position)
-        pygame.draw.circle(self.screen, (0, 255, 0), pos, size*self.camera.zoom)
+        pygame.draw.circle(self.screen, (0, 255, 0), pos, m2px(size)*self.camera.zoom)
         pygame.draw.circle(self.screen, (255, 0, 0), pos, 2)
         if text != "":
             text_surface = self.font.render(text, True, (255, 255, 255))
@@ -338,8 +360,8 @@ class Game:
 
         Args:
             texture_name (str): název obrázku v slovníku
-            world_position (tuple[float, float]): světové souřadnice obrázku (x, y)
-            size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0
+            world_position (tuple[float, float]): světové souřadnice obrázku v metrech (x, y)
+            size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka) v metrech, pro původní velikost na ose použijte velikost 0
             rotation (float; default: 0): rotace obrázku ve stupních
             x_alignment (str; default: "center"): zarovnání v ose x (viz funkce calculate_alignment)
             y_alignment (str; default: "center"): zarovnání v ose y (viz funkce calculate_alignment)
@@ -349,18 +371,21 @@ class Game:
 
             texture = self.images[texture_name]
 
-            if size[0] == 0:
-                size = (texture.get_size()[0], size[1])
-            if size[1] == 0:
-                size = (size[0], texture.get_size()[1])
+            # originál je v px; tzn. pokud size 0 -> px2m originální velikosti
+            size_m = (size[0], size[1])
+            if size_m[0] == 0:
+                size_m = (px2m(texture.get_size()[0]), size_m[1])
+            if size_m[1] == 0:
+                size_m = (size_m[0], px2m(texture.get_size()[1]))
 
-            size = self.__ceil_tuple((size[0] * self.camera.zoom, size[1] * self.camera.zoom))
+            # převod na px s ohledem na zoom
+            scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
 
-            texture_cache_key = (texture_name, size, rotation)
+            texture_cache_key = (texture_name, scaled_size, rotation)
             if texture_cache_key in self.texture_cache:
                 texture = self.texture_cache[texture_cache_key]
             else:
-                texture = pygame.transform.scale(texture, size)
+                texture = pygame.transform.scale(texture, scaled_size)
                 texture = self.rotate_image(texture, rotation)
                 self.texture_cache[texture_cache_key] = texture
                 
@@ -374,19 +399,19 @@ class Game:
 
             offset_x, offset_y = 0, 0
             if x_alignment == "center":
-                offset_x = -size[0]/2
+                offset_x = -scaled_size[0]/2
             elif x_alignment == "left":
-                offset_x = -size[0]
+                offset_x = -scaled_size[0]
             # right nic
 
             if y_alignment == "center":
-                offset_y = -size[1]/2
+                offset_y = -scaled_size[1]/2
             elif y_alignment == "top":
-                offset_y = -size[1]
+                offset_y = -scaled_size[1]
             # bottom nic
 
 
-            center_x, center_y = size[0]/2, size[1]/2
+            center_x, center_y = scaled_size[0]/2, scaled_size[1]/2
             pivot_x, pivot_y = -offset_x, -offset_y
             vec = pygame.math.Vector2(pivot_x - center_x, pivot_y - center_y)
 
