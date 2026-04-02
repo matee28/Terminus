@@ -9,17 +9,19 @@ class City:
     """
     Reprezentuje město.
     """
-    def __init__(self, name: str, position: tuple[float, float], population: int):
+    def __init__(self, name: str, position: tuple[float, float], radius: float, population: int):
         """
         Inicializuje město.
 
         Args:
             name (str): název
             position (tuple[float, float]): pozice (x, y)
+            radius (float): poloměr města
             population (int): počet obyvatel
         """
         self.name = name
         self.position = position
+        self.radius = radius
         self.population = population
         self.stations = []
 
@@ -135,21 +137,47 @@ def WorldGenerator(
     def generate_station_position(position: tuple[float, float]):
         return (position[0] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary), position[1] + random.randint(-pixel_max_city_boundary, pixel_max_city_boundary))
 
+    # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
+    grid_size = math.ceil(math.sqrt(cities))
+    cell_size = (2 * pixel_world_boundary) / grid_size
+    available_cells = [(x, y) for x in range(grid_size) for y in range(grid_size)]
+    random.shuffle(available_cells)
+
     # výběr náhodných měst
     selected_city_names = random.sample(city_names, cities)
     
     generated_cities = []
-    for city_name in selected_city_names:
+    for i, city_name in enumerate(selected_city_names):
 
-        position = (random.randint(-pixel_world_boundary, pixel_world_boundary), random.randint(-pixel_world_boundary, pixel_world_boundary))
-        
         # rozhodnutí, zda je město velké nebo malé
         is_large = random.choice([True, False])
-        
-        if is_large: # velké město -> více stanic a obyvatel
+
+        if is_large:
             population = random.randint(small_city_max_population + 1, large_city_max_population)
-            city = City(name=city_name, position=position, population=population)
-            
+        else:
+            population = random.randint(1, small_city_max_population)
+
+        city_radius = population / large_city_max_population * max_city_boundary
+        pixel_city_radius = city_radius * WORLD_SCALE_M_PX
+
+        # získání nezabrané buňky z mřížky
+        cell_x, cell_y = available_cells[i]
+        
+        # střed buňky
+        center_x = -pixel_world_boundary + cell_x * cell_size + cell_size / 2
+        center_y = -pixel_world_boundary + cell_y * cell_size + cell_size / 2
+        
+        # o kolik se město může náhodně odchýlit od středu, aby nezasáhlo do sousední buňky
+        jitter = max(0.0, (cell_size / 2) - pixel_city_radius)
+        
+        position = (
+            center_x + random.uniform(-jitter, jitter),
+            center_y + random.uniform(-jitter, jitter)
+        )
+
+        city = City(name=city_name, position=position, radius=city_radius, population=population)
+
+        if is_large: # velké město -> více stanic
             if max_stations_per_city > 1:
                 num_stations = random.randint(2, max_stations_per_city)
             else:
@@ -157,10 +185,11 @@ def WorldGenerator(
 
             city_pass_names = random.sample(passenger_station_names, num_stations)
             city_cargo_names = random.sample(cargo_station_names, num_stations)
+            city_station_types = [True] + random.choices([True, False], k=num_stations-1) # zaručuje alespoň jednu osobní stanici
             
             for i in range(num_stations):
                 # rozhodnutí, zda je stanice nákladní nebo osobní
-                is_cargo = random.choice([True, False])
+                is_cargo = not city_station_types[i]
                 
                 station_position = generate_station_position(city.position)
 
@@ -172,8 +201,6 @@ def WorldGenerator(
                     Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
 
         else: # malé město
-            population = random.randint(1, small_city_max_population)
-            city = City(name=city_name, position=position, population=population)
             Station(city=city, name=city_name, position=generate_station_position(city.position), passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
             
         generated_cities.append(city)
