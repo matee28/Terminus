@@ -3,6 +3,11 @@ import TerminusEngine
 import TerminusEngine.World
 import os
 
+# TODO: integrovat tratě do World + optimalizovat NĚJAK vykreslování a výpočet bodů
+
+
+RAILWAY_MODE = False
+RAILWAYS = []
 
 
 def main():
@@ -63,6 +68,24 @@ def main():
             if event.buttons[0]:
                 camera.move((-event.rel[0], +event.rel[1]))
 
+        # stisk klávesy
+        if event.type == pygame.KEYDOWN:
+
+            # RAILWAY_MODE toggle = T
+            if event.key == pygame.K_t:
+                global RAILWAY_MODE
+                RAILWAY_MODE = not RAILWAY_MODE
+                if RAILWAY_MODE:
+                    RAILWAYS.append([])
+
+
+        # přidávání kolejí
+        if RAILWAY_MODE:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 3: # pravé tlačítko
+                    RAILWAYS[-1].append(game.world_position(event.pos))
+                    print(RAILWAYS)
+
 
     def loop():
         game.render_image(
@@ -72,16 +95,21 @@ def main():
             tiled=True
         )
 
-        game.render_image_path(
-            texture_name="rail_tile",
-            distance=11/8, # velikost textury / METERS_TO_PIXELS
-            path=[(0, 0), (-100, 100), (-200, 330), (-300, 1000)]
-        )
+        for railway in RAILWAYS:
+            if len(railway) > 1:
+                game.render_image_path(
+                    texture_name="rail_tile",
+                    distance=11/8, # velikost textury / METERS_TO_PIXELS
+                    path=railway
+                )
+            elif len(railway) == 1:
+                game.draw_debug_dot(railway[0], 5)
 
         game.draw_debug_dot((0, 0))
         game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
         game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
         game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
+        game.screen.blit(font.render("r mode: " + str(RAILWAY_MODE), False, (255, 0, 0)), (0, 60))
 
         game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
         game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
