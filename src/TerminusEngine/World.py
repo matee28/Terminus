@@ -155,7 +155,6 @@ class World:
         return closest_station, min_distance
 
 
-# TODO: stále jsou hardcoded hodnoty jako kapacita stanic a počet kolejí
 def WorldGenerator(
         world_boundary: int,
 
@@ -168,7 +167,13 @@ def WorldGenerator(
 
         max_stations_per_city: int,
         passenger_station_names: list[str],
-        cargo_station_names: list[str]
+        cargo_station_names: list[str],
+
+        large_city_cargo_capacity_range: tuple[float, float],
+        large_city_passenger_capacity_range: tuple[int, int],
+        large_city_max_tracks: int,
+        small_city_passenger_capacity_range: tuple[int, int],
+        small_city_cargo_capacity_range: tuple[float, float]
     ):
 
     """
@@ -185,6 +190,11 @@ def WorldGenerator(
         max_stations_per_city (int): maximální počet stanic, které mohou být v jednom městě
         passenger_station_names (list[str]): seznam názvů pro osobní stanice
         cargo_station_names (list[str]): seznam názvů pro nákladní stanice
+        large_city_cargo_capacity_range (tuple[float, float]): rozsah kapacity pro nákladní stanice ve velkých městech
+        large_city_passenger_capacity_range (tuple[int, int]): rozsah kapacity pro osobní stanice ve velkých městech
+        large_city_max_tracks (int): maximální počet kolejí ve stanicích ve velkých městech (minimum je 1)
+        small_city_passenger_capacity_range (tuple[int, int]): rozsah kapacity pro osobní stanice v malých městech
+        small_city_cargo_capacity_range (tuple[float, float]): rozsah kapacity pro nákladní stanice v malých městech
     """
 
     if (len(city_names) < cities) or (len(passenger_station_names) < max_stations_per_city) or (len(cargo_station_names) < max_stations_per_city):
@@ -262,13 +272,13 @@ def WorldGenerator(
 
                 if is_cargo:
                     station_name = f"{city_name}-{city_cargo_names[i].capitalize()}"
-                    Station(city=city, name=station_name, position=station_position, passenger_capacity=0, cargo_capacity=random.uniform(500, 5000), tracks=random.randint(1, 4))
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=0, cargo_capacity=random.uniform(*large_city_cargo_capacity_range), tracks=random.randint(1, large_city_max_tracks))
                 else:
                     station_name = f"{city_name}-{city_pass_names[i].capitalize()}"
-                    Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(*large_city_passenger_capacity_range), cargo_capacity=0, tracks=random.randint(1, large_city_max_tracks))
 
         else: # malé město
-            Station(city=city, name=city_name, position=generate_station_position(city), passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
+            Station(city=city, name=city_name, position=generate_station_position(city), passenger_capacity=random.randint(*small_city_passenger_capacity_range), cargo_capacity=random.uniform(*small_city_cargo_capacity_range), tracks=1)
             
         generated_cities.append(city)
 

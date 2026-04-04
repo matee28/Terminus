@@ -24,7 +24,12 @@ def main():
         max_city_boundary=1000,
         max_stations_per_city=3,
         passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
-        cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()
+        cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines(),
+        large_city_cargo_capacity_range=(500.0, 5000.0),
+        large_city_passenger_capacity_range=(200, 2000),
+        large_city_max_tracks=4,
+        small_city_passenger_capacity_range=(50, 300),
+        small_city_cargo_capacity_range=(50.0, 300.0)
     )
 
     print(world)
@@ -91,7 +96,6 @@ def main():
                 if event.button == 3: # pravé tlačítko
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
-                    print("closest station:", closest_station.name if closest_station else None, "distance:", distance)
                     if len(world.railways[-1].points) == 0:
                         if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
                             world.railways[-1].station_a = closest_station
@@ -99,12 +103,12 @@ def main():
                             world.railways[-1].add_point(closest_station.position) # dvakrát, aby se trať aktualizovala při pohybu myši
                     else:
                         if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX and closest_station != world.railways[-1].station_a:
-                            world.railways[-1].station_b = closest_station
+                            world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
+                            world.railways[-1].station_b = closest_station 
                             world.railways[-1].add_point(closest_station.position)
                             RAILWAY_MODE = False
                         else:
                             world.railways[-1].points.append(point_position)
-                            print(world.railways[-1].points)
             if len(world.railways) > 0:
                 if len(world.railways[-1].points) > 0 and event.type == pygame.MOUSEMOTION:
                     world.railways[-1].points[-1] = game.world_position(event.pos)
@@ -122,7 +126,7 @@ def main():
         game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
-            game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(city.radius) + ")")
+            game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
 
