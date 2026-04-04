@@ -84,10 +84,8 @@ def main():
                 if RAILWAY_MODE:
                     world.add_railway(TerminusEngine.World.Railway(None, None, []))
                 else:
-                    if len(world.railways) > 0 and len(world.railways[-1].points) < 2:
-                        world.remove_railway(world.railways[-1])
-                    if len(world.railways[-1].points) > 2:
-                        world.railways[-1].remove_last_point()
+                    if len(world.railways) > 0 and world.railways[-1].station_b is None:
+                        world.railways.remove(world.railways[-1])
 
 
         # přidávání kolejí
