@@ -269,6 +269,15 @@ class Game:
             -rel_y + self.camera.position[1]
         )
 
+    def screen_distance(self, distance_m: float):
+        """
+        Převádí vzdálenost ve světě (v metrech) na vzdálenost na obrazovce (v pixelech) podle aktuálního přiblížení kamery.
+
+        Args:
+            value_m (float): vzdálenost ve světě v metrech
+        """
+        return m2px(distance_m) * self.camera.zoom
+
     # def calculate_alignment(self, position: tuple[float, float], size: tuple[float, float], x_alignment: str, y_alignment: str, y_axis_offset_rotation: float = 0):
     #     """
     #     Vypočítává souřadnice pro zadané zarovnání.

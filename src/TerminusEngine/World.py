@@ -64,14 +64,30 @@ class Railway:
         self.station_b = station_b
         self.points = points
 
-    def update_points(self, new_points: list[tuple[float, float]]):
+    def replace_points(self, new_points: list[tuple[float, float]]):
         """
-        Aktualizuje body trati.
+        Nahradí body trati.
 
         Args:
             new_points (list[tuple[float, float]]): nový seznam bodů trati
         """
         self.points = new_points
+
+    def add_point(self, point: tuple[float, float]):
+        """
+        Přidá bod na konec trati.
+
+        Args:
+            point (tuple[float, float]): bod, který se má přidat
+        """
+        self.points.append(point)
+
+    def remove_last_point(self):
+        """
+        Odstraní poslední bod z trati.
+        """
+        if len(self.points) > 0:
+            self.points.pop()
 
 
 
@@ -115,6 +131,28 @@ class World:
             railway (Railway): trať, která se má odstranit
         """
         self.railways.remove(railway)
+
+    def get_closest_station(self, point: tuple[float, float]):
+        """
+        Najde stanici, která je nejblíže k zadanému bodu.
+
+        Args:
+            tuple[float, float]: zadaný bod (x, y)
+
+        Returns:
+            tuple[Station, float]: nejbližší stanice a její vzdálenost (v metrech)
+        """
+        closest_station = None
+        min_distance = float("inf") # https://stackoverflow.com/questions/34264710/what-is-the-point-of-floatinf-in-python
+
+        for city in self.cities:
+            for station in city.stations:
+                distance = math.dist(station.position, point)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_station = station
+                    
+        return closest_station, min_distance
 
 
 # TODO: stále jsou hardcoded hodnoty jako kapacita stanic a počet kolejí

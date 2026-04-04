@@ -7,6 +7,7 @@ import os
 
 
 RAILWAY_MODE = False
+RAILWAY_MODE_SNAP_DIST_PX = 100
 
 
 def main():
@@ -76,16 +77,33 @@ def main():
                 RAILWAY_MODE = not RAILWAY_MODE
                 if RAILWAY_MODE:
                     world.add_railway(TerminusEngine.World.Railway(None, None, []))
+                else:
+                    if len(world.railways) > 0 and len(world.railways[-1].points) < 2:
+                        world.remove_railway(world.railways[-1])
+                    if len(world.railways[-1].points) > 2:
+                        world.railways[-1].remove_last_point()
 
 
         # přidávání kolejí
         if RAILWAY_MODE:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 3: # pravé tlačítko
-                    world.railways[-1].points.append(game.world_position(event.pos))
-                    if len(world.railways[-1].points) == 1:
-                        world.railways[-1].points.append(game.world_position(event.pos))
-                    print(world.railways[-1].points)
+                    point_position = game.world_position(event.pos)
+                    closest_station, distance = world.get_closest_station(point_position)
+                    print("closest station:", closest_station.name if closest_station else None, "distance:", distance)
+                    if len(world.railways[-1].points) == 0:
+                        if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
+                            world.railways[-1].station_a = closest_station
+                            world.railways[-1].add_point(closest_station.position)
+                            world.railways[-1].add_point(closest_station.position) # dvakrát, aby se trať aktualizovala při pohybu myši
+                    else:
+                        if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
+                            world.railways[-1].station_b = closest_station
+                            world.railways[-1].add_point(closest_station.position)
+                            RAILWAY_MODE = False
+                        else:
+                            world.railways[-1].points.append(point_position)
+                            print(world.railways[-1].points)
             if len(world.railways) > 0:
                 if len(world.railways[-1].points) > 0 and event.type == pygame.MOUSEMOTION:
                     world.railways[-1].points[-1] = game.world_position(event.pos)
@@ -98,14 +116,6 @@ def main():
             size=(200, 200),
             tiled=True
         )
-
-        for railway in world.railways:
-            if len(railway.points) > 1:
-                game.render_image_path(
-                    texture_name="rail_tile",
-                    distance=11/8, # velikost textury / METERS_TO_PIXELS
-                    path=railway.points
-                )
 
         game.draw_debug_dot((0, 0))
         game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
@@ -121,6 +131,13 @@ def main():
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
 
+        for railway in world.railways:
+            if len(railway.points) > 1:
+                game.render_image_path(
+                    texture_name="rail_tile",
+                    distance=11/8, # velikost textury / METERS_TO_PIXELS
+                    path=railway.points
+                )
 
     game.run(
         loop=loop,
