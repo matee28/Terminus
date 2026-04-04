@@ -97,7 +97,7 @@ def main():
                             world.railways[-1].add_point(closest_station.position)
                             world.railways[-1].add_point(closest_station.position) # dvakrát, aby se trať aktualizovala při pohybu myši
                     else:
-                        if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
+                        if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX and closest_station != world.railways[-1].station_a:
                             world.railways[-1].station_b = closest_station
                             world.railways[-1].add_point(closest_station.position)
                             RAILWAY_MODE = False

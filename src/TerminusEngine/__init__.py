@@ -417,16 +417,20 @@ class Game:
         return math.degrees(math.atan2(y2-y1, x2-x1))
 
     
-    def __points_on_path(self, path: list[tuple[float, float]], distance_delta: float):
+    def __points_on_path(self, path: list[tuple[float, float]], distance_delta: float, smooth: bool = True):
         """
         Vypočítává body v zadané vzdálenosti na zadané cestě.
 
         Args:
             path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu
             distance_delta (float): vzdálenost mezi body
+            smooth (bool; default: True): zda se má cesta vyhladit
         """
         # https://stackoverflow.com/questions/62990029/how-to-get-equally-spaced-points-on-a-line-in-shapely
         # https://stackoverflow.com/a/62994304 by Georgy (CC BY-SA 4.0)
+
+        if smooth:
+            path = self.__smooth_path(path)
 
         if len(path) < 2:
             return path
@@ -449,6 +453,48 @@ class Game:
             ret.append([(point.x, point.y), heading])
         
         return ret
+    
+
+    def __smooth_path(self, path: list[tuple[float, float]], smoothing_iterations: int = 3):
+        """
+        Převádí zadanou cestu na hladší cestu pomocí Chaikinova algoritmu.
+
+        Args:
+            path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu
+            distance_delta (float): vzdálenost mezi body
+            smoothing_iterations (int; default 3): počet iterací pro vyhlazení rohů (čím vyšší, tím kulatější)
+        """
+
+        if len(path) <= 2: # nemá smysl
+            return path
+        
+        # shoutout gemini
+        # Chaikinův algoritmus funguje tak, že v každé iteraci "usekne" ostré rohy 
+        # původní lomené čáry. Ze všech úseček vygeneruje nové body ve čtvrtině
+        # a ve třech čtvrtinách jejich délky a původní rohy zahodí.
+        smoothed_path = path
+        for _ in range(smoothing_iterations):
+            new_path = [smoothed_path[0]]
+            for i in range(len(smoothed_path) - 1):
+                p0 = smoothed_path[i]
+                p1 = smoothed_path[i + 1]
+
+                # Výpočet nových bodů (ve 25 % a 75 % délky aktuálního segmentu)
+                pA = (0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1])
+                pB = (0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1])
+
+                # Klasický algoritmus by smazal i původní první a poslední bod (cesta by se "smrskla").
+                # Proto uměle první přidaný bod z prvního segmentu a poslední z posledního přeskočíme,
+                # čímž se zbytek křivky natvrdo ukotví na absolutní začátek/konec trasy.
+                if i != 0:
+                    new_path.append(pA)
+                if i != len(smoothed_path) - 2:
+                    new_path.append(pB)
+
+            new_path.append(smoothed_path[-1]) # Vždy bezpečně přidáme původní koncový bod
+            smoothed_path = new_path
+
+        return smoothed_path
 
 
     
@@ -467,7 +513,7 @@ class Game:
             if path_key in self.path_cache:
                 points = self.path_cache[path_key]
             else:
-                points = self.__points_on_path(path, distance)
+                points = self.__points_on_path(path, distance, smooth=True)
                 self.path_cache[path_key] = points
 
             # for position, _ in points:
