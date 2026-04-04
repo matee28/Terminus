@@ -12,15 +12,16 @@ RAILWAY_MODE_SNAP_DIST_PX = 100
 
 def main():
 
-    world_boundary = 1000
+    world_boundary = 20000
 
     world = TerminusEngine.World.WorldGenerator(
         world_boundary=world_boundary,
         city_names=TerminusEngine.read_src("assets/names/CITIES").splitlines(),
         cities=10,
-        small_city_max_population=5000,
-        large_city_max_population=500000,
-        max_city_boundary=100,
+        small_city_max_population=500,
+        large_city_max_population=5000,
+        min_city_radius=500,
+        max_city_boundary=1000,
         max_stations_per_city=3,
         passenger_station_names=TerminusEngine.read_src("assets/names/STATIONS_PASSENGER").splitlines(),
         cargo_station_names=TerminusEngine.read_src("assets/names/STATIONS_CARGO").splitlines()
@@ -39,7 +40,7 @@ def main():
         move_speed=1.0,
         zoom=1.0,
         max_zoom=2.5,
-        min_zoom=0.01,
+        min_zoom=0.001,
         zoom_speed=1.5
     )
 
@@ -117,17 +118,11 @@ def main():
             tiled=True
         )
 
-        game.draw_debug_dot((0, 0))
-        game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
-        game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
-        game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
-        game.screen.blit(font.render("r mode: " + str(RAILWAY_MODE), False, (255, 0, 0)), (0, 60))
-
         game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
         game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
-            game.draw_debug_dot(city.position, size=100, text=city.name)
+            game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(city.radius) + ")")
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
 
@@ -138,6 +133,12 @@ def main():
                     distance=11/8, # velikost textury / METERS_TO_PIXELS
                     path=railway.points
                 )
+
+        game.draw_debug_dot((0, 0))
+        game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
+        game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
+        game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
+        game.screen.blit(font.render("r mode: " + str(RAILWAY_MODE), False, (255, 0, 0)), (0, 60))
 
     game.run(
         loop=loop,

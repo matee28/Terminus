@@ -163,6 +163,7 @@ def WorldGenerator(
         cities: int,
         small_city_max_population: int,
         large_city_max_population: int,
+        min_city_radius: int,
         max_city_boundary: int,
 
         max_stations_per_city: int,
@@ -179,6 +180,7 @@ def WorldGenerator(
         cities (int): počet měst, které se mají vygenerovat
         small_city_max_population (int): maximální počet obyvatel v malém městě
         large_city_max_population (int): maximální počet obyvatel v velkém městě
+        min_city_radius (int): minimální poloměr města v metrech
         max_city_boundary (int): maximální velikost města v metrech (pro generování stanic atd.)
         max_stations_per_city (int): maximální počet stanic, které mohou být v jednom městě
         passenger_station_names (list[str]): seznam názvů pro osobní stanice
@@ -197,8 +199,10 @@ def WorldGenerator(
     if max_stations_per_city < 1:
         raise ValueError("Maximální počet stanic v městě musí být alespoň 1.")
 
-    def generate_station_position(position: tuple[float, float]):
-        return (position[0] + random.randint(-max_city_boundary, max_city_boundary), position[1] + random.randint(-max_city_boundary, max_city_boundary))
+    def generate_station_position(city_pass: City): # generuje pozici stanice náhodně uvnitř města
+        angle = random.uniform(0, 2 * math.pi)
+        r = random.uniform(city_pass.radius * 0.2, city_pass.radius)
+        return (city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle))
 
     # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
     grid_size = math.ceil(math.sqrt(cities))
@@ -220,7 +224,8 @@ def WorldGenerator(
         else:
             population = random.randint(1, small_city_max_population)
 
-        city_radius = population / large_city_max_population * max_city_boundary
+        city_radius = math.sqrt(population / large_city_max_population) * max_city_boundary # plocha roste lineárně s populací
+        city_radius = max(city_radius, min_city_radius) # minimální poloměr
 
         # získání nezabrané buňky z mřížky
         cell_x, cell_y = available_cells[i]
@@ -253,7 +258,7 @@ def WorldGenerator(
                 # rozhodnutí, zda je stanice nákladní nebo osobní
                 is_cargo = not city_station_types[i]
                 
-                station_position = generate_station_position(city.position)
+                station_position = generate_station_position(city)
 
                 if is_cargo:
                     station_name = f"{city_name}-{city_cargo_names[i].capitalize()}"
@@ -263,7 +268,7 @@ def WorldGenerator(
                     Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(200, 2000), cargo_capacity=0, tracks=random.randint(1, 4))
 
         else: # malé město
-            Station(city=city, name=city_name, position=generate_station_position(city.position), passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
+            Station(city=city, name=city_name, position=generate_station_position(city), passenger_capacity=random.randint(50, 300), cargo_capacity=random.uniform(50, 300), tracks=1)
             
         generated_cities.append(city)
 
