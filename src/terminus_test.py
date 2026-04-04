@@ -3,7 +3,7 @@ import TerminusEngine
 import TerminusEngine.World
 import os
 
-# TODO: integrovat tratě do World + optimalizovat NĚJAK vykreslování a výpočet bodů
+# TODO: optimalizovat NĚJAK vykreslování a výpočet bodů
 
 
 RAILWAY_MODE = False
