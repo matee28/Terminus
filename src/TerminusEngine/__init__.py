@@ -277,50 +277,6 @@ class Game:
             value_m (float): vzdálenost ve světě v metrech
         """
         return m2px(distance_m) * self.camera.zoom
-
-    # def calculate_alignment(self, position: tuple[float, float], size: tuple[float, float], x_alignment: str, y_alignment: str, y_axis_offset_rotation: float = 0):
-    #     """
-    #     Vypočítává souřadnice pro zadané zarovnání.
-
-    #     Args:
-    #         position (tuple[float, float]): souřadnice (x, y)
-    #         size (tuple[float, float]): velikost objektu (výška, šířka)
-    #         x_alignment (str): zarovnání v ose x ("left", "center", "right")
-    #         y_alignment (str): zarovnání v ose y ("top", "center", "bottom")
-    #         y_axis_offset_rotation (float; default: 0): offset rotace osy y ve stupních (např. při zarovnání již rotovaných obrázků; tzn. alignment možnosti jsou relativně k obrázku, ne k světu)
-    #     """
-    #     x_alignment = x_alignment.lower().strip()
-    #     y_alignment = y_alignment.lower().strip()
-
-    #     position_x, position_y = position
-    #     size_x, size_y = size
-    #     offset_x, offset_y = 0, 0
-
-    #     if x_alignment == "center":
-    #         offset_x = -size_x/2
-    #     elif x_alignment == "left":
-    #         offset_x = -size_x
-    #     # right nic
-        
-    #     if y_alignment == "center":
-    #         offset_y = -size_y/2
-    #     elif y_alignment == "top":
-    #         offset_y = -size_y
-    #     # bottom nic
-
-    #     if y_axis_offset_rotation != 0: # rotace offsetu
-    #         cos_angle = math.cos(math.radians(y_axis_offset_rotation))
-    #         sin_angle = math.sin(math.radians(y_axis_offset_rotation))
-
-    #         rotated_offset_x = offset_x * cos_angle - offset_y * sin_angle
-    #         rotated_offset_y = offset_x * sin_angle + offset_y * cos_angle
-
-    #         offset_x, offset_y = rotated_offset_x, rotated_offset_y
-
-    #     position_x += offset_x
-    #     position_y += offset_y
-
-    #     return (position_x, position_y)
     
     def draw_debug_dot(self, world_position: tuple[float, float], size=10, text: str = ""):
         """
@@ -372,8 +328,8 @@ class Game:
             world_position (tuple[float, float]): světové souřadnice obrázku v metrech (x, y)
             size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka) v metrech, pro původní velikost na ose použijte velikost 0
             rotation (float; default: 0): rotace obrázku ve stupních
-            x_alignment (str; default: "center"): zarovnání v ose x (viz funkce calculate_alignment)
-            y_alignment (str; default: "center"): zarovnání v ose y (viz funkce calculate_alignment)
+            x_alignment (str; default: "center"): zarovnání v ose x (left, center, right)
+            y_alignment (str; default: "center"): zarovnání v ose y (top, center, bottom)
             tiled (bool; default: False): zda se má obrázek vykreslit jako dlaždice
         """
         if texture_name in self.images:
