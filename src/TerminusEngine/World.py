@@ -51,16 +51,27 @@ class Railway:
     """
     Reprezentuje železniční trať.
     """
-    def __init__(self, name: str, stations: list[Station]):
+    def __init__(self, station_a: Station, station_b: Station, points: list[tuple[float, float]] = []):
         """
         Inicializuje železniční trať.
 
         Args:
-            name (str): název
-            stations (list[Station]): seznam stanic, kterými trať prochází
+            station_a (Station): počáteční stanice
+            station_b (Station): konečná stanice
+            points (list[tuple[float, float]]): seznam bodů trati
         """
-        self.name = name
-        self.stations = stations
+        self.station_a = station_a
+        self.station_b = station_b
+        self.points = points
+
+    def update_points(self, new_points: list[tuple[float, float]]):
+        """
+        Aktualizuje body trati.
+
+        Args:
+            new_points (list[tuple[float, float]]): nový seznam bodů trati
+        """
+        self.points = new_points
 
 
 
@@ -68,14 +79,16 @@ class World:
     """
     Reprezentuje svět.
     """
-    def __init__(self, cities: list[City]):
+    def __init__(self, cities: list[City], railways: list[Railway] = []):
         """
         Inicializuje svět.
 
         Args:
             cities (list[City]): seznam měst
+            railways (list[Railway]): seznam železničních tratí
         """
         self.cities = cities
+        self.railways = railways
 
     def __str__(self):
         return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
@@ -84,6 +97,24 @@ class World:
             city.position, 
             '\n\t\t'.join([f'{s.name} {s.position}' for s in city.stations])
         ) for city in self.cities])
+    
+    def add_railway(self, railway: Railway):
+        """
+        Přidá železniční trať do světa.
+
+        Args:
+            railway (Railway): trať, která se má přidat
+        """
+        self.railways.append(railway)
+    
+    def remove_railway(self, railway: Railway):
+        """
+        Odstraní železniční trať ze světa.
+
+        Args:
+            railway (Railway): trať, která se má odstranit
+        """
+        self.railways.remove(railway)
 
 
 # TODO: stále jsou hardcoded hodnoty jako kapacita stanic a počet kolejí

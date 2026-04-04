@@ -7,7 +7,6 @@ import os
 
 
 RAILWAY_MODE = False
-RAILWAYS = []
 
 
 def main():
@@ -76,20 +75,20 @@ def main():
                 global RAILWAY_MODE
                 RAILWAY_MODE = not RAILWAY_MODE
                 if RAILWAY_MODE:
-                    RAILWAYS.append([])
+                    world.add_railway(TerminusEngine.World.Railway(None, None, []))
 
 
         # přidávání kolejí
         if RAILWAY_MODE:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 3: # pravé tlačítko
-                    RAILWAYS[-1].append(game.world_position(event.pos))
-                    if len(RAILWAYS[-1]) == 1:
-                        RAILWAYS[-1].append(game.world_position(event.pos))
-                    print(RAILWAYS)
-            if len(RAILWAYS) > 0:
-                if len(RAILWAYS[-1]) > 0 and event.type == pygame.MOUSEMOTION:
-                    RAILWAYS[-1][-1] = game.world_position(event.pos)
+                    world.railways[-1].points.append(game.world_position(event.pos))
+                    if len(world.railways[-1].points) == 1:
+                        world.railways[-1].points.append(game.world_position(event.pos))
+                    print(world.railways[-1].points)
+            if len(world.railways) > 0:
+                if len(world.railways[-1].points) > 0 and event.type == pygame.MOUSEMOTION:
+                    world.railways[-1].points[-1] = game.world_position(event.pos)
 
 
     def loop():
@@ -100,15 +99,13 @@ def main():
             tiled=True
         )
 
-        for railway in RAILWAYS:
-            if len(railway) > 1:
+        for railway in world.railways:
+            if len(railway.points) > 1:
                 game.render_image_path(
                     texture_name="rail_tile",
                     distance=11/8, # velikost textury / METERS_TO_PIXELS
-                    path=railway
+                    path=railway.points
                 )
-            elif len(railway) == 1:
-                game.draw_debug_dot(railway[0], 5)
 
         game.draw_debug_dot((0, 0))
         game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
