@@ -84,7 +84,12 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 3: # pravé tlačítko
                     RAILWAYS[-1].append(game.world_position(event.pos))
+                    if len(RAILWAYS[-1]) == 1:
+                        RAILWAYS[-1].append(game.world_position(event.pos))
                     print(RAILWAYS)
+            if len(RAILWAYS) > 0:
+                if len(RAILWAYS[-1]) > 0 and event.type == pygame.MOUSEMOTION:
+                    RAILWAYS[-1][-1] = game.world_position(event.pos)
 
 
     def loop():
