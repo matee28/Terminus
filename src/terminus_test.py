@@ -3,8 +3,6 @@ import TerminusEngine
 import TerminusEngine.World
 import os
 
-# TODO: optimalizovat NĚJAK vykreslování a výpočet bodů
-
 
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 100

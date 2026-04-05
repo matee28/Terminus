@@ -13,8 +13,16 @@ terminus-test
 ```
 
 
-## Specifikace projektu
+## Ovládání
 
+### Stavba kolejí
+
+- **klávesa `T`** aktivuje režim stavby, opětovný stisk zruší rozpracovanou trať
+- **pravé tlačítko myši** do kolejové trati přidává body
+- první i poslední bod musí být umístěn na zastávce, jinak se trať nepostaví
+
+
+## Specifikace projektu
 
 ### Základní idea
 
@@ -42,7 +50,6 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 - random
 
 
-
 ## Poznámky
 
 ### Měřítko
@@ -50,3 +57,8 @@ Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
 
 ### Seznam měst s železničními stanicemi
 Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=34462).
+
+
+## TODO
+
+- optimalizace výpočtu a vykreslování trati během její stavby (FPS drop)
