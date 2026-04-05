@@ -1,18 +1,24 @@
+import random
+import math
+
+
 class City:
     """
     Reprezentuje město.
     """
-    def __init__(self, name: str, position: tuple[float, float], population: int):
+    def __init__(self, name: str, position: tuple[float, float], radius: float, population: int):
         """
         Inicializuje město.
 
         Args:
             name (str): název
             position (tuple[float, float]): pozice (x, y)
+            radius (float): poloměr města
             population (int): počet obyvatel
         """
         self.name = name
         self.position = position
+        self.radius = radius
         self.population = population
         self.stations = []
 
@@ -45,13 +51,235 @@ class Railway:
     """
     Reprezentuje železniční trať.
     """
-    def __init__(self, name: str, stations: list[Station]):
+    def __init__(self, station_a: Station, station_b: Station, points: list[tuple[float, float]] = []):
         """
         Inicializuje železniční trať.
 
         Args:
-            name (str): název
-            stations (list[Station]): seznam stanic, kterými trať prochází
+            station_a (Station): počáteční stanice
+            station_b (Station): konečná stanice
+            points (list[tuple[float, float]]): seznam bodů trati
         """
-        self.name = name
-        self.stations = stations
+        self.station_a = station_a
+        self.station_b = station_b
+        self.points = points
+
+    def replace_points(self, new_points: list[tuple[float, float]]):
+        """
+        Nahradí body trati.
+
+        Args:
+            new_points (list[tuple[float, float]]): nový seznam bodů trati
+        """
+        self.points = new_points
+
+    def add_point(self, point: tuple[float, float]):
+        """
+        Přidá bod na konec trati.
+
+        Args:
+            point (tuple[float, float]): bod, který se má přidat
+        """
+        self.points.append(point)
+
+    def remove_last_point(self):
+        """
+        Odstraní poslední bod z trati.
+        """
+        if len(self.points) > 0:
+            self.points.pop()
+
+
+
+class World:
+    """
+    Reprezentuje svět.
+    """
+    def __init__(self, cities: list[City], railways: list[Railway] = []):
+        """
+        Inicializuje svět.
+
+        Args:
+            cities (list[City]): seznam měst
+            railways (list[Railway]): seznam železničních tratí
+        """
+        self.cities = cities
+        self.railways = railways
+
+    def __str__(self):
+        return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
+            city.name, 
+            city.population, 
+            city.position, 
+            '\n\t\t'.join([f'{s.name} {s.position}' for s in city.stations])
+        ) for city in self.cities])
+    
+    def add_railway(self, railway: Railway):
+        """
+        Přidá železniční trať do světa.
+
+        Args:
+            railway (Railway): trať, která se má přidat
+        """
+        self.railways.append(railway)
+    
+    def remove_railway(self, railway: Railway):
+        """
+        Odstraní železniční trať ze světa.
+
+        Args:
+            railway (Railway): trať, která se má odstranit
+        """
+        self.railways.remove(railway)
+
+    def get_closest_station(self, point: tuple[float, float]):
+        """
+        Najde stanici, která je nejblíže k zadanému bodu.
+
+        Args:
+            tuple[float, float]: zadaný bod (x, y)
+
+        Returns:
+            tuple[Station, float]: nejbližší stanice a její vzdálenost (v metrech)
+        """
+        closest_station = None
+        min_distance = float("inf") # https://stackoverflow.com/questions/34264710/what-is-the-point-of-floatinf-in-python
+
+        for city in self.cities:
+            for station in city.stations:
+                distance = math.dist(station.position, point)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_station = station
+                    
+        return closest_station, min_distance
+
+
+def WorldGenerator(
+        world_boundary: int,
+
+        city_names: list[str],
+        cities: int,
+        small_city_max_population: int,
+        large_city_max_population: int,
+        min_city_radius: int,
+        max_city_boundary: int,
+
+        max_stations_per_city: int,
+        passenger_station_names: list[str],
+        cargo_station_names: list[str],
+
+        large_city_cargo_capacity_range: tuple[float, float],
+        large_city_passenger_capacity_range: tuple[int, int],
+        large_city_max_tracks: int,
+        small_city_passenger_capacity_range: tuple[int, int],
+        small_city_cargo_capacity_range: tuple[float, float]
+    ):
+
+    """
+    Generuje svět.
+
+    Args:
+        world_boundary (int): velikost hranice světa v metrech (pro generování měst atd.)
+        city_names (list[str]): seznam názvů pro města
+        cities (int): počet měst, které se mají vygenerovat
+        small_city_max_population (int): maximální počet obyvatel v malém městě
+        large_city_max_population (int): maximální počet obyvatel v velkém městě
+        min_city_radius (int): minimální poloměr města v metrech
+        max_city_boundary (int): maximální velikost města v metrech (pro generování stanic atd.)
+        max_stations_per_city (int): maximální počet stanic, které mohou být v jednom městě
+        passenger_station_names (list[str]): seznam názvů pro osobní stanice
+        cargo_station_names (list[str]): seznam názvů pro nákladní stanice
+        large_city_cargo_capacity_range (tuple[float, float]): rozsah kapacity pro nákladní stanice ve velkých městech
+        large_city_passenger_capacity_range (tuple[int, int]): rozsah kapacity pro osobní stanice ve velkých městech
+        large_city_max_tracks (int): maximální počet kolejí ve stanicích ve velkých městech (minimum je 1)
+        small_city_passenger_capacity_range (tuple[int, int]): rozsah kapacity pro osobní stanice v malých městech
+        small_city_cargo_capacity_range (tuple[float, float]): rozsah kapacity pro nákladní stanice v malých městech
+    """
+
+    if (len(city_names) < cities) or (len(passenger_station_names) < max_stations_per_city) or (len(cargo_station_names) < max_stations_per_city):
+        raise ValueError("Není dostatek názvů pro generování světa.")
+    
+    if small_city_max_population < 1:
+        raise ValueError("Maximální počet obyvatel v malém městě musí být alespoň 1.")
+    
+    if small_city_max_population >= large_city_max_population:
+        raise ValueError("Maximální počet obyvatel v malém městě musí být menší než ve velkém městě.")
+    
+    if max_stations_per_city < 1:
+        raise ValueError("Maximální počet stanic v městě musí být alespoň 1.")
+
+    def generate_station_position(city_pass: City): # generuje pozici stanice náhodně uvnitř města
+        angle = random.uniform(0, 2 * math.pi)
+        r = random.uniform(city_pass.radius * 0.2, city_pass.radius)
+        return (city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle))
+
+    # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
+    grid_size = math.ceil(math.sqrt(cities))
+    cell_size = (2 * world_boundary) / grid_size
+    available_cells = [(x, y) for x in range(grid_size) for y in range(grid_size)]
+    random.shuffle(available_cells)
+
+    # výběr náhodných měst
+    selected_city_names = random.sample(city_names, cities)
+    
+    generated_cities = []
+    for i, city_name in enumerate(selected_city_names):
+
+        # rozhodnutí, zda je město velké nebo malé
+        is_large = random.choice([True, False])
+
+        if is_large:
+            population = random.randint(small_city_max_population + 1, large_city_max_population)
+        else:
+            population = random.randint(1, small_city_max_population)
+
+        city_radius = math.sqrt(population / large_city_max_population) * max_city_boundary # plocha roste lineárně s populací
+        city_radius = max(city_radius, min_city_radius) # minimální poloměr
+
+        # získání nezabrané buňky z mřížky
+        cell_x, cell_y = available_cells[i]
+        
+        # střed buňky
+        center_x = -world_boundary + cell_x * cell_size + cell_size / 2
+        center_y = -world_boundary + cell_y * cell_size + cell_size / 2
+        
+        # o kolik se město může náhodně odchýlit od středu, aby nezasáhlo do sousední buňky
+        jitter = max(0.0, (cell_size / 2) - city_radius)
+        
+        position = (
+            center_x + random.uniform(-jitter, jitter),
+            center_y + random.uniform(-jitter, jitter)
+        )
+
+        city = City(name=city_name, position=position, radius=city_radius, population=population)
+
+        if is_large: # velké město -> více stanic
+            if max_stations_per_city > 1:
+                num_stations = random.randint(2, max_stations_per_city)
+            else:
+                num_stations = 1
+
+            city_pass_names = random.sample(passenger_station_names, num_stations)
+            city_cargo_names = random.sample(cargo_station_names, num_stations)
+            city_station_types = [True] + random.choices([True, False], k=num_stations-1) # zaručuje alespoň jednu osobní stanici
+            
+            for i in range(num_stations):
+                # rozhodnutí, zda je stanice nákladní nebo osobní
+                is_cargo = not city_station_types[i]
+                
+                station_position = generate_station_position(city)
+
+                if is_cargo:
+                    station_name = f"{city_name}-{city_cargo_names[i].capitalize()}"
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=0, cargo_capacity=random.uniform(*large_city_cargo_capacity_range), tracks=random.randint(1, large_city_max_tracks))
+                else:
+                    station_name = f"{city_name}-{city_pass_names[i].capitalize()}"
+                    Station(city=city, name=station_name, position=station_position, passenger_capacity=random.randint(*large_city_passenger_capacity_range), cargo_capacity=0, tracks=random.randint(1, large_city_max_tracks))
+
+        else: # malé město
+            Station(city=city, name=city_name, position=generate_station_position(city), passenger_capacity=random.randint(*small_city_passenger_capacity_range), cargo_capacity=random.uniform(*small_city_cargo_capacity_range), tracks=1)
+            
+        generated_cities.append(city)
+
+    return World(cities=generated_cities)
