@@ -15,11 +15,11 @@ terminus-test
 
 ## Ovládání
 
-### Stavba kolejí
+### Stavba tratí
 
 - **klávesa `T`** aktivuje režim stavby, opětovný stisk zruší rozpracovanou trať
 - **pravé tlačítko myši** do kolejové trati přidává body
-- první i poslední bod musí být umístěn na zastávce, jinak se trať nepostaví
+- první i poslední bod musí být umístěn na zastávce, jinak trať nelze dokončit
 
 
 ## Specifikace projektu
