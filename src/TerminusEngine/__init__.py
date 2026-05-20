@@ -501,7 +501,7 @@ class Game:
 
 
     
-    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0):
+    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0, cache: bool = True):
         """
         Vykreslí obrázek uložený v paměti podél zadané cesty.
 
@@ -510,14 +510,16 @@ class Game:
             path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu
             size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0
             rotation (float; default: 0): rotace obrázku ve stupních
+            cache (bool; default: True): zda se má cesta uložit do/volat z paměti
         """
         if texture_name in self.images:
             path_key = (tuple(path), distance)
-            if path_key in self.path_cache:
+            if cache and path_key in self.path_cache:
                 points = self.path_cache[path_key]
             else:
                 points = self.__points_on_path(path, distance, smooth=True)
-                self.path_cache[path_key] = points
+                if cache:
+                    self.path_cache[path_key] = points
 
             # for position, _ in points:
             #     for deg in range(0, 360, 30):
