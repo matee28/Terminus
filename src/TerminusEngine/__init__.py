@@ -172,6 +172,7 @@ class Game:
         """
 
         self.images = {}
+        self.image_colors = {}
         self.texture_cache = {}
         self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
 
@@ -309,6 +310,7 @@ class Game:
         image = pygame.image.load(self.__abs_path(path)).convert_alpha()
         image = self.rotate_image(image, rotation)
         self.images[name] = image
+        self.image_colors[name] = pygame.transform.average_color(image)
 
     def rotate_image(self, image: pygame.Surface, rotation: float):
         """
@@ -348,6 +350,30 @@ class Game:
 
             # převod na px s ohledem na zoom
             scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+
+            # Fade to color LOD (Level of Detail)
+            if scaled_size[0] <= 32 or scaled_size[1] <= 32:
+                avg_color = self.image_colors.get(texture_name, (255, 0, 255))
+                if tiled:
+                    self.screen.fill(avg_color)
+                else:
+                    offset_x, offset_y = 0, 0
+                    if x_alignment == "center": offset_x = -scaled_size[0]/2
+                    elif x_alignment == "left": offset_x = -scaled_size[0]
+                    if y_alignment == "center": offset_y = -scaled_size[1]/2
+                    elif y_alignment == "top": offset_y = -scaled_size[1]
+
+                    center_x, center_y = scaled_size[0]/2, scaled_size[1]/2
+                    vec = pygame.math.Vector2(-offset_x - center_x, -offset_y - center_y)
+                    rotated_vec = vec.rotate(-rotation) if rotation != 0 else vec
+
+                    pos = self.screen_position(world_position)
+                    rect = pygame.Rect(0, 0, scaled_size[0], scaled_size[1])
+                    rect.center = (pos[0] - rotated_vec.x, pos[1] - rotated_vec.y)
+
+                    if rect.right >= 0 and rect.left < self.screen.get_width() and rect.bottom >= 0 and rect.top < self.screen.get_height():
+                        pygame.draw.rect(self.screen, avg_color, rect)
+                return
 
             texture_cache_key = (texture_name, scaled_size, rotation)
             if texture_cache_key in self.texture_cache:
@@ -501,7 +527,7 @@ class Game:
 
 
     
-    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0):
+    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0, cache: bool = True):
         """
         Vykreslí obrázek uložený v paměti podél zadané cesty.
 
@@ -510,14 +536,16 @@ class Game:
             path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu
             size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0
             rotation (float; default: 0): rotace obrázku ve stupních
+            cache (bool; default: True): zda se má cesta uložit do/volat z paměti
         """
         if texture_name in self.images:
             path_key = (tuple(path), distance)
-            if path_key in self.path_cache:
+            if cache and path_key in self.path_cache:
                 points = self.path_cache[path_key]
             else:
                 points = self.__points_on_path(path, distance, smooth=True)
-                self.path_cache[path_key] = points
+                if cache:
+                    self.path_cache[path_key] = points
 
             # for position, _ in points:
             #     for deg in range(0, 360, 30):
