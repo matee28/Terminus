@@ -220,6 +220,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
                     exit()
+                elif event.type == pygame.VIDEORESIZE:
+                    if event.w > 0 and event.h > 0:
+                        self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                 
                 event_handler(event)
 
