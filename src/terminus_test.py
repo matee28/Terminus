@@ -55,7 +55,7 @@ def main():
 
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
-    game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
+    game.load_image("rail_tile", "assets/rails/rail_tile_1_small.png", rotation=90)
 
 
     def event_handler(event: pygame.event.Event):
@@ -126,15 +126,12 @@ def main():
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
 
-        for i, railway in enumerate(world.railways):
+        for railway in world.railways:
             if len(railway.points) > 1:
-                is_building = RAILWAY_MODE and (i == len(world.railways) - 1)
-                cache =  not is_building
                 game.render_image_path(
                     texture_name="rail_tile",
-                    distance=TerminusEngine.px2m(game.images["rail_tile"].get_width()), # velikost textury / METERS_TO_PIXELS
-                    path=railway.points,
-                    cache=cache
+                    distance=11/8, # velikost textury / METERS_TO_PIXELS
+                    path=railway.points
                 )
 
         game.draw_debug_dot((0, 0))
