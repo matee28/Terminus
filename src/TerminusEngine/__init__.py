@@ -16,6 +16,9 @@ METERS_TO_PIXELS = 8 # (1 metr = 8 pixelů)
 # hranice pixelů pro vykreslování barvy <-> textury
 FADE_TO_COLOR_THRESHOLD_PX = 16
 
+# minimální šířka kolejí
+RAILWAY_MIN_WIDTH_PX = 2
+
 def m2px(value: float):
     """
     Převádí metry na pixely.
@@ -549,7 +552,7 @@ class Game:
                 smoothed_path = self.__smooth_path(path)
                 screen_points = [self.screen_position(p) for p in smoothed_path]
                 if len(screen_points) >= 2:
-                    thickness = max(1, int(scaled_size[1])) # tloušťka čáry = tloušťka textury
+                    thickness = max(RAILWAY_MIN_WIDTH_PX, int(scaled_size[1])) # tloušťka čáry = tloušťka textury
                     pygame.draw.lines(self.screen, avg_color, False, screen_points, thickness)
                 return
 

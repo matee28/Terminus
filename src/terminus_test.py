@@ -10,7 +10,11 @@ import math
 
 
 RAILWAY_MODE = False
-RAILWAY_MODE_SNAP_DIST_PX = 100
+RAILWAY_MODE_SNAP_DIST_PX = 20
+
+INITIAL_BALANCE = 1000000
+
+RAILWAY_COST_PER_METER = 10
 
 
 def main():
@@ -58,7 +62,7 @@ def main():
         height=600
     )
 
-    economy = TerminusEngine.Economy.Economy(initial_balance=1000000)
+    economy = TerminusEngine.Economy.Economy(initial_balance=INITIAL_BALANCE)
 
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
@@ -92,6 +96,11 @@ def main():
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
 
+            # smazání posledního bodu tratě = Z
+            if event.key == pygame.K_z:
+                if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 2:
+                    del world.railways[-1].points[-2] # -2, protože poslední je poloha kurzoru
+
 
         # přidávání kolejí
         if RAILWAY_MODE:
@@ -107,7 +116,7 @@ def main():
                     else:
                         if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX and closest_station != world.railways[-1].station_a:
                             temp_points = world.railways[-1].points[:-1] + [closest_station.position]
-                            total_cost = sum(math.dist(temp_points[i-1], temp_points[i]) for i in range(1, len(temp_points))) * 10
+                            total_cost = sum(math.dist(temp_points[i-1], temp_points[i]) for i in range(1, len(temp_points))) * RAILWAY_COST_PER_METER
                             if economy.can_afford(total_cost):
                                 economy.deduct(total_cost)
                                 world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
@@ -157,7 +166,7 @@ def main():
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
-            current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * 10
+            current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * RAILWAY_COST_PER_METER
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
             game.screen.blit(font.render("$" + str(int(current_cost)), False, color), (mouse_pos[0] + 15, mouse_pos[1] + 15))
