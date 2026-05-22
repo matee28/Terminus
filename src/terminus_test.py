@@ -1,7 +1,12 @@
 import pygame
+
 import TerminusEngine
 import TerminusEngine.World
+import TerminusEngine.Economy
+
+
 import os
+import math
 
 
 RAILWAY_MODE = False
@@ -53,6 +58,8 @@ def main():
         height=600
     )
 
+    economy = TerminusEngine.Economy.Economy(initial_balance=1000000)
+
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
@@ -99,10 +106,14 @@ def main():
                             world.railways[-1].add_point(closest_station.position) # dvakrát, aby se trať aktualizovala při pohybu myši
                     else:
                         if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX and closest_station != world.railways[-1].station_a:
-                            world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
-                            world.railways[-1].station_b = closest_station 
-                            world.railways[-1].add_point(closest_station.position)
-                            RAILWAY_MODE = False
+                            temp_points = world.railways[-1].points[:-1] + [closest_station.position]
+                            total_cost = sum(math.dist(temp_points[i-1], temp_points[i]) for i in range(1, len(temp_points))) * 10
+                            if economy.can_afford(total_cost):
+                                economy.deduct(total_cost)
+                                world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
+                                world.railways[-1].station_b = closest_station 
+                                world.railways[-1].add_point(closest_station.position)
+                                RAILWAY_MODE = False
                         else:
                             world.railways[-1].points.append(point_position)
             if len(world.railways) > 0:
@@ -142,6 +153,14 @@ def main():
         game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
         game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
         game.screen.blit(font.render("r mode: " + str(RAILWAY_MODE), False, (255, 0, 0)), (0, 60))
+        game.screen.blit(font.render("balance: $" + str(int(economy.balance)), False, (255, 0, 0)), (0, 80))
+
+        if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
+            pts = world.railways[-1].points
+            current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * 10
+            mouse_pos = pygame.mouse.get_pos()
+            color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
+            game.screen.blit(font.render("$" + str(int(current_cost)), False, color), (mouse_pos[0] + 15, mouse_pos[1] + 15))
 
     game.run(
         loop=loop,
