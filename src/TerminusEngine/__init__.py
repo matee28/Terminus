@@ -354,6 +354,12 @@ class Game:
             # převod na px s ohledem na zoom
             scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
 
+            if not tiled:
+                pos = self.screen_position(world_position)
+                margin = max(scaled_size)
+                if pos[0] < -margin or pos[0] > self.screen.get_width() + margin or pos[1] < -margin or pos[1] > self.screen.get_height() + margin:
+                    return
+
             # fade to color pokud je textura moc malá
             if tiled and (scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX):
                 avg_color = self.image_colors[texture_name]
