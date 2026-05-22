@@ -13,6 +13,9 @@ pygame.font.init()
 # poměr metrů na pixely dle rozlišení textur/ortofot
 METERS_TO_PIXELS = 8 # (1 metr = 8 pixelů)
 
+# hranice pixelů pro vykreslování barvy <-> textury
+FADE_TO_COLOR_THRESHOLD_PX = 16
+
 def m2px(value: float):
     """
     Převádí metry na pixely.
@@ -172,6 +175,7 @@ class Game:
         """
 
         self.images = {}
+        self.image_colors = {}
         self.texture_cache = {}
         self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
 
@@ -309,6 +313,7 @@ class Game:
         image = pygame.image.load(self.__abs_path(path)).convert_alpha()
         image = self.rotate_image(image, rotation)
         self.images[name] = image
+        self.image_colors[name] = pygame.transform.average_color(image)
 
     def rotate_image(self, image: pygame.Surface, rotation: float):
         """
@@ -348,6 +353,12 @@ class Game:
 
             # převod na px s ohledem na zoom
             scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+
+            # fade to color pokud je textura moc malá
+            if tiled and (scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX):
+                avg_color = self.image_colors[texture_name]
+                self.screen.fill(avg_color)
+                return
 
             texture_cache_key = (texture_name, scaled_size, rotation)
             if texture_cache_key in self.texture_cache:
@@ -513,6 +524,30 @@ class Game:
             cache (bool; default: True): zda se má cesta uložit do/volat z paměti
         """
         if texture_name in self.images:
+
+            # výpočet velikosti textury
+            texture = self.images[texture_name]
+            
+            size_m = (size[0], size[1])
+            if size_m[0] == 0:
+                size_m = (px2m(texture.get_size()[0]), size_m[1])
+            if size_m[1] == 0:
+                size_m = (size_m[0], px2m(texture.get_size()[1]))
+
+            scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+
+
+            # fade to color pokud je textura moc malá
+            if scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX:
+                avg_color = self.image_colors.get(texture_name, (255, 0, 255))
+                smoothed_path = self.__smooth_path(path)
+                screen_points = [self.screen_position(p) for p in smoothed_path]
+                if len(screen_points) >= 2:
+                    thickness = max(1, int(scaled_size[1])) # tloušťka čáry = tloušťka textury
+                    pygame.draw.lines(self.screen, avg_color, False, screen_points, thickness)
+                return
+
+
             path_key = (tuple(path), distance)
             if cache and path_key in self.path_cache:
                 points = self.path_cache[path_key]
