@@ -60,5 +60,3 @@ Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=344
 
 
 ## TODO
-
-- optimalizace výpočtu a vykreslování trati během její stavby (FPS drop)
