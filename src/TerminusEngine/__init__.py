@@ -166,7 +166,7 @@ class Game:
     """
     # https://www.geeksforgeeks.org/python/pygame-tutorial/
 
-    def __init__(self, camera: Camera, width: int, height: int, font: pygame.font.Font = pygame.font.SysFont("Comic Sans MS", 20)):
+    def __init__(self, camera: Camera, width: int, height: int, font_name: str = "Comic Sans MS"):
         """
         Inicializuje herní okno.
 
@@ -174,7 +174,7 @@ class Game:
             camera (Camera): kamera
             width (int): šířka okna
             height (int): výška okna
-            font (pygame.font.Font): font pro vykreslování textu
+            font_name (str): název fontu
         """
 
         self.images = {}
@@ -185,7 +185,8 @@ class Game:
         self.path_cache = {}
         
         self.camera = camera
-        self.font = font
+        self.font_name = font_name
+        self.fonts = {}
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -301,8 +302,7 @@ class Game:
         pygame.draw.circle(self.screen, (0, 255, 0), pos, m2px(size)*self.camera.zoom)
         pygame.draw.circle(self.screen, (255, 0, 0), pos, 2)
         if text != "":
-            text_surface = self.font.render(text, True, (255, 255, 255))
-            self.screen.blit(text_surface, pos)
+            self.render_text(text, pos, color=(255, 255, 255))
 
     def load_image(self, name: str, path: str, rotation: float = 0):
         """
@@ -572,3 +572,56 @@ class Game:
                 self.render_image(texture_name, position, size, rotation + heading, x_alignment="right", y_alignment="center", tiled=False)
             # for position, _ in points:
                 # self.draw_debug_dot(position, 2)
+
+
+    def get_font(self, size: int):
+        """
+        Vrátí font dané velikosti z paměti, nebo ho inicializuje.
+
+        Args:
+            size (int): velikost fontu
+        """
+        if size not in self.fonts:
+            self.fonts[size] = pygame.font.SysFont(self.font_name, size)
+        return self.fonts[size]
+
+    def render_text(self, text: str, position: tuple[float, float], color: tuple[int, int, int] = (255, 255, 255), is_world_position: bool = False, x_alignment: str = "left", y_alignment: str = "top", antialias: bool = True, font_size: int = 20):
+        """
+        Vykreslí text na obrazovku.
+
+        Args:
+            text (str): text k vykreslení
+            position (tuple[float, float]): souřadnice (x, y) na obrazovce nebo ve světě
+            color (tuple[int, int, int]; default: (255, 255, 255)): barva textu
+            is_world_position (bool; default: False): zda je pozice ve světových souřadnicích
+            x_alignment (str; default: "left"): zarovnání na ose X (left, center, right)
+            y_alignment (str; default: "top"): zarovnání na ose Y (top, center, bottom)
+            antialias (bool; default: True): zda se má použít antialiasing
+            font_size (int; default: 20): velikost textu
+        """
+        
+        font = self.get_font(font_size)
+        text_surface = font.render(text, antialias, color)
+        
+        if is_world_position:
+            pos = self.screen_position(position)
+        else:
+            pos = position
+
+        rect = text_surface.get_rect()
+        
+        if x_alignment == "left":
+            rect.left = pos[0]
+        elif x_alignment == "center":
+            rect.centerx = pos[0]
+        elif x_alignment == "right":
+            rect.right = pos[0]
+            
+        if y_alignment == "top":
+            rect.top = pos[1]
+        elif y_alignment == "center":
+            rect.centery = pos[1]
+        elif y_alignment == "bottom":
+            rect.bottom = pos[1]
+            
+        self.screen.blit(text_surface, rect)

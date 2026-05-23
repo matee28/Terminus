@@ -42,9 +42,6 @@ def main():
     print(world)
 
 
-    pygame.font.init()
-    font = pygame.font.SysFont("Comic Sans MS", 20)
-
 
     camera = TerminusEngine.Camera(
         position=(0, 0),
@@ -59,7 +56,8 @@ def main():
     game = TerminusEngine.Game(
         camera=camera,
         width=800,
-        height=600
+        height=600,
+        font_name="Arial"
     )
 
     economy = TerminusEngine.Economy.Economy(initial_balance=INITIAL_BALANCE)
@@ -158,11 +156,11 @@ def main():
                 )
 
         game.draw_debug_dot((0, 0))
-        game.screen.blit(font.render("pos: " + str(camera.position), False, (255, 0, 0)), (0, 0))
-        game.screen.blit(font.render("zoom: " + str(camera.zoom), False, (255, 0, 0)), (0, 20))
-        game.screen.blit(font.render("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), False, (255, 0, 0)), (0, 40))
-        game.screen.blit(font.render("r mode: " + str(RAILWAY_MODE), False, (255, 0, 0)), (0, 60))
-        game.screen.blit(font.render("balance: $" + str(int(economy.balance)), False, (255, 0, 0)), (0, 80))
+        game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))
+        game.render_text("zoom: " + str(camera.zoom), (0, 20), color=(255, 0, 0))
+        game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
+        game.render_text("r mode: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
+        game.render_text("balance: $" + str(int(economy.balance)), (0, 80), color=(255, 0, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -173,7 +171,7 @@ def main():
             current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * RAILWAY_COST_PER_METER
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
-            game.screen.blit(font.render("$" + str(int(current_cost)), False, color), (mouse_pos[0] + 15, mouse_pos[1] + 15))
+            game.render_text("$" + str(int(current_cost)), (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
 
     game.run(
         loop=loop,
