@@ -96,8 +96,12 @@ def main():
 
             # smazání posledního bodu tratě = Z
             if event.key == pygame.K_z:
-                if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 2:
-                    del world.railways[-1].points[-2] # -2, protože poslední je poloha kurzoru
+                if RAILWAY_MODE and len(world.railways) > 0:
+                    if len(world.railways[-1].points) > 2:
+                        del world.railways[-1].points[-2] # -2, protože poslední je poloha kurzoru
+                    else:
+                        world.railways.remove(world.railways[-1])
+                        RAILWAY_MODE = False
 
 
         # přidávání kolejí
