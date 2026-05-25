@@ -194,6 +194,7 @@ class Game:
         self.time_scale = 180 # 1 irl sekunda = 180 ingame sekund
         self.time = 0
         self.time_paused = False
+        self.train_speed_multiplier = 0.01
 
         # pygame
         pygame.init()
@@ -497,6 +498,37 @@ class Game:
             ret.append([(point.x, point.y), heading])
         
         return ret
+    
+    def get_point_on_path(self, path: list[tuple[float, float]], distance: float):
+        """
+        Vrátí přesnou souřadnici a úhel natočení pro zadanou vzdálenost na trati.
+
+        Args:
+            path (list[tuple[float, float]]): seznam bodů cesty
+            distance (float): vzdálenost od začátku trati
+            
+        Returns:
+            tuple[tuple[float, float], float]: (pozice (x, y), úhel (stupně))
+        """
+        if len(path) < 2:
+            return path[0], 0, 0
+        
+        smoothed_path = self.__smooth_path(path)
+        line = LineString(smoothed_path)
+        
+        # clamp vzdálenosti
+        dist = max(0.0, min(distance, line.length))
+        point = line.interpolate(dist)
+        
+        # výpočet heading úhlu
+        if dist >= line.length - 1:
+            point_behind = line.interpolate(max(0.0, dist - 1.0))
+            heading = self.__get_angle(point_behind.coords[0], point.coords[0])
+        else:
+            point_ahead = line.interpolate(min(line.length, dist + 1.0))
+            heading = self.__get_angle(point.coords[0], point_ahead.coords[0])
+            
+        return (point.x, point.y), heading
     
 
     def __smooth_path(self, path: list[tuple[float, float]], smoothing_iterations: int = 3):

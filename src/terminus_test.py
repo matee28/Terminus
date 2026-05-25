@@ -3,6 +3,7 @@ import pygame
 import TerminusEngine
 import TerminusEngine.World
 import TerminusEngine.Economy
+import TerminusEngine.Vehicles
 
 
 import os
@@ -15,7 +16,6 @@ RAILWAY_MODE_SNAP_DIST_PX = 20
 INITIAL_BALANCE = 1000000
 
 RAILWAY_COST_PER_METER = 10
-
 
 def main():
 
@@ -65,6 +65,13 @@ def main():
 
     game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
+    game.load_image("ce_head", "assets/trains/ce/head.png", rotation=-90)
+    game.load_image("ce_middle", "assets/trains/ce/middle.png", rotation=-90)
+
+    # City Elephant
+    ce_loco = TerminusEngine.Vehicles.Locomotive("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_head", passenger_capacity=310)
+    ce_wagons = [TerminusEngine.Vehicles.PassengerWagon("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_middle") for _ in range(2)]
+    ce_train = TerminusEngine.Vehicles.Train("CityElephant", ce_loco, ce_wagons)
 
 
     def event_handler(event: pygame.event.Event):
@@ -129,6 +136,9 @@ def main():
                                 world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
                                 world.railways[-1].station_b = closest_station 
                                 world.railways[-1].add_point(closest_station.position)
+                                
+                                world.active_trains.append(TerminusEngine.World.ActiveTrain(ce_train, world.railways[-1])) # nasazení vlaku
+                                
                                 RAILWAY_MODE = False
                         else:
                             world.railways[-1].points.append(point_position)
@@ -163,6 +173,36 @@ def main():
                     path=railway.points,
                     cache=cache
                 )
+
+        # aktualizace a vykreslení vlaků
+        dt_seconds = game.clock.get_time() / 1000.0
+        for at in world.active_trains:
+            if len(at.railway.points) < 2: continue
+            
+            if not game.time_paused:
+                speed_m_s = at.train.locomotive.max_speed / 3.6 # km/h na m/s
+                at.distance += at.direction * speed_m_s * dt_seconds * game.time_scale * game.train_speed_multiplier
+                
+            all_parts = [at.train.locomotive] + at.train.wagons # zkombinování částí
+            current_offset = 0.0
+            prev_len = 0.0
+            
+            for i, part in enumerate(all_parts):
+                part_len = TerminusEngine.px2m(game.images[part.texture_name].get_width())
+                
+                if i > 0:
+                    current_offset += (prev_len / 2) + (part_len / 2)
+                prev_len = part_len
+                
+                part_dist = at.distance - (current_offset * at.direction)
+                pos, heading = game.get_point_on_path(at.railway.points, part_dist)
+                
+                render_heading = heading + (180 if at.direction == -1 else 0)
+                game.render_image(part.texture_name, pos, size=(0,0), rotation=render_heading)
+                
+                # debug dot na pozici vlaku
+                if i == 0:
+                    game.draw_debug_dot(pos, size=5)
 
         game.draw_debug_dot((0, 0))
         game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))

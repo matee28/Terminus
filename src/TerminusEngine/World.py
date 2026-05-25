@@ -91,20 +91,39 @@ class Railway:
 
 
 
+class ActiveTrain:
+    """
+    Reprezentuje aktivní vlak na trati.
+    """
+    def __init__(self, train, railway):
+        """
+        Inicializuje aktivní vlak.
+        
+        Args:
+            train (Train): vlaková souprava
+            railway (Railway): trať, po které vlak jede
+        """
+        self.train = train
+        self.railway = railway
+        self.distance = 0.0
+        self.direction = 1 # 1 = A -> B; -1 = B -> A
+
 class World:
     """
     Reprezentuje svět.
     """
-    def __init__(self, cities: list[City], railways: list[Railway] = []):
+    def __init__(self, cities: list[City], railways: list[Railway] = [], active_trains: list[ActiveTrain] = []):
         """
         Inicializuje svět.
 
         Args:
             cities (list[City]): seznam měst
             railways (list[Railway]): seznam železničních tratí
+            active_trains (list[ActiveTrain]): seznam aktivních vlaků
         """
         self.cities = cities
         self.railways = railways
+        self.active_trains = active_trains
 
     def __str__(self):
         return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
