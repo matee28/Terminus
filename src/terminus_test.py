@@ -103,6 +103,11 @@ def main():
                         world.railways.remove(world.railways[-1])
                         RAILWAY_MODE = False
 
+            # pozastavení času = P
+            if event.key == pygame.K_p:
+                game.time_paused = not game.time_paused
+
+
 
         # přidávání kolejí
         if RAILWAY_MODE:
@@ -176,6 +181,14 @@ def main():
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
             game.render_text("$" + str(int(current_cost)), (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
+
+        time_str = game.get_time_string()
+        if game.time_paused:
+            time_str += " (pozastaveno)"
+        
+        screen_w = game.screen.get_width()
+        screen_h = game.screen.get_height()
+        game.render_text(time_str, (screen_w - 10, screen_h - 10), color=(255, 255, 255), x_alignment="right", y_alignment="bottom", font_size=24)
 
     game.run(
         loop=loop,

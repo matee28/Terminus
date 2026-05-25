@@ -190,6 +190,11 @@ class Game:
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+        # čas
+        self.time_scale = 180 # 1 irl sekunda = 180 ingame sekund
+        self.time = 0
+        self.time_paused = False
+
         # pygame
         pygame.init()
         self.clock = pygame.time.Clock()
@@ -224,6 +229,11 @@ class Game:
         """
         running = True
         while running:
+            dt_seconds = self.clock.tick(60) / 1000.0
+            
+            if not self.time_paused:
+                self.time += dt_seconds * self.time_scale
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -237,9 +247,20 @@ class Game:
             self.screen.fill((0, 0, 0))
             loop()
             pygame.display.flip()
-            self.clock.tick(60)
+            # self.clock.tick(60) # na zacatku loopu kvuli mereni casu
 
         pygame.quit()
+
+    def get_time_string(self):
+        """
+        Vrací aktuální herní čas ve formátu 'Den X, HH:MM'.
+        """
+        total_minutes = int(self.time // 60)
+        minutes = total_minutes % 60
+        total_hours = total_minutes // 60
+        hours = total_hours % 24
+        days = (total_hours // 24) + 1
+        return f"Den {days}, {hours:02d}:{minutes:02d}"
 
     def relative_position(self, position: tuple[float, float]):
         """
