@@ -22,6 +22,12 @@ class City:
         self.population = population
         self.stations = []
 
+    def add_station(self, station):
+        """
+        Přidá stanici k městu.
+        """
+        self.stations.append(station)
+
 class Station:
     """
     Reprezentuje stanici.
@@ -45,7 +51,7 @@ class Station:
         self.cargo_capacity = cargo_capacity
         self.tracks = tracks
         
-        self.city.stations.append(self)
+        self.city.add_station(self)
 
 class Railway:
     """
@@ -141,6 +147,15 @@ class World:
             railway (Railway): trať, která se má přidat
         """
         self.railways.append(railway)
+    
+    def add_active_train(self, train: ActiveTrain):
+        """
+        Přidá aktivní vlak do světa.
+
+        Args:
+            train (ActiveTrain): vlak, který se má přidat
+        """
+        self.active_trains.append(train)
     
     def remove_railway(self, railway: Railway):
         """

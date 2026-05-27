@@ -137,7 +137,7 @@ def main():
                                 world.railways[-1].station_b = closest_station 
                                 world.railways[-1].add_point(closest_station.position)
                                 
-                                world.active_trains.append(TerminusEngine.World.ActiveTrain(ce_train, world.railways[-1])) # nasazení vlaku
+                                world.add_active_train(TerminusEngine.World.ActiveTrain(ce_train, world.railways[-1])) # nasazení vlaku
                                 
                                 RAILWAY_MODE = False
                         else:
