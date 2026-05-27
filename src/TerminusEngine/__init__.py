@@ -195,6 +195,7 @@ class Game:
         self.time = 0
         self.time_paused = False
         self.train_speed_multiplier = 0.01
+        self.train_gap = 0.2
 
         # pygame
         pygame.init()

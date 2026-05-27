@@ -191,7 +191,7 @@ def main():
                 part_len = TerminusEngine.px2m(game.images[part.texture_name].get_width())
                 
                 if i > 0:
-                    current_offset += (prev_len / 2) + (part_len / 2)
+                    current_offset += (prev_len / 2) + (part_len / 2) + game.train_gap
                 prev_len = part_len
                 
                 part_dist = at.distance - (current_offset * at.direction)
