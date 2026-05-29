@@ -162,6 +162,17 @@ def main():
             game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
+                
+                # zobrazení kapacity stanice
+                if station.passenger_capacity > 0:
+                    game.render_text(
+                        f"{int(station.passengers)}/{station.passenger_capacity}",
+                        game.screen_position((station.position[0], station.position[1] - 50)),
+                        color=(255, 255, 0),
+                        font_size=16,
+                        x_alignment="center",
+                        y_alignment="bottom"
+                    )
 
         for i, railway in enumerate(world.railways):
             if len(railway.points) > 1:
@@ -176,13 +187,13 @@ def main():
 
         # aktualizace a vykreslení vlaků
         dt_seconds = game.clock.get_time() / 1000.0
+        
+        if not game.time_paused:
+            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.get_point_on_path)
+
         for at in world.active_trains:
             if len(at.railway.points) < 2: continue
             
-            if not game.time_paused:
-                speed_m_s = at.train.locomotive.max_speed / 3.6 # km/h na m/s
-                at.distance += at.direction * speed_m_s * dt_seconds * game.time_scale * game.train_speed_multiplier
-                
             all_parts = [at.train.locomotive] + at.train.wagons # zkombinování částí
             current_offset = 0.0
             prev_len = 0.0
@@ -195,14 +206,22 @@ def main():
                 prev_len = part_len
                 
                 part_dist = at.distance - (current_offset * at.direction)
-                pos, heading = game.get_point_on_path(at.railway.points, part_dist)
+                pos, heading, total_len = game.get_point_on_path(at.railway.points, part_dist)
                 
                 render_heading = heading + (180 if at.direction == -1 else 0)
                 game.render_image(part.texture_name, pos, size=(0,0), rotation=render_heading)
                 
-                # debug dot na pozici vlaku
+                # počet cestujících a debug dot na pozici vlaku
                 if i == 0:
                     game.draw_debug_dot(pos, size=5)
+                    game.render_text(
+                        f"{int(at.passengers)}/{at.get_passenger_capacity()}",
+                        game.screen_position((pos[0], pos[1] - 30)),
+                        color=(0, 200, 255),
+                        font_size=16,
+                        x_alignment="center",
+                        y_alignment="bottom"
+                    )
 
         game.draw_debug_dot((0, 0))
         game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))

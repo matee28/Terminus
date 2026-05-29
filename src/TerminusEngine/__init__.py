@@ -194,8 +194,9 @@ class Game:
         self.time_scale = 180 # 1 irl sekunda = 180 ingame sekund
         self.time = 0
         self.time_paused = False
-        self.train_speed_multiplier = 0.01
+        self.train_speed_multiplier = 0.5
         self.train_gap = 0.2
+        self.passenger_generation_rate = 0.05 # rychlost zaplnění stanic cestujícími
 
         # pygame
         pygame.init()
@@ -529,7 +530,7 @@ class Game:
             point_ahead = line.interpolate(min(line.length, dist + 1.0))
             heading = self.__get_angle(point.coords[0], point_ahead.coords[0])
             
-        return (point.x, point.y), heading
+        return (point.x, point.y), heading, line.length
     
 
     def __smooth_path(self, path: list[tuple[float, float]], smoothing_iterations: int = 3):
