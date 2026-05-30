@@ -63,7 +63,7 @@ def main():
     economy = TerminusEngine.Economy.Economy(initial_balance=INITIAL_BALANCE)
 
 
-    game.load_image("terrain", "assets/terrain/rocky_terrain_02_diff_1k.png")
+    game.load_image("terrain", "assets/terrain/seamless_2048.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
     game.load_image("ce_head", "assets/trains/ce/head.png", rotation=-90)
     game.load_image("ce_middle", "assets/trains/ce/middle.png", rotation=-90)
@@ -151,7 +151,7 @@ def main():
         game.render_image(
             texture_name="terrain",
             world_position=(0, 0),
-            size=(200, 200),
+            size=(0, 0),
             tiled=True
         )
 
