@@ -13,8 +13,9 @@ pygame.font.init()
 # poměr metrů na pixely dle rozlišení textur/ortofot
 METERS_TO_PIXELS = 8 # (1 metr = 8 pixelů)
 
-# hranice pixelů pro vykreslování barvy <-> textury
-FADE_TO_COLOR_THRESHOLD_PX = 16
+# hranice zoomu pro vykreslování barvy <-> textury
+FADE_TO_COLOR_ZOOM_THRESHOLD = 0.05
+FADE_TO_COLOR_ZOOM_START = 0.15
 
 # minimální šířka kolejí
 RAILWAY_MIN_WIDTH_PX = 2
@@ -388,7 +389,7 @@ class Game:
                     return
 
             # fade to color pokud je textura moc malá
-            if tiled and (scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX):
+            if tiled and self.camera.zoom <= FADE_TO_COLOR_ZOOM_THRESHOLD:
                 avg_color = self.image_colors[texture_name]
                 self.screen.fill(avg_color)
                 return
@@ -449,6 +450,17 @@ class Game:
                 for y in range(0-size_y, self.screen.get_height(), size_y):
                     for x in range(0-size_x, self.screen.get_width(), size_x):
                         self.screen.blit(texture, (x + offset_x, y + offset_y)) 
+
+                if self.camera.zoom <= FADE_TO_COLOR_ZOOM_START:
+                    if self.camera.zoom < FADE_TO_COLOR_ZOOM_START:
+                        fade_range = FADE_TO_COLOR_ZOOM_START - FADE_TO_COLOR_ZOOM_THRESHOLD
+                        opacity = 255 * (1.0 - (self.camera.zoom - FADE_TO_COLOR_ZOOM_THRESHOLD) / fade_range)
+                        opacity = max(0, min(255, int(opacity)))
+                        if opacity > 0:
+                            fade_surface = pygame.Surface(self.screen.get_size())
+                            fade_surface.fill(self.image_colors[texture_name])
+                            fade_surface.set_alpha(opacity)
+                            self.screen.blit(fade_surface, (0, 0))
 
     def __get_angle(self, pos1: tuple[float, float], pos2: tuple[float, float]):
         """
@@ -602,7 +614,7 @@ class Game:
 
 
             # fade to color pokud je textura moc malá
-            if scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX:
+            if self.camera.zoom <= FADE_TO_COLOR_ZOOM_THRESHOLD:
                 avg_color = self.image_colors.get(texture_name, (255, 0, 255))
                 smoothed_path = self.__smooth_path(path)
                 screen_points = [self.screen_position(p) for p in smoothed_path]
