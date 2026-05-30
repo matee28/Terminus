@@ -65,12 +65,12 @@ def main():
 
     game.load_image("terrain", "assets/terrain/seamless_2048.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
-    game.load_image("ce_head", "assets/trains/ce/head.png", rotation=-90)
-    game.load_image("ce_middle", "assets/trains/ce/middle.png", rotation=-90)
+    game.load_image("ce_locomotive", "assets/trains/locomotives/cityelefant.png", rotation=-90)
+    game.load_image("ce_wagon", "assets/trains/passenger_wagons/cityelefant.png", rotation=-90)
 
     # City Elephant
-    ce_loco = TerminusEngine.Vehicles.Locomotive("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_head", passenger_capacity=310)
-    ce_wagons = [TerminusEngine.Vehicles.PassengerWagon("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_middle") for _ in range(2)]
+    ce_loco = TerminusEngine.Vehicles.Locomotive("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_locomotive", passenger_capacity=310)
+    ce_wagons = [TerminusEngine.Vehicles.PassengerWagon("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_wagon") for _ in range(2)]
     ce_train = TerminusEngine.Vehicles.Train("CityElephant", ce_loco, ce_wagons)
 
 
