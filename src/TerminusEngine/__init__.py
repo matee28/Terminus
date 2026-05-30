@@ -13,6 +13,12 @@ pygame.font.init()
 # poměr metrů na pixely dle rozlišení textur/ortofot
 METERS_TO_PIXELS = 8 # (1 metr = 8 pixelů)
 
+# hranice pixelů pro vykreslování barvy <-> textury
+FADE_TO_COLOR_THRESHOLD_PX = 16
+
+# minimální šířka kolejí
+RAILWAY_MIN_WIDTH_PX = 2
+
 def m2px(value: float):
     """
     Převádí metry na pixely.
@@ -160,7 +166,7 @@ class Game:
     """
     # https://www.geeksforgeeks.org/python/pygame-tutorial/
 
-    def __init__(self, camera: Camera, width: int, height: int, font: pygame.font.Font = pygame.font.SysFont("Comic Sans MS", 20)):
+    def __init__(self, camera: Camera, width: int, height: int, font_name: str = "Comic Sans MS"):
         """
         Inicializuje herní okno.
 
@@ -168,19 +174,29 @@ class Game:
             camera (Camera): kamera
             width (int): šířka okna
             height (int): výška okna
-            font (pygame.font.Font): font pro vykreslování textu
+            font_name (str): název fontu
         """
 
         self.images = {}
+        self.image_colors = {}
         self.texture_cache = {}
         self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
 
         self.path_cache = {}
         
         self.camera = camera
-        self.font = font
+        self.font_name = font_name
+        self.fonts = {}
 
         self.src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+        # čas
+        self.time_scale = 180 # 1 irl sekunda = 180 ingame sekund
+        self.time = 0
+        self.time_paused = False
+        self.train_speed_multiplier = 0.5
+        self.train_gap = 0.2
+        self.passenger_generation_rate = 0.05 # rychlost zaplnění stanic cestujícími
 
         # pygame
         pygame.init()
@@ -216,19 +232,38 @@ class Game:
         """
         running = True
         while running:
+            dt_seconds = self.clock.tick(60) / 1000.0
+            
+            if not self.time_paused:
+                self.time += dt_seconds * self.time_scale
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                     exit()
+                elif event.type == pygame.VIDEORESIZE:
+                    if event.w > 0 and event.h > 0:
+                        self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                 
                 event_handler(event)
 
             self.screen.fill((0, 0, 0))
             loop()
             pygame.display.flip()
-            self.clock.tick(60)
+            # self.clock.tick(60) # na zacatku loopu kvuli mereni casu
 
         pygame.quit()
+
+    def get_time_string(self):
+        """
+        Vrací aktuální herní čas ve formátu 'Den X, HH:MM'.
+        """
+        total_minutes = int(self.time // 60)
+        minutes = total_minutes % 60
+        total_hours = total_minutes // 60
+        hours = total_hours % 24
+        days = (total_hours // 24) + 1
+        return f"Den {days}, {hours:02d}:{minutes:02d}"
 
     def relative_position(self, position: tuple[float, float]):
         """
@@ -291,8 +326,7 @@ class Game:
         pygame.draw.circle(self.screen, (0, 255, 0), pos, m2px(size)*self.camera.zoom)
         pygame.draw.circle(self.screen, (255, 0, 0), pos, 2)
         if text != "":
-            text_surface = self.font.render(text, True, (255, 255, 255))
-            self.screen.blit(text_surface, pos)
+            self.render_text(text, pos, color=(255, 255, 255))
 
     def load_image(self, name: str, path: str, rotation: float = 0):
         """
@@ -306,6 +340,7 @@ class Game:
         image = pygame.image.load(self.__abs_path(path)).convert_alpha()
         image = self.rotate_image(image, rotation)
         self.images[name] = image
+        self.image_colors[name] = pygame.transform.average_color(image)
 
     def rotate_image(self, image: pygame.Surface, rotation: float):
         """
@@ -345,6 +380,18 @@ class Game:
 
             # převod na px s ohledem na zoom
             scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+
+            if not tiled:
+                pos = self.screen_position(world_position)
+                margin = max(scaled_size)
+                if pos[0] < -margin or pos[0] > self.screen.get_width() + margin or pos[1] < -margin or pos[1] > self.screen.get_height() + margin:
+                    return
+
+            # fade to color pokud je textura moc malá
+            if tiled and (scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX):
+                avg_color = self.image_colors[texture_name]
+                self.screen.fill(avg_color)
+                return
 
             texture_cache_key = (texture_name, scaled_size, rotation)
             if texture_cache_key in self.texture_cache:
@@ -454,6 +501,37 @@ class Game:
         
         return ret
     
+    def get_point_on_path(self, path: list[tuple[float, float]], distance: float):
+        """
+        Vrátí přesnou souřadnici a úhel natočení pro zadanou vzdálenost na trati.
+
+        Args:
+            path (list[tuple[float, float]]): seznam bodů cesty
+            distance (float): vzdálenost od začátku trati
+            
+        Returns:
+            tuple[tuple[float, float], float]: (pozice (x, y), úhel (stupně))
+        """
+        if len(path) < 2:
+            return path[0], 0, 0
+        
+        smoothed_path = self.__smooth_path(path)
+        line = LineString(smoothed_path)
+        
+        # clamp vzdálenosti
+        dist = max(0.0, min(distance, line.length))
+        point = line.interpolate(dist)
+        
+        # výpočet heading úhlu
+        if dist >= line.length - 1:
+            point_behind = line.interpolate(max(0.0, dist - 1.0))
+            heading = self.__get_angle(point_behind.coords[0], point.coords[0])
+        else:
+            point_ahead = line.interpolate(min(line.length, dist + 1.0))
+            heading = self.__get_angle(point.coords[0], point_ahead.coords[0])
+            
+        return (point.x, point.y), heading, line.length
+    
 
     def __smooth_path(self, path: list[tuple[float, float]], smoothing_iterations: int = 3):
         """
@@ -498,7 +576,7 @@ class Game:
 
 
     
-    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0):
+    def render_image_path(self, texture_name: str, path: list[tuple[float, float]], distance: float, size: tuple[float, float] = (0, 0), rotation: float = 0, cache: bool = True):
         """
         Vykreslí obrázek uložený v paměti podél zadané cesty.
 
@@ -507,14 +585,40 @@ class Game:
             path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu
             size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0
             rotation (float; default: 0): rotace obrázku ve stupních
+            cache (bool; default: True): zda se má cesta uložit do/volat z paměti
         """
         if texture_name in self.images:
+
+            # výpočet velikosti textury
+            texture = self.images[texture_name]
+            
+            size_m = (size[0], size[1])
+            if size_m[0] == 0:
+                size_m = (px2m(texture.get_size()[0]), size_m[1])
+            if size_m[1] == 0:
+                size_m = (size_m[0], px2m(texture.get_size()[1]))
+
+            scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+
+
+            # fade to color pokud je textura moc malá
+            if scaled_size[0] <= FADE_TO_COLOR_THRESHOLD_PX or scaled_size[1] <= FADE_TO_COLOR_THRESHOLD_PX:
+                avg_color = self.image_colors.get(texture_name, (255, 0, 255))
+                smoothed_path = self.__smooth_path(path)
+                screen_points = [self.screen_position(p) for p in smoothed_path]
+                if len(screen_points) >= 2:
+                    thickness = max(RAILWAY_MIN_WIDTH_PX, int(scaled_size[1])) # tloušťka čáry = tloušťka textury
+                    pygame.draw.lines(self.screen, avg_color, False, screen_points, thickness)
+                return
+
+
             path_key = (tuple(path), distance)
-            if path_key in self.path_cache:
+            if cache and path_key in self.path_cache:
                 points = self.path_cache[path_key]
             else:
                 points = self.__points_on_path(path, distance, smooth=True)
-                self.path_cache[path_key] = points
+                if cache:
+                    self.path_cache[path_key] = points
 
             # for position, _ in points:
             #     for deg in range(0, 360, 30):
@@ -523,3 +627,56 @@ class Game:
                 self.render_image(texture_name, position, size, rotation + heading, x_alignment="right", y_alignment="center", tiled=False)
             # for position, _ in points:
                 # self.draw_debug_dot(position, 2)
+
+
+    def get_font(self, size: int):
+        """
+        Vrátí font dané velikosti z paměti, nebo ho inicializuje.
+
+        Args:
+            size (int): velikost fontu
+        """
+        if size not in self.fonts:
+            self.fonts[size] = pygame.font.SysFont(self.font_name, size)
+        return self.fonts[size]
+
+    def render_text(self, text: str, position: tuple[float, float], color: tuple[int, int, int] = (255, 255, 255), is_world_position: bool = False, x_alignment: str = "left", y_alignment: str = "top", antialias: bool = True, font_size: int = 20):
+        """
+        Vykreslí text na obrazovku.
+
+        Args:
+            text (str): text k vykreslení
+            position (tuple[float, float]): souřadnice (x, y) na obrazovce nebo ve světě
+            color (tuple[int, int, int]; default: (255, 255, 255)): barva textu
+            is_world_position (bool; default: False): zda je pozice ve světových souřadnicích
+            x_alignment (str; default: "left"): zarovnání na ose X (left, center, right)
+            y_alignment (str; default: "top"): zarovnání na ose Y (top, center, bottom)
+            antialias (bool; default: True): zda se má použít antialiasing
+            font_size (int; default: 20): velikost textu
+        """
+        
+        font = self.get_font(font_size)
+        text_surface = font.render(text, antialias, color)
+        
+        if is_world_position:
+            pos = self.screen_position(position)
+        else:
+            pos = position
+
+        rect = text_surface.get_rect()
+        
+        if x_alignment == "left":
+            rect.left = pos[0]
+        elif x_alignment == "center":
+            rect.centerx = pos[0]
+        elif x_alignment == "right":
+            rect.right = pos[0]
+            
+        if y_alignment == "top":
+            rect.top = pos[1]
+        elif y_alignment == "center":
+            rect.centery = pos[1]
+        elif y_alignment == "bottom":
+            rect.bottom = pos[1]
+            
+        self.screen.blit(text_surface, rect)

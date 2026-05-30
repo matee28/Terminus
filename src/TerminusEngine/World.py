@@ -22,6 +22,12 @@ class City:
         self.population = population
         self.stations = []
 
+    def add_station(self, station):
+        """
+        Přidá stanici k městu.
+        """
+        self.stations.append(station)
+
 class Station:
     """
     Reprezentuje stanici.
@@ -42,10 +48,11 @@ class Station:
         self.name = name
         self.position = position
         self.passenger_capacity = passenger_capacity
+        self.passengers = 0
         self.cargo_capacity = cargo_capacity
         self.tracks = tracks
         
-        self.city.stations.append(self)
+        self.city.add_station(self)
 
 class Railway:
     """
@@ -91,20 +98,100 @@ class Railway:
 
 
 
+class ActiveTrain:
+    """
+    Reprezentuje aktivní vlak na trati.
+    """
+    def __init__(self, train, railway):
+        """
+        Inicializuje aktivní vlak.
+        
+        Args:
+            train (Train): vlaková souprava
+            railway (Railway): trať, po které vlak jede
+        """
+        self.train = train
+        self.railway = railway
+        self.distance = 0.0
+        self.direction = 1 # 1 = A -> B; -1 = B -> A
+        self.passengers = 0
+
+    def get_passenger_capacity(self):
+        """Vrátí celkovou kapacitu osobního vlaku."""
+        cap = getattr(self.train.locomotive, "passenger_capacity", 0)
+        for wagon in self.train.wagons:
+            cap += getattr(wagon, "passenger_capacity", 0)
+        return cap
+
 class World:
     """
     Reprezentuje svět.
     """
-    def __init__(self, cities: list[City], railways: list[Railway] = []):
+    def __init__(self, cities: list[City], railways: list[Railway] = [], active_trains: list[ActiveTrain] = []):
         """
         Inicializuje svět.
 
         Args:
             cities (list[City]): seznam měst
             railways (list[Railway]): seznam železničních tratí
+            active_trains (list[ActiveTrain]): seznam aktivních vlaků
         """
         self.cities = cities
         self.railways = railways
+        self.active_trains = active_trains
+
+    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, get_point_func: callable):
+        """
+        Aktualizuje stav světa, generování cestujících a pohyb vlaků.
+        """
+        # aktualizace stanic; generování cestujících ve stanicích na tratích
+        connected_stations = set()
+        for r in self.railways:
+            connected_stations.add(r.station_a)
+            connected_stations.add(r.station_b)
+            
+        for city in self.cities:
+            for station in city.stations:
+                if station in connected_stations and station.passenger_capacity > 0:
+                    if station.passengers < station.passenger_capacity:
+                        generated = passenger_generation_rate * dt_seconds * time_scale
+                        station.passengers = min(station.passenger_capacity, station.passengers + generated)
+        
+        # aktualizace vlaků
+        for at in self.active_trains:
+            speed_m_s = at.train.locomotive.max_speed / 3.6
+            moved_dist = at.direction * speed_m_s * dt_seconds * time_scale * train_speed_multiplier
+            at.distance += moved_dist
+            
+            pts = at.railway.points
+            if len(pts) < 2:
+                continue
+            
+            _, _, total_len = get_point_func(pts, at.distance)
+            
+            # vlak dojel do stanice B
+            if at.distance >= total_len:
+                at.distance = total_len
+                target_station = at.railway.station_b
+                at.passengers = 0
+                if target_station:
+                    capacity = at.get_passenger_capacity()
+                    to_load = min(capacity, int(target_station.passengers))
+                    target_station.passengers -= to_load
+                    at.passengers = to_load
+                at.direction = -1 # otočka
+
+            # vlak dojel do stanice A
+            elif at.distance <= 0:
+                at.distance = 0
+                target_station = at.railway.station_a
+                at.passengers = 0
+                if target_station:
+                    capacity = at.get_passenger_capacity()
+                    to_load = min(capacity, int(target_station.passengers))
+                    target_station.passengers -= to_load
+                    at.passengers = to_load
+                at.direction = 1 # otočka
 
     def __str__(self):
         return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
@@ -122,6 +209,15 @@ class World:
             railway (Railway): trať, která se má přidat
         """
         self.railways.append(railway)
+    
+    def add_active_train(self, train: ActiveTrain):
+        """
+        Přidá aktivní vlak do světa.
+
+        Args:
+            train (ActiveTrain): vlak, který se má přidat
+        """
+        self.active_trains.append(train)
     
     def remove_railway(self, railway: Railway):
         """
