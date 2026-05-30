@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+
+<html lang="cs" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TerminusEngine &#8212; Dokumentace pro Terminus </title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=9a9e823d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/translations.js?v=22e1c300"></script>
+    <link rel="index" title="Rejstřík" href="../genindex.html" />
+    <link rel="search" title="Vyhledávání" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Zdrojový kód pro TerminusEngine</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pygame</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+
+
+<span class="c1"># systém souřadnic enginu: +y je nahoru; +x je doprava</span>
+
+<span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+<span class="c1"># poměr metrů na pixely dle rozlišení textur/ortofot</span>
+<span class="n">METERS_TO_PIXELS</span> <span class="o">=</span> <span class="mi">8</span> <span class="c1"># (1 metr = 8 pixelů)</span>
+
+<span class="c1"># hranice pixelů pro vykreslování barvy &lt;-&gt; textury</span>
+<span class="n">FADE_TO_COLOR_THRESHOLD_PX</span> <span class="o">=</span> <span class="mi">16</span>
+
+<span class="c1"># minimální šířka kolejí</span>
+<span class="n">RAILWAY_MIN_WIDTH_PX</span> <span class="o">=</span> <span class="mi">2</span>
+
+<div class="viewcode-block" id="m2px">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.m2px">[dokumentace]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">m2px</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Převádí metry na pixely.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (float): hodnota v metrech</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="n">METERS_TO_PIXELS</span></div>
+
+
+<div class="viewcode-block" id="px2m">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.px2m">[dokumentace]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">px2m</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Převádí pixely na metry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (float): hodnota v pixelech</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">/</span> <span class="n">METERS_TO_PIXELS</span></div>
+
+
+
+<div class="viewcode-block" id="read_src">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.read_src">[dokumentace]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_src</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vrací obsah souboru (string) ve složce src/.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)),</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="Camera">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera">[dokumentace]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Camera</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inicializuje a uchovává atributy kamery.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+            <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">move_speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">zoom</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_zoom</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">min_zoom</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">zoom_speed</span><span class="p">:</span> <span class="nb">float</span>
+        <span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializuje kameru.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            position (tuple[float, float]): počáteční souřadnice kamery (x, y)</span>
+<span class="sd">            max_distance (float): maximální vzdálenost kamery od středu světa (0, 0)</span>
+<span class="sd">            move_speed (float): rychlost pohybu kamery</span>
+<span class="sd">            zoom (float): počáteční přiblížení pohledu kamery</span>
+<span class="sd">            max_zoom (float): maximální přiblížení pohledu kamery</span>
+<span class="sd">            min_zoom (float): minimální přiblížení pohledu kamery</span>
+<span class="sd">            zoom_speed (float): rychlost přiblížování pohledu kamery</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span> <span class="o">=</span> <span class="n">max_distance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">move_speed</span> <span class="o">=</span> <span class="n">move_speed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_zoom</span> <span class="o">=</span> <span class="n">max_zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_zoom</span> <span class="o">=</span> <span class="n">min_zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom_speed</span> <span class="o">=</span> <span class="n">zoom_speed</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__validate_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ponechává přiblížení pohledu kamery v rozmezí mezi minimálním a maximálním přiblížením.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: zda bylo přiblížení upraveno</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_zoom</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_zoom</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_zoom</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_zoom</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="Camera.set_zoom">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera.set_zoom">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zoom</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Nastavuje přiblížení pohledu kamery.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            zoom (float): nové přiblížení pohledu kamery</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: zda bylo přiblížení upraveno</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">zoom</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_zoom</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Camera.zoom_in">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera.zoom_in">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Přibližuje pohled kamery.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: zda bylo přiblížení upraveno</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_speed</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_zoom</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Camera.zoom_out">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera.zoom_out">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Oddaluje pohled kamery.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: zda bylo přiblížení upraveno</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom_speed</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__validate_zoom</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Camera.move">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera.move">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Posouvá kameru.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            d (tuple[float, float]): vzdálenost posunu kamery z myši v px na obrazovce (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="c1"># dx, dy je v px -&gt; převod na m</span>
+        <span class="n">new_position</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">px2m</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">move_speed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">px2m</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">move_speed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_position</span><span class="p">(</span><span class="n">new_position</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Camera.set_position">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Camera.set_position">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Přesouvá kameru na zadané souřadnice.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            position (tuple[float, float]): nové souřadnice kamery (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">max_distance</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Game">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game">[dokumentace]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Game</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Umožňuje inicializovat a spouštět hru.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># https://www.geeksforgeeks.org/python/pygame-tutorial/</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="p">:</span> <span class="n">Camera</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">font_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Comic Sans MS&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializuje herní okno.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            camera (Camera): kamera</span>
+<span class="sd">            width (int): šířka okna</span>
+<span class="sd">            height (int): výška okna</span>
+<span class="sd">            font_name (str): název fontu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_colors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_texture_cache_size</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># limit pro počet cachovaných textur</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span> <span class="o">=</span> <span class="n">camera</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_name</span> <span class="o">=</span> <span class="n">font_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;..&quot;</span><span class="p">))</span>
+
+        <span class="c1"># čas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_scale</span> <span class="o">=</span> <span class="mi">180</span> <span class="c1"># 1 irl sekunda = 180 ingame sekund</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_paused</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_speed_multiplier</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_gap</span> <span class="o">=</span> <span class="mf">0.2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passenger_generation_rate</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c1"># rychlost zaplnění stanic cestujícími</span>
+
+        <span class="c1"># pygame</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">pygame</span><span class="o">.</span><span class="n">RESIZABLE</span><span class="p">)</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s2">&quot;TerminusEngine&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__abs_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relative_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrací absolutní cestu k souboru.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            relative_path (str): relativní cesta k souboru (relativně k src/)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_path</span><span class="p">,</span> <span class="n">relative_path</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">__ceil_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Zaokrouhluje souřadnice nahoru na celá čísla.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tuple (tuple[float, float]): tuple s dvěma float hodnotami</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="Game.run">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.run">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span> <span class="n">event_handler</span><span class="p">:</span> <span class="nb">callable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Spouští hlavní smyčku hry.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loop (callable): funkce hlavní smyčky hry</span>
+<span class="sd">            event_handler (callable): funkce pro zpracování událostí, dostává jako argument objekt event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
+            <span class="n">dt_seconds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clock</span><span class="o">.</span><span class="n">tick</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_paused</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="n">dt_seconds</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_scale</span>
+
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">QUIT</span><span class="p">:</span>
+                    <span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">exit</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">VIDEORESIZE</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">w</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="n">event</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">h</span><span class="p">),</span> <span class="n">pygame</span><span class="o">.</span><span class="n">RESIZABLE</span><span class="p">)</span>
+                
+                <span class="n">event_handler</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">loop</span><span class="p">()</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
+            <span class="c1"># self.clock.tick(60) # na zacatku loopu kvuli mereni casu</span>
+
+        <span class="n">pygame</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Game.get_time_string">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.get_time_string">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_time_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrací aktuální herní čas ve formátu &#39;Den X, HH:MM&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_minutes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">//</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">minutes</span> <span class="o">=</span> <span class="n">total_minutes</span> <span class="o">%</span> <span class="mi">60</span>
+        <span class="n">total_hours</span> <span class="o">=</span> <span class="n">total_minutes</span> <span class="o">//</span> <span class="mi">60</span>
+        <span class="n">hours</span> <span class="o">=</span> <span class="n">total_hours</span> <span class="o">%</span> <span class="mi">24</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_hours</span> <span class="o">//</span> <span class="mi">24</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Den </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">hours</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">minutes</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="Game.relative_position">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.relative_position">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">relative_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Převádí světové souřadnice na relativní souřadnice.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            position (tuple[float, float]): světová souřadnice (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.screen_position">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.screen_position">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">screen_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Převádí světové souřadnice (v metrech) na souřadnice na obrazovce (v pixelech).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            position (tuple[float, float]): světová souřadnice v metrech (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rel_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_position</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">m2px</span><span class="p">(</span><span class="n">rel_position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">m2px</span><span class="p">(</span><span class="n">rel_position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Game.world_position">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.world_position">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">world_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen_position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Převádí souřadnice na obrazovce (v pixelech) na světové souřadnice (v metrech).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            screen_position (tuple[float, float]): souřadnice na obrazovce (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rel_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">screen_position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">*</span> <span class="n">METERS_TO_PIXELS</span><span class="p">)</span>
+        <span class="n">rel_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">screen_position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">*</span> <span class="n">METERS_TO_PIXELS</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">rel_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="o">-</span><span class="n">rel_y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.screen_distance">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.screen_distance">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">screen_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance_m</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Převádí vzdálenost ve světě (v metrech) na vzdálenost na obrazovce (v pixelech) podle aktuálního přiblížení kamery.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value_m (float): vzdálenost ve světě v metrech</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">m2px</span><span class="p">(</span><span class="n">distance_m</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span></div>
+
+    
+<div class="viewcode-block" id="Game.draw_debug_dot">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.draw_debug_dot">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_debug_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world_position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vykreslí debugovací bod s textem na zadané souřadnici.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            world_position (tuple[float, float]): světové souřadnice v metrech (x, y)</span>
+<span class="sd">            size (float; default: 10): velikost bodu v metrech</span>
+<span class="sd">            text (str; default: &quot;&quot;): text, který se zobrazí u bodu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">world_position</span><span class="p">)</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">pos</span><span class="p">,</span> <span class="n">m2px</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span><span class="p">)</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">pos</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">render_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Game.load_image">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.load_image">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Načítá obrázek a ukládá ho do paměti.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): název obrázku v paměti</span>
+<span class="sd">            path (str): cesta k souboru (relativně k src/)</span>
+<span class="sd">            rotation (float): rotace obrázku ve stupních</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__abs_path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">convert_alpha</span><span class="p">()</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">rotation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_colors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">average_color</span><span class="p">(</span><span class="n">image</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Game.rotate_image">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.rotate_image">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rotate_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotuje obrázek.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image (pygame.Surface): obrázek</span>
+<span class="sd">            rotation (float): rotace obrázku ve stupních</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">rotation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">image</span></div>
+
+
+<div class="viewcode-block" id="Game.render_image">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.render_image">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texture_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">world_position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">rotation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">y_alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vykreslí obrázek uložený v paměti.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            texture_name (str): název obrázku v slovníku</span>
+<span class="sd">            world_position (tuple[float, float]): světové souřadnice obrázku v metrech (x, y)</span>
+<span class="sd">            size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka) v metrech, pro původní velikost na ose použijte velikost 0</span>
+<span class="sd">            rotation (float; default: 0): rotace obrázku ve stupních</span>
+<span class="sd">            x_alignment (str; default: &quot;center&quot;): zarovnání v ose x (left, center, right)</span>
+<span class="sd">            y_alignment (str; default: &quot;center&quot;): zarovnání v ose y (top, center, bottom)</span>
+<span class="sd">            tiled (bool; default: False): zda se má obrázek vykreslit jako dlaždice</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">texture_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
+
+            <span class="n">texture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">texture_name</span><span class="p">]</span>
+
+            <span class="c1"># originál je v px; tzn. pokud size 0 -&gt; px2m originální velikosti</span>
+            <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">px2m</span><span class="p">(</span><span class="n">texture</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">px2m</span><span class="p">(</span><span class="n">texture</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="c1"># převod na px s ohledem na zoom</span>
+            <span class="n">scaled_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ceil_tuple</span><span class="p">((</span><span class="n">m2px</span><span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span><span class="p">,</span> <span class="n">m2px</span><span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tiled</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">world_position</span><span class="p">)</span>
+                <span class="n">margin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">scaled_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">margin</span> <span class="ow">or</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span> <span class="ow">or</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">margin</span> <span class="ow">or</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+            <span class="c1"># fade to color pokud je textura moc malá</span>
+            <span class="k">if</span> <span class="n">tiled</span> <span class="ow">and</span> <span class="p">(</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">FADE_TO_COLOR_THRESHOLD_PX</span> <span class="ow">or</span> <span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">FADE_TO_COLOR_THRESHOLD_PX</span><span class="p">):</span>
+                <span class="n">avg_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_colors</span><span class="p">[</span><span class="n">texture_name</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">avg_color</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">texture_cache_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">texture_name</span><span class="p">,</span> <span class="n">scaled_size</span><span class="p">,</span> <span class="n">rotation</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">texture_cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="p">:</span>
+                <span class="n">texture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="p">[</span><span class="n">texture_cache_key</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">texture</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span> <span class="n">scaled_size</span><span class="p">)</span>
+                <span class="n">texture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate_image</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span> <span class="n">rotation</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="p">[</span><span class="n">texture_cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">texture</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_texture_cache_size</span><span class="p">:</span> <span class="c1"># cache přesahuje max velikost</span>
+                    <span class="n">oldest_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span><span class="p">[</span><span class="n">oldest_key</span><span class="p">]</span>
+
+
+
+            <span class="c1"># počítání vectoru (shoutout gemini)</span>
+
+            <span class="n">offset_x</span><span class="p">,</span> <span class="n">offset_y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">x_alignment</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+                <span class="n">offset_x</span> <span class="o">=</span> <span class="o">-</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">elif</span> <span class="n">x_alignment</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+                <span class="n">offset_x</span> <span class="o">=</span> <span class="o">-</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># right nic</span>
+
+            <span class="k">if</span> <span class="n">y_alignment</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+                <span class="n">offset_y</span> <span class="o">=</span> <span class="o">-</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">elif</span> <span class="n">y_alignment</span> <span class="o">==</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span>
+                <span class="n">offset_y</span> <span class="o">=</span> <span class="o">-</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># bottom nic</span>
+
+
+            <span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span> <span class="o">=</span> <span class="n">scaled_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">pivot_x</span><span class="p">,</span> <span class="n">pivot_y</span> <span class="o">=</span> <span class="o">-</span><span class="n">offset_x</span><span class="p">,</span> <span class="o">-</span><span class="n">offset_y</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">Vector2</span><span class="p">(</span><span class="n">pivot_x</span> <span class="o">-</span> <span class="n">center_x</span><span class="p">,</span> <span class="n">pivot_y</span> <span class="o">-</span> <span class="n">center_y</span><span class="p">)</span>
+
+            <span class="n">rotated_vec</span> <span class="o">=</span> <span class="n">vec</span>
+            <span class="k">if</span> <span class="n">rotation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rotated_vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span>
+
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">world_position</span><span class="p">)</span>
+            <span class="n">final_center_x</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">rotated_vec</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">final_center_y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rotated_vec</span><span class="o">.</span><span class="n">y</span>
+            
+            <span class="n">rect</span> <span class="o">=</span> <span class="n">texture</span><span class="o">.</span><span class="n">get_rect</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="n">final_center_x</span><span class="p">,</span> <span class="n">final_center_y</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">tiled</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rect</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="ow">and</span> <span class="n">rect</span><span class="o">.</span><span class="n">bottom</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rect</span><span class="o">.</span><span class="n">top</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_height</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span> <span class="n">rect</span><span class="o">.</span><span class="n">topleft</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">tiled</span><span class="p">:</span>
+                <span class="n">position_x</span><span class="p">,</span> <span class="n">position_y</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">topleft</span>
+                <span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span> <span class="o">=</span> <span class="n">texture</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span>
+                
+                <span class="n">offset_x</span> <span class="o">=</span> <span class="n">position_x</span> <span class="o">%</span> <span class="n">size_x</span>
+                <span class="n">offset_y</span> <span class="o">=</span> <span class="n">position_y</span> <span class="o">%</span> <span class="n">size_y</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">size_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_height</span><span class="p">(),</span> <span class="n">size_y</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">size_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span> <span class="n">size_x</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">texture</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">offset_x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">offset_y</span><span class="p">))</span> </div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__get_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">pos2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vypočítává úhel mezi dvěma body.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pos1 (tuple[float, float]): souřadnice prvního bodu (x, y)</span>
+<span class="sd">            pos2 (tuple[float, float]): souřadnice druhého bodu (x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># https://stackoverflow.com/a/72602196 by Boris Kaptsanov (CC BY-SA 4.0)</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">pos1</span>
+        <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">pos2</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">))</span>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">__points_on_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">distance_delta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">smooth</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vypočítává body v zadané vzdálenosti na zadané cestě.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu</span>
+<span class="sd">            distance_delta (float): vzdálenost mezi body</span>
+<span class="sd">            smooth (bool; default: True): zda se má cesta vyhladit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># https://stackoverflow.com/questions/62990029/how-to-get-equally-spaced-points-on-a-line-in-shapely</span>
+        <span class="c1"># https://stackoverflow.com/a/62994304 by Georgy (CC BY-SA 4.0)</span>
+
+        <span class="k">if</span> <span class="n">smooth</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">distance_delta</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="k">for</span> <span class="n">distance</span> <span class="ow">in</span> <span class="n">distances</span><span class="p">]</span>
+
+        <span class="n">original_end_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">points</span> <span class="ow">or</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">original_end_point</span><span class="p">:</span> <span class="c1"># zahrnutí posledního bodu</span>
+            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">original_end_point</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">heading</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_angle</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">heading</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_angle</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([(</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">heading</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">ret</span>
+    
+<div class="viewcode-block" id="Game.get_point_on_path">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.get_point_on_path">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_point_on_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrátí přesnou souřadnici a úhel natočení pro zadanou vzdálenost na trati.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (list[tuple[float, float]]): seznam bodů cesty</span>
+<span class="sd">            distance (float): vzdálenost od začátku trati</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[tuple[float, float], float]: (pozice (x, y), úhel (stupně))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        
+        <span class="n">smoothed_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">smoothed_path</span><span class="p">)</span>
+        
+        <span class="c1"># clamp vzdálenosti</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+        
+        <span class="c1"># výpočet heading úhlu</span>
+        <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;=</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">point_behind</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dist</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_angle</span><span class="p">(</span><span class="n">point_behind</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">point_ahead</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">dist</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_angle</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point_ahead</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            
+        <span class="k">return</span> <span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">heading</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span></div>
+
+    
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__smooth_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">smoothing_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Převádí zadanou cestu na hladší cestu pomocí Chaikinova algoritmu.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu</span>
+<span class="sd">            distance_delta (float): vzdálenost mezi body</span>
+<span class="sd">            smoothing_iterations (int; default 3): počet iterací pro vyhlazení rohů (čím vyšší, tím kulatější)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># nemá smysl</span>
+            <span class="k">return</span> <span class="n">path</span>
+        
+        <span class="c1"># shoutout gemini</span>
+        <span class="c1"># Chaikinův algoritmus funguje tak, že v každé iteraci &quot;usekne&quot; ostré rohy </span>
+        <span class="c1"># původní lomené čáry. Ze všech úseček vygeneruje nové body ve čtvrtině</span>
+        <span class="c1"># a ve třech čtvrtinách jejich délky a původní rohy zahodí.</span>
+        <span class="n">smoothed_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">smoothing_iterations</span><span class="p">):</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">smoothed_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">smoothed_path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">p0</span> <span class="o">=</span> <span class="n">smoothed_path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">smoothed_path</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Výpočet nových bodů (ve 25 % a 75 % délky aktuálního segmentu)</span>
+                <span class="n">pA</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.75</span> <span class="o">*</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">pB</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># Klasický algoritmus by smazal i původní první a poslední bod (cesta by se &quot;smrskla&quot;).</span>
+                <span class="c1"># Proto uměle první přidaný bod z prvního segmentu a poslední z posledního přeskočíme,</span>
+                <span class="c1"># čímž se zbytek křivky natvrdo ukotví na absolutní začátek/konec trasy.</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">new_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pA</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smoothed_path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">new_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pB</span><span class="p">)</span>
+
+            <span class="n">new_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">smoothed_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Vždy bezpečně přidáme původní koncový bod</span>
+            <span class="n">smoothed_path</span> <span class="o">=</span> <span class="n">new_path</span>
+
+        <span class="k">return</span> <span class="n">smoothed_path</span>
+
+
+    
+<div class="viewcode-block" id="Game.render_image_path">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.render_image_path">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render_image_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texture_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">rotation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vykreslí obrázek uložený v paměti podél zadané cesty.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            texture_name (str): název obrázku v slovníku</span>
+<span class="sd">            path (list[tuple[float, float]]): seznam světových souřadnic tvořících cestu</span>
+<span class="sd">            size (tuple[float, float]; default: (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0</span>
+<span class="sd">            rotation (float; default: 0): rotace obrázku ve stupních</span>
+<span class="sd">            cache (bool; default: True): zda se má cesta uložit do/volat z paměti</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">texture_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
+
+            <span class="c1"># výpočet velikosti textury</span>
+            <span class="n">texture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">texture_name</span><span class="p">]</span>
+            
+            <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">px2m</span><span class="p">(</span><span class="n">texture</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">px2m</span><span class="p">(</span><span class="n">texture</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="n">scaled_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ceil_tuple</span><span class="p">((</span><span class="n">m2px</span><span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span><span class="p">,</span> <span class="n">m2px</span><span class="p">(</span><span class="n">size_m</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span><span class="p">))</span>
+
+
+            <span class="c1"># fade to color pokud je textura moc malá</span>
+            <span class="k">if</span> <span class="n">scaled_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">FADE_TO_COLOR_THRESHOLD_PX</span> <span class="ow">or</span> <span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">FADE_TO_COLOR_THRESHOLD_PX</span><span class="p">:</span>
+                <span class="n">avg_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_colors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">texture_name</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+                <span class="n">smoothed_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">screen_points</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">smoothed_path</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">screen_points</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">thickness</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RAILWAY_MIN_WIDTH_PX</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">scaled_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="c1"># tloušťka čáry = tloušťka textury</span>
+                    <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">,</span> <span class="n">avg_color</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">screen_points</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+                <span class="k">return</span>
+
+
+            <span class="n">path_key</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">distance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cache</span> <span class="ow">and</span> <span class="n">path_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span><span class="p">:</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span><span class="p">[</span><span class="n">path_key</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__points_on_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span><span class="p">[</span><span class="n">path_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span>
+
+            <span class="c1"># for position, _ in points:</span>
+            <span class="c1">#     for deg in range(0, 360, 30):</span>
+            <span class="c1">#         self.render_image(texture_name, position, size, deg, x_alignment=&quot;right&quot;, y_alignment=&quot;center&quot;, tiled=False)</span>
+            <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">render_image</span><span class="p">(</span><span class="n">texture_name</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">rotation</span> <span class="o">+</span> <span class="n">heading</span><span class="p">,</span> <span class="n">x_alignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">y_alignment</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">tiled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+            <span class="c1"># for position, _ in points:</span>
+                <span class="c1"># self.draw_debug_dot(position, 2)</span>
+
+
+<div class="viewcode-block" id="Game.get_font">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.get_font">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrátí font dané velikosti z paměti, nebo ho inicializuje.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (int): velikost fontu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">SysFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font_name</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">size</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Game.render_text">
+<a class="viewcode-back" href="../TerminusEngine.html#TerminusEngine.Game.render_text">[dokumentace]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">render_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">color</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="n">is_world_position</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">x_alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">y_alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">antialias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">font_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vykreslí text na obrazovku.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): text k vykreslení</span>
+<span class="sd">            position (tuple[float, float]): souřadnice (x, y) na obrazovce nebo ve světě</span>
+<span class="sd">            color (tuple[int, int, int]; default: (255, 255, 255)): barva textu</span>
+<span class="sd">            is_world_position (bool; default: False): zda je pozice ve světových souřadnicích</span>
+<span class="sd">            x_alignment (str; default: &quot;left&quot;): zarovnání na ose X (left, center, right)</span>
+<span class="sd">            y_alignment (str; default: &quot;top&quot;): zarovnání na ose Y (top, center, bottom)</span>
+<span class="sd">            antialias (bool; default: True): zda se má použít antialiasing</span>
+<span class="sd">            font_size (int; default: 20): velikost textu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_font</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span>
+        <span class="n">text_surface</span> <span class="o">=</span> <span class="n">font</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">antialias</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">is_world_position</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">position</span>
+
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">text_surface</span><span class="o">.</span><span class="n">get_rect</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">x_alignment</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">x_alignment</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">centerx</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">x_alignment</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            
+        <span class="k">if</span> <span class="n">y_alignment</span> <span class="o">==</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">y_alignment</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">centery</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">y_alignment</span> <span class="o">==</span> <span class="s2">&quot;bottom&quot;</span><span class="p">:</span>
+            <span class="n">rect</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">text_surface</span><span class="p">,</span> <span class="n">rect</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Terminus</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="OK" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigace</h3>
+<p class="caption" role="heading"><span class="caption-text">Obsah:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../TerminusEngine.html">TerminusEngine package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminus_test.html">terminus_test module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Kód modulu</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, matee28.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

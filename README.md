@@ -66,5 +66,20 @@ Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
 ### Seznam měst s železničními stanicemi
 Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=34462).
 
+### Generování dokumentace
 
-## TODO
+Dokumentace se generuje pomocí knihovny Sphinx (`pip install sphinx`).
+
+1. Připravení složky `docs_template`
+
+    1. Pokud zatím neexistuje:
+
+        `sphinx-apidoc -o docs_template src --full --force`
+
+    2. Pokud existuje:
+
+        `sphinx-apidoc -o docs_template src --force`
+
+2. Vygenerování dokumentace do složky `docs`
+
+    `sphinx-build docs_template docs`
