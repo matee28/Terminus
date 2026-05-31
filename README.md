@@ -69,6 +69,11 @@ Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
 ### Časové měřítko
 1 reálná sekunda odpovídá 3 ingame minutám.
 
+### Fyzikální jednotky v kódu
+- rychlost (`max_speed`): km/h
+- výkon lokomotivy (`power`): kW
+- kapacita nákladu (`cargo_capacity`): t
+
 ### Seznam měst s železničními stanicemi
 Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=34462).
 
