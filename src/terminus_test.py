@@ -69,8 +69,8 @@ def main():
 
     game.load_image("terrain", "assets/terrain/seamless_2048.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
-    game.load_image("ce_locomotive", "assets/trains/locomotives/cityelefant.png", rotation=-90)
-    game.load_image("ce_wagon", "assets/trains/passenger_wagons/cityelefant.png", rotation=-90)
+    game.load_image("ce_locomotive", "assets/vehicles/locomotives/cityelefant.png", rotation=-90)
+    game.load_image("ce_wagon", "assets/vehicles/passenger_wagons/cityelefant.png", rotation=-90)
 
     # City Elephant
     ce_loco_type = TerminusEngine.Vehicles.LocomotiveType("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_locomotive", passenger_capacity=310)
