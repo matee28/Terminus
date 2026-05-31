@@ -19,7 +19,7 @@ terminus-test
 
 - **klávesa `T`** aktivuje režim stavby, opětovný stisk zruší rozpracovanou trať
 - **klávesa `Z`** během stavby tratě smaže naposledy přidaný bod
-- **pravé tlačítko myši** do kolejové trati přidává body
+- **levé tlačítko myši** do kolejové trati přidává body
 - první i poslední bod musí být umístěn na zastávce, jinak trať nelze dokončit
 
 ### Plánování spojů

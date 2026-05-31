@@ -173,7 +173,7 @@ def main():
         # přidávání kolejí
         if RAILWAY_MODE:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 3: # pravé tlačítko
+                if event.button == 1: # levé tlačítko
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
                     if len(world.railways[-1].points) == 0:
