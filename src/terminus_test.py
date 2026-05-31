@@ -69,12 +69,32 @@ def main():
 
     game.load_image("terrain", "assets/terrain/seamless_2048.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
-    game.load_image("ce_locomotive", "assets/vehicles/locomotives/cityelefant.png", rotation=-90)
-    game.load_image("ce_wagon", "assets/vehicles/passenger_wagons/cityelefant.png", rotation=-90)
 
-    # City Elephant
-    ce_loco_type = TerminusEngine.Vehicles.LocomotiveType("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_locomotive", passenger_capacity=310)
-    ce_wagon_type = TerminusEngine.Vehicles.PassengerWagonType("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_wagon")
+    # textury lokomotiv
+    game.load_image("loco_ce", "assets/vehicles/locomotives/cityelefant.png", rotation=-90)
+    game.load_image("loco_742", "assets/vehicles/locomotives/742.png", rotation=-90)
+    game.load_image("loco_vectron", "assets/vehicles/locomotives/vectron.png", rotation=-90)
+
+    # textury osobních vagonů
+    game.load_image("wagon_p_ce", "assets/vehicles/passenger_wagons/cityelefant.png", rotation=-90)
+    game.load_image("wagon_p_b", "assets/vehicles/passenger_wagons/b.png", rotation=-90)
+
+    # textury nákladních vagonů
+    game.load_image("wagon_c_single", "assets/vehicles/cargo_wagons/single_container.png", rotation=-90)
+    game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
+
+    # definice lokomotiv
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="loco_ce", passenger_capacity=59)
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, texture_name="loco_742")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+
+    # definice osobních vagonů
+    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, texture_name="wagon_p_ce")
+    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, texture_name="wagon_p_b")
+
+    # definice nákladních vagonů
+    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, texture_name="wagon_c_single")
+    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, texture_name="wagon_c_double")
 
 
     def event_handler(event: pygame.event.Event):
@@ -159,8 +179,8 @@ def main():
                 elif event.button == 3: # pravé tlačítko = vytvoření spoje a nasazení vlaku
                     if len(current_route_stations) >= 2:
                         route = TerminusEngine.World.Route("Nový Spoj", current_route_stations.copy(), current_route_stop_flags.copy(), current_route_railways.copy())
-                        new_loco = TerminusEngine.Vehicles.Locomotive(ce_loco_type)
-                        new_wagons = [TerminusEngine.Vehicles.PassengerWagon(ce_wagon_type) for _ in range(2)]
+                        new_loco = TerminusEngine.Vehicles.Locomotive(type_loco_ce)
+                        new_wagons = [TerminusEngine.Vehicles.PassengerWagon(type_wagon_p_ce) for _ in range(2)]
                         new_train = TerminusEngine.Vehicles.Train("CityElephant", new_loco, new_wagons)
                         world.add_active_train(TerminusEngine.World.ActiveTrain(new_train, route))
                         ROUTE_MODE = False
