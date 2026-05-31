@@ -1,10 +1,10 @@
-class Locomotive:
+class LocomotiveType:
     """
-    Reprezentuje lokomotivu.
+    Reprezentuje typ lokomotivy.
     """
     def __init__(self, name: str, max_speed: float, power: float, texture_name: str = "", passenger_capacity: int = 0):
         """
-        Inicializuje lokomotivu.
+        Inicializuje typ lokomotivy.
 
         Args:
             name (str): název
@@ -19,13 +19,13 @@ class Locomotive:
         self.texture_name = texture_name
         self.passenger_capacity = passenger_capacity
 
-class PassengerWagon:
+class PassengerWagonType:
     """
-    Reprezentuje osobní vagon.
+    Reprezentuje typ osobního vagonu.
     """
     def __init__(self, name: str, passenger_capacity: int, texture_name: str = ""):
         """
-        Inicializuje osobní vagon.
+        Inicializuje typ osobního vagonu.
 
         Args:
             name (str): název
@@ -36,13 +36,13 @@ class PassengerWagon:
         self.passenger_capacity = passenger_capacity
         self.texture_name = texture_name
 
-class CargoWagon:
+class CargoWagonType:
     """
-    Reprezentuje nákladní vagon.
+    Reprezentuje typ nákladního vagonu.
     """
     def __init__(self, name: str, cargo_capacity: float, texture_name: str = ""):
         """
-        Inicializuje nákladní vagon.
+        Inicializuje typ nákladního vagonu.
 
         Args:
             name (str): název
@@ -53,18 +53,60 @@ class CargoWagon:
         self.cargo_capacity = cargo_capacity
         self.texture_name = texture_name
 
+class Locomotive:
+    """
+    Reprezentuje instanci lokomotivy.
+    """
+    def __init__(self, type_: LocomotiveType):
+        """
+        Inicializuje instanci lokomotivy z daného typu.
+
+        Args:
+            type_ (LocomotiveType): typ lokomotivy
+        """
+        self.type = type_
+        self.health = 100.0
+
+class PassengerWagon:
+    """
+    Reprezentuje instanci osobního vagonu.
+    """
+    def __init__(self, type_: PassengerWagonType):
+        """
+        Inicializuje instanci osobního vagonu z daného typu.
+
+        Args:
+            type_ (PassengerWagonType): typ vagonu
+        """
+        self.type = type_
+        self.health = 100.0
+
+class CargoWagon:
+    """
+    Reprezentuje instanci nákladního vagonu.
+    """
+    def __init__(self, type_: CargoWagonType):
+        """
+        Inicializuje instanci nákladního vagonu z daného typu.
+
+        Args:
+            type_ (CargoWagonType): typ vagonu
+        """
+        self.type = type_
+        self.health = 100.0
+
 class Train:
     """
-    Reprezentuje vlakovou soupravu.
+    Reprezentuje instanci vlakové soupravy.
     """
     def __init__(self, name: str, locomotive: Locomotive, wagons: list[PassengerWagon | CargoWagon]):
         """
-        Inicializuje vlakovou soupravu.
+        Inicializuje vlakovou soupravu (instanci).
 
         Args:
-            name (str): název
-            locomotive (Locomotive): lokomotiva
-            wagons (list[PassengerWagon | CargoWagon]): seznam vagonů
+            name (str): název soupravy
+            locomotive (Locomotive): připojená lokomotiva (instance)
+            wagons (list[PassengerWagon | CargoWagon]): připojené vagony (instance)
         """
         self.name = name
         self.locomotive = locomotive

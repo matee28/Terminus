@@ -22,6 +22,12 @@ terminus-test
 - **pravé tlačítko myši** do kolejové trati přidává body
 - první i poslední bod musí být umístěn na zastávce, jinak trať nelze dokončit
 
+### Plánování spojů
+
+- **klávesa `R`** aktivuje režim plánování spojů, opětovný stisk zruší rozpracovaný spoj
+- **levé tlačítko myši** přidává další zastávku do rozpracovaného spoje (stanice musí být propojeny tratí)
+- **pravé tlačítko myši** vytvoří navržený spoj
+
 ### Čas
 
 - **klávesa `P`** pozastaví nebo opětovně spustí běh herního času

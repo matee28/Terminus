@@ -12,6 +12,10 @@ import math
 
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
+ROUTE_MODE = False
+current_route_stations = []
+current_route_stop_flags = []
+current_route_railways = []
 
 INITIAL_BALANCE = 1000000
 
@@ -69,12 +73,12 @@ def main():
     game.load_image("ce_wagon", "assets/trains/passenger_wagons/cityelefant.png", rotation=-90)
 
     # City Elephant
-    ce_loco = TerminusEngine.Vehicles.Locomotive("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_locomotive", passenger_capacity=310)
-    ce_wagons = [TerminusEngine.Vehicles.PassengerWagon("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_wagon") for _ in range(2)]
-    ce_train = TerminusEngine.Vehicles.Train("CityElephant", ce_loco, ce_wagons)
+    ce_loco_type = TerminusEngine.Vehicles.LocomotiveType("CityElephant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="ce_locomotive", passenger_capacity=310)
+    ce_wagon_type = TerminusEngine.Vehicles.PassengerWagonType("CityElephant (vložený vůz)", passenger_capacity=310, texture_name="ce_wagon")
 
 
     def event_handler(event: pygame.event.Event):
+        global RAILWAY_MODE, ROUTE_MODE
 
         # zoom: zatím doprostřed obrazovky -> k myši?
         if event.type == pygame.MOUSEWHEEL:
@@ -88,16 +92,36 @@ def main():
             if event.buttons[0]:
                 camera.move((-event.rel[0], +event.rel[1]))
 
+        def find_railway(st1, st2):
+            for rw in world.railways:
+                if (rw.station_a == st1 and rw.station_b == st2) or (rw.station_a == st2 and rw.station_b == st1):
+                    return rw
+            return None
+
         # stisk klávesy
         if event.type == pygame.KEYDOWN:
 
             # RAILWAY_MODE toggle = T
             if event.key == pygame.K_t:
-                global RAILWAY_MODE
                 RAILWAY_MODE = not RAILWAY_MODE
                 if RAILWAY_MODE:
+                    ROUTE_MODE = False
+                    current_route_stations.clear()
+                    current_route_stop_flags.clear()
+                    current_route_railways.clear()
                     world.add_railway(TerminusEngine.World.Railway(None, None, []))
                 else:
+                    if len(world.railways) > 0 and world.railways[-1].station_b is None:
+                        world.railways.remove(world.railways[-1])
+
+            # ROUTE_MODE toggle = R
+            if event.key == pygame.K_r:
+                ROUTE_MODE = not ROUTE_MODE
+                current_route_stations.clear()
+                current_route_stop_flags.clear()
+                current_route_railways.clear()
+                if ROUTE_MODE:
+                    RAILWAY_MODE = False
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
 
@@ -113,6 +137,36 @@ def main():
             # pozastavení času = P
             if event.key == pygame.K_p:
                 game.time_paused = not game.time_paused
+
+        # ROUTE_MODE click handling
+        if ROUTE_MODE:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # levé tlačítko = přidání stanice
+                    point_position = game.world_position(event.pos)
+                    closest_station, distance = world.get_closest_station(point_position)
+                    if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
+                        if len(current_route_stations) == 0:
+                            current_route_stations.append(closest_station)
+                            current_route_stop_flags.append(True)
+                        else:
+                            last_station = current_route_stations[-1]
+                            if closest_station != last_station:
+                                rw = find_railway(last_station, closest_station)
+                                if rw:
+                                    current_route_stations.append(closest_station)
+                                    current_route_stop_flags.append(True)
+                                    current_route_railways.append(rw)
+                elif event.button == 3: # pravé tlačítko = vytvoření spoje a nasazení vlaku
+                    if len(current_route_stations) >= 2:
+                        route = TerminusEngine.World.Route("Nový Spoj", current_route_stations.copy(), current_route_stop_flags.copy(), current_route_railways.copy())
+                        new_loco = TerminusEngine.Vehicles.Locomotive(ce_loco_type)
+                        new_wagons = [TerminusEngine.Vehicles.PassengerWagon(ce_wagon_type) for _ in range(2)]
+                        new_train = TerminusEngine.Vehicles.Train("CityElephant", new_loco, new_wagons)
+                        world.add_active_train(TerminusEngine.World.ActiveTrain(new_train, route))
+                        ROUTE_MODE = False
+                        current_route_stations.clear()
+                        current_route_stop_flags.clear()
+                        current_route_railways.clear()
 
 
 
@@ -136,8 +190,6 @@ def main():
                                 world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
                                 world.railways[-1].station_b = closest_station 
                                 world.railways[-1].add_point(closest_station.position)
-                                
-                                world.add_active_train(TerminusEngine.World.ActiveTrain(ce_train, world.railways[-1])) # nasazení vlaku
                                 
                                 RAILWAY_MODE = False
                         else:
@@ -192,24 +244,36 @@ def main():
             world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.get_point_on_path)
 
         for at in world.active_trains:
-            if len(at.railway.points) < 2: continue
+            if len(at.route.railways) == 0: continue
+            
+            rw = at.route.railways[at.current_leg_index]
+            pts = rw.points
+            if len(pts) < 2: continue
             
             all_parts = [at.train.locomotive] + at.train.wagons # zkombinování částí
             current_offset = 0.0
             prev_len = 0.0
             
+            _, _, total_len = game.get_point_on_path(pts, 0)
+            
             for i, part in enumerate(all_parts):
-                part_len = TerminusEngine.px2m(game.images[part.texture_name].get_width())
+                part_len = TerminusEngine.px2m(game.images[part.type.texture_name].get_width())
                 
                 if i > 0:
                     current_offset += (prev_len / 2) + (part_len / 2) + game.train_gap
                 prev_len = part_len
                 
-                part_dist = at.distance - (current_offset * at.direction)
-                pos, heading, total_len = game.get_point_on_path(at.railway.points, part_dist)
+                part_dist = at.leg_distance - current_offset
                 
-                render_heading = heading + (180 if at.direction == -1 else 0)
-                game.render_image(part.texture_name, pos, size=(0,0), rotation=render_heading)
+                if at.railway_dir == 1:
+                    raw_dist = part_dist
+                else:
+                    raw_dist = total_len - part_dist
+                    
+                pos, heading, _ = game.get_point_on_path(pts, raw_dist)
+                
+                render_heading = heading + (180 if at.railway_dir == -1 else 0)
+                game.render_image(part.type.texture_name, pos, size=(0,0), rotation=render_heading)
                 
                 # počet cestujících a debug dot na pozici vlaku
                 if i == 0:
@@ -227,8 +291,9 @@ def main():
         game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))
         game.render_text("zoom: " + str(camera.zoom), (0, 20), color=(255, 0, 0))
         game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
-        game.render_text("r mode: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
-        game.render_text("balance: $" + str(int(economy.balance)), (0, 80), color=(255, 0, 0))
+        game.render_text("stavba tratě: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
+        game.render_text("plánování spoje: " + str(ROUTE_MODE), (0, 80), color=(255, 0, 0))
+        game.render_text("balance: $" + str(int(economy.balance)), (0, 100), color=(255, 0, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -240,6 +305,16 @@ def main():
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
             game.render_text("$" + str(int(current_cost)), (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
+
+        if ROUTE_MODE:
+            if len(current_route_stations) > 0:
+                for i in range(len(current_route_stations) - 1):
+                    p1 = game.screen_position(current_route_stations[i].position)
+                    p2 = game.screen_position(current_route_stations[i+1].position)
+                    pygame.draw.line(game.screen, (0, 255, 255), p1, p2, 5)
+                
+                p_last = game.screen_position(current_route_stations[-1].position)
+                pygame.draw.line(game.screen, (0, 255, 255), p_last, pygame.mouse.get_pos(), 2)
 
         time_str = game.get_time_string()
         if game.time_paused:

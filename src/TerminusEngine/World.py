@@ -97,30 +97,69 @@ class Railway:
             self.points.pop()
 
 
+class Route:
+    """
+    Reprezentuje vlakový spoj.
+    """
+    def __init__(self, name: str, stations: list[Station], stop_flags: list[bool], railways: list[Railway]):
+        """
+        Inicializuje spoj.
+
+        Args:
+            name (str): název spoje
+            stations (list[Station]): seznam stanic (od počáteční po koncovou)
+            stop_flags (list[bool]): zda ve stanici vlak zastavuje
+            railways (list[Railway]): tratě spojující stanice
+        """
+        self.name = name
+        self.stations = stations
+        self.stop_flags = stop_flags
+        self.railways = railways
+
 
 class ActiveTrain:
     """
-    Reprezentuje aktivní vlak na trati.
+    Reprezentuje aktivní vlak na spoji.
     """
-    def __init__(self, train, railway):
+    def __init__(self, train, route: Route):
         """
         Inicializuje aktivní vlak.
         
         Args:
             train (Train): vlaková souprava
-            railway (Railway): trať, po které vlak jede
+            route (Route): spoj, po kterém vlak jede
         """
         self.train = train
-        self.railway = railway
-        self.distance = 0.0
-        self.direction = 1 # 1 = A -> B; -1 = B -> A
+        self.route = route
+        self.current_leg_index = 0
+        self.forward = True
+        self.leg_distance = 0.0
         self.passengers = 0
+        self.railway_dir = 1
+        
+        self._setup_leg()
+
+    def _setup_leg(self):
+        if len(self.route.railways) == 0:
+            return
+            
+        rw = self.route.railways[self.current_leg_index]
+        if self.forward:
+            from_station = self.route.stations[self.current_leg_index]
+        else:
+            from_station = self.route.stations[self.current_leg_index + 1]
+            
+        if rw.station_a == from_station:
+            self.railway_dir = 1
+        else:
+            self.railway_dir = -1
+        self.leg_distance = 0.0
 
     def get_passenger_capacity(self):
         """Vrátí celkovou kapacitu osobního vlaku."""
-        cap = getattr(self.train.locomotive, "passenger_capacity", 0)
+        cap = getattr(self.train.locomotive.type, "passenger_capacity", 0)
         for wagon in self.train.wagons:
-            cap += getattr(wagon, "passenger_capacity", 0)
+            cap += getattr(wagon.type, "passenger_capacity", 0)
         return cap
 
 class World:
@@ -159,39 +198,53 @@ class World:
         
         # aktualizace vlaků
         for at in self.active_trains:
-            speed_m_s = at.train.locomotive.max_speed / 3.6
-            moved_dist = at.direction * speed_m_s * dt_seconds * time_scale * train_speed_multiplier
-            at.distance += moved_dist
+            if len(at.route.railways) == 0:
+                continue
+                
+            speed_m_s = at.train.locomotive.type.max_speed / 3.6
+            moved_dist = speed_m_s * dt_seconds * time_scale * train_speed_multiplier
+            at.leg_distance += moved_dist
             
-            pts = at.railway.points
+            rw = at.route.railways[at.current_leg_index]
+            pts = rw.points
             if len(pts) < 2:
                 continue
             
-            _, _, total_len = get_point_func(pts, at.distance)
+            _, _, total_len = get_point_func(pts, 0)
             
-            # vlak dojel do stanice B
-            if at.distance >= total_len:
-                at.distance = total_len
-                target_station = at.railway.station_b
-                at.passengers = 0
-                if target_station:
-                    capacity = at.get_passenger_capacity()
-                    to_load = min(capacity, int(target_station.passengers))
-                    target_station.passengers -= to_load
-                    at.passengers = to_load
-                at.direction = -1 # otočka
-
-            # vlak dojel do stanice A
-            elif at.distance <= 0:
-                at.distance = 0
-                target_station = at.railway.station_a
-                at.passengers = 0
-                if target_station:
-                    capacity = at.get_passenger_capacity()
-                    to_load = min(capacity, int(target_station.passengers))
-                    target_station.passengers -= to_load
-                    at.passengers = to_load
-                at.direction = 1 # otočka
+            if at.leg_distance >= total_len:
+                at.leg_distance = total_len
+                
+                # vlak dojel na konec úseku (do stanice)
+                if at.forward:
+                    target_station_idx = at.current_leg_index + 1
+                else:
+                    target_station_idx = at.current_leg_index
+                    
+                target_station = at.route.stations[target_station_idx]
+                stop_here = at.route.stop_flags[target_station_idx]
+                
+                if stop_here:
+                    at.passengers = 0
+                    if target_station:
+                        capacity = at.get_passenger_capacity()
+                        to_load = min(capacity, int(target_station.passengers))
+                        target_station.passengers -= to_load
+                        at.passengers = to_load
+                        
+                # přepnutí na další úsek
+                if at.forward:
+                    at.current_leg_index += 1
+                    if at.current_leg_index >= len(at.route.railways):
+                        at.forward = False
+                        at.current_leg_index = len(at.route.railways) - 1
+                else:
+                    at.current_leg_index -= 1
+                    if at.current_leg_index < 0:
+                        at.forward = True
+                        at.current_leg_index = 0
+                        
+                at._setup_leg()
 
     def __str__(self):
         return "Města:\n" + "\n".join(["\t{} (populace: {}, pozice: {}\n\t\t{})".format(
