@@ -17,7 +17,7 @@ current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
 
-INITIAL_BALANCE = 1000000
+INITIAL_BALANCE = 10000000000
 
 RAILWAY_COST_PER_METER = 10
 
@@ -64,7 +64,7 @@ def main():
         font_name="Arial"
     )
 
-    economy = TerminusEngine.Economy.Economy(initial_balance=INITIAL_BALANCE)
+    economy = TerminusEngine.Economy.Economy(initial_balance=INITIAL_BALANCE, currency_symbol=" Kč")
 
 
     game.load_image("terrain", "assets/terrain/seamless_2048.png")
@@ -84,17 +84,28 @@ def main():
     game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
 
     # definice lokomotiv
-    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, texture_name="loco_ce", passenger_capacity=59)
-    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, texture_name="loco_742")
-    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, price=300000.0, texture_name="loco_742")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
 
     # definice osobních vagonů
-    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, texture_name="wagon_p_ce")
-    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, texture_name="wagon_p_b")
+    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, price=150000.0, texture_name="wagon_p_ce")
+    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, price=100000.0, texture_name="wagon_p_b")
 
     # definice nákladních vagonů
-    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, texture_name="wagon_c_single")
-    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, texture_name="wagon_c_double")
+    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, price=80000.0, texture_name="wagon_c_single")
+    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, price=140000.0, texture_name="wagon_c_double")
+
+    # seznamy pro UI
+    available_loco_types = [type_loco_ce, type_loco_742, type_loco_vectron]
+    available_wagon_types = [type_wagon_p_ce, type_wagon_p_b, type_wagon_c_single, type_wagon_c_double]
+    
+    # inventář
+    owned_locos = []
+    owned_wagons = []
+    assembled_trains = [] # {"name": str, "loco": loco, "wagons": list}
+    
+    menu_state = {"mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None}
 
 
     def event_handler(event: pygame.event.Event):
@@ -149,6 +160,61 @@ def main():
 
         # stisk klávesy
         if event.type == pygame.KEYDOWN:
+            if menu_state["mode"] != "closed":
+                if event.key == pygame.K_ESCAPE:
+                    menu_state["mode"] = "closed"
+                
+                if pygame.K_1 <= event.key <= pygame.K_9:
+                    idx = event.key - pygame.K_1
+                    if menu_state["mode"] == "main":
+                        if idx == 0: menu_state["mode"] = "buy_loco"
+                        elif idx == 1: menu_state["mode"] = "buy_wagon"
+                        elif idx == 2: 
+                            menu_state["mode"] = "assemble_loco"
+                            menu_state["temp_loco"] = None
+                            menu_state["temp_wagons"] = []
+                    elif menu_state["mode"] == "buy_loco":
+                        if idx < len(available_loco_types):
+                            t = available_loco_types[idx]
+                            if economy.can_afford(t.price):
+                                economy.deduct(t.price)
+                                owned_locos.append(TerminusEngine.Vehicles.Locomotive(t))
+                    elif menu_state["mode"] == "buy_wagon":
+                        if idx < len(available_wagon_types):
+                            t = available_wagon_types[idx]
+                            if economy.can_afford(t.price):
+                                economy.deduct(t.price)
+                                if isinstance(t, TerminusEngine.Vehicles.PassengerWagonType):
+                                    owned_wagons.append(TerminusEngine.Vehicles.PassengerWagon(t))
+                                else:
+                                    owned_wagons.append(TerminusEngine.Vehicles.CargoWagon(t))
+                    elif menu_state["mode"] == "assemble_loco":
+                        if idx < len(owned_locos):
+                            menu_state["temp_loco"] = owned_locos.pop(idx)
+                            menu_state["mode"] = "assemble_wagons"
+                    elif menu_state["mode"] == "assemble_wagons":
+                        if idx < len(owned_wagons):
+                            menu_state["temp_wagons"].append(owned_wagons.pop(idx))
+                    elif menu_state["mode"] == "assign_train":
+                        if idx < len(assembled_trains):
+                            train_info = assembled_trains.pop(idx)
+                            new_train = TerminusEngine.Vehicles.Train("Vlak", train_info["loco"], train_info["wagons"])
+                            world.add_active_train(TerminusEngine.World.ActiveTrain(new_train, menu_state["temp_route"]))
+                            menu_state["mode"] = "closed"
+                            menu_state["temp_route"] = None
+                
+                if event.key == pygame.K_RETURN and menu_state["mode"] == "assemble_wagons":
+                    if menu_state["temp_loco"] is not None:
+                        assembled_trains.append({
+                            "loco": menu_state["temp_loco"],
+                            "wagons": menu_state["temp_wagons"].copy()
+                        })
+                    menu_state["mode"] = "main"
+
+                return # nepokračovat ve zpracování hry, pokud v menu
+
+            if event.key == pygame.K_m:
+                menu_state["mode"] = "main"
 
             # RAILWAY_MODE toggle = T
             if event.key == pygame.K_t:
@@ -211,10 +277,8 @@ def main():
                 elif event.button == 3: # pravé tlačítko = vytvoření spoje a nasazení vlaku
                     if len(current_route_stations) >= 2:
                         route = TerminusEngine.World.Route("Nový Spoj", current_route_stations.copy(), current_route_stop_flags.copy(), current_route_railways.copy())
-                        new_loco = TerminusEngine.Vehicles.Locomotive(type_loco_ce)
-                        new_wagons = [TerminusEngine.Vehicles.PassengerWagon(type_wagon_p_ce) for _ in range(2)]
-                        new_train = TerminusEngine.Vehicles.Train("CityElephant", new_loco, new_wagons)
-                        world.add_active_train(TerminusEngine.World.ActiveTrain(new_train, route))
+                        menu_state["mode"] = "assign_train"
+                        menu_state["temp_route"] = route
                         ROUTE_MODE = False
                         current_route_stations.clear()
                         current_route_stop_flags.clear()
@@ -345,7 +409,7 @@ def main():
         game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
         game.render_text("stavba tratě: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
         game.render_text("plánování spoje: " + str(ROUTE_MODE), (0, 80), color=(255, 0, 0))
-        game.render_text("balance: $" + str(int(economy.balance)), (0, 100), color=(255, 0, 0))
+        game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 100), color=(255, 0, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -356,7 +420,7 @@ def main():
             current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * RAILWAY_COST_PER_METER
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
-            game.render_text("$" + str(int(current_cost)), (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
+            game.render_text(str(int(current_cost)) + economy.currency_symbol, (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
 
         if ROUTE_MODE:
             if len(current_route_stations) > 0:
@@ -379,6 +443,71 @@ def main():
         screen_w = game.screen.get_width()
         screen_h = game.screen.get_height()
         game.render_text(time_str, (screen_w - 10, screen_h - 10), color=(255, 255, 255), x_alignment="right", y_alignment="bottom", font_size=24)
+
+        if menu_state["mode"] != "closed":
+            menu_surface = pygame.Surface((400, 400))
+            menu_surface.fill((50, 50, 50))
+            game.screen.blit(menu_surface, (screen_w/2 - 200, screen_h/2 - 200))
+            
+            y_offset = screen_h/2 - 180
+            x_offset = screen_w/2 - 180
+            
+            game.render_text(f"MENU: {menu_state['mode']} (ESC zrušit)", (x_offset, y_offset), color=(255, 255, 0))
+            y_offset += 30
+            
+            if menu_state["mode"] == "main":
+                opts = ["1: Koupit lokomotivu", "2: Koupit vagon", "3: Sestavit soupravu (z inventáře)"]
+                for o in opts:
+                    game.render_text(o, (x_offset, y_offset))
+                    y_offset += 25
+                y_offset += 15
+                game.render_text(f"Zůstatek: {int(economy.balance)}{economy.currency_symbol}", (x_offset, y_offset), color=(0,255,0))
+                y_offset += 25
+                game.render_text(f"Volné lokomotivy: {len(owned_locos)}", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text(f"Volné vagony: {len(owned_wagons)}", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text(f"Sestavené soupravy: {len(assembled_trains)}", (x_offset, y_offset))
+                
+            elif menu_state["mode"] == "buy_loco":
+                for i, t in enumerate(available_loco_types):
+                    color = (0,255,0) if economy.can_afford(t.price) else (255,0,0)
+                    game.render_text(f"{i+1}: {t.name} - {int(t.price)}{economy.currency_symbol}", (x_offset, y_offset), color=color)
+                    y_offset += 25
+            elif menu_state["mode"] == "buy_wagon":
+                for i, t in enumerate(available_wagon_types):
+                    color = (0,255,0) if economy.can_afford(t.price) else (255,0,0)
+                    game.render_text(f"{i+1}: {t.name} - {int(t.price)}{economy.currency_symbol}", (x_offset, y_offset), color=color)
+                    y_offset += 25
+            elif menu_state["mode"] == "assemble_loco":
+                game.render_text("Vyberte lokomotivu pro novou soupravu:", (x_offset, y_offset), color=(255,255,255))
+                y_offset += 25
+                for i, loc in enumerate(owned_locos):
+                    game.render_text(f"{i+1}: {loc.type.name}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "assemble_wagons":
+                game.render_text(f"Loko: {menu_state['temp_loco'].type.name}", (x_offset, y_offset), color=(0,255,255))
+                y_offset += 25
+                game.render_text(f"Vagony: {len(menu_state['temp_wagons'])}", (x_offset, y_offset), color=(0,255,255))
+                y_offset += 25
+                game.render_text("Přidejte vagony a stiskněte ENTER", (x_offset, y_offset), color=(255,255,0))
+                y_offset += 25
+                for i, wag in enumerate(owned_wagons):
+                    if y_offset > screen_h/2 + 180:
+                        game.render_text("... další nezobrazeny", (x_offset, y_offset))
+                        break
+                    game.render_text(f"{i+1}: {wag.type.name}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "assign_train":
+                game.render_text("Vyberte sestavenou soupravu pro spoj:", (x_offset, y_offset), color=(255,255,255))
+                y_offset += 25
+                for i, tr in enumerate(assembled_trains):
+                    if y_offset > screen_h/2 + 180:
+                        break
+                    game.render_text(f"{i+1}: Lokomotiva {tr['loco'].type.name} + {len(tr['wagons'])} vagonů", (x_offset, y_offset))
+                    y_offset += 25
+                if len(assembled_trains) == 0:
+                    game.render_text("Žádné volné sestavené soupravy!", (x_offset, y_offset), color=(255,0,0))
 
     game.run(
         loop=loop,
