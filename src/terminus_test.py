@@ -112,11 +112,40 @@ def main():
             if event.buttons[0]:
                 camera.move((-event.rel[0], +event.rel[1]))
 
-        def find_railway(st1, st2):
-            for rw in world.railways:
-                if (rw.station_a == st1 and rw.station_b == st2) or (rw.station_a == st2 and rw.station_b == st1):
-                    return rw
-            return None
+        def find_railway_path(start_station, end_station):
+            import heapq
+            counter = 0
+            queue = [(0.0, counter, start_station, [], [])]
+            visited = set()
+            
+            while queue:
+                dist, _, curr, p_st, p_rw = heapq.heappop(queue)
+                
+                if curr == end_station:
+                    return p_st, p_rw
+                    
+                if curr in visited:
+                    continue
+                visited.add(curr)
+                
+                for rw in world.railways:
+                    nxt = None
+                    if rw.station_a == curr and rw.station_b is not None:
+                        nxt = rw.station_b
+                    elif rw.station_b == curr and rw.station_a is not None:
+                        nxt = rw.station_a
+                        
+                    if nxt and nxt not in visited:
+                        rw_dist = 0.0
+                        if len(rw.points) > 1:
+                            rw_dist = sum(math.dist(rw.points[i-1], rw.points[i]) for i in range(1, len(rw.points)))
+                        else:
+                            rw_dist = math.dist(curr.position, nxt.position)
+                        
+                        counter += 1
+                        heapq.heappush(queue, (dist + rw_dist, counter, nxt, p_st + [nxt], p_rw + [rw]))
+                        
+            return None, None
 
         # stisk klávesy
         if event.type == pygame.KEYDOWN:
@@ -171,11 +200,14 @@ def main():
                         else:
                             last_station = current_route_stations[-1]
                             if closest_station != last_station:
-                                rw = find_railway(last_station, closest_station)
-                                if rw:
-                                    current_route_stations.append(closest_station)
-                                    current_route_stop_flags.append(True)
-                                    current_route_railways.append(rw)
+                                path_st, path_rw = find_railway_path(last_station, closest_station)
+                                if path_st is not None:
+                                    for i in range(len(path_st)):
+                                        st = path_st[i]
+                                        rw = path_rw[i]
+                                        current_route_stations.append(st)
+                                        current_route_railways.append(rw)
+                                        current_route_stop_flags.append(i == len(path_st) - 1)
                 elif event.button == 3: # pravé tlačítko = vytvoření spoje a nasazení vlaku
                     if len(current_route_stations) >= 2:
                         route = TerminusEngine.World.Route("Nový Spoj", current_route_stations.copy(), current_route_stop_flags.copy(), current_route_railways.copy())
@@ -333,6 +365,10 @@ def main():
                     p2 = game.screen_position(current_route_stations[i+1].position)
                     pygame.draw.line(game.screen, (0, 255, 255), p1, p2, 5)
                 
+                for i, st in enumerate(current_route_stations):
+                    if current_route_stop_flags[i]:
+                        pygame.draw.circle(game.screen, (255, 255, 0), game.screen_position(st.position), 8, 3)
+
                 p_last = game.screen_position(current_route_stations[-1].position)
                 pygame.draw.line(game.screen, (0, 255, 255), p_last, pygame.mouse.get_pos(), 2)
 
