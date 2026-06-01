@@ -136,6 +136,8 @@ class ActiveTrain:
         self.leg_distance = 0.0
         self.passengers = 0
         self.railway_dir = 1
+        self.wait_timer = 0.0
+        self.current_stop_station = None
         
         self._setup_leg()
 
@@ -183,15 +185,16 @@ class World:
         """
         Aktualizuje stav světa, generování cestujících a pohyb vlaků.
         """
-        # aktualizace stanic; generování cestujících ve stanicích na tratích
-        connected_stations = set()
-        for r in self.railways:
-            connected_stations.add(r.station_a)
-            connected_stations.add(r.station_b)
+        # aktualizace stanic; generování cestujících ve stanicích (kde reálně zastavuje nějaký spoj)
+        served_stations = set()
+        for at in self.active_trains:
+            for i, st in enumerate(at.route.stations):
+                if at.route.stop_flags[i]:
+                    served_stations.add(st)
             
         for city in self.cities:
             for station in city.stations:
-                if station in connected_stations and station.passenger_capacity > 0:
+                if station in served_stations and station.passenger_capacity > 0:
                     if station.passengers < station.passenger_capacity:
                         generated = passenger_generation_rate * dt_seconds * time_scale
                         station.passengers = min(station.passenger_capacity, station.passengers + generated)
@@ -201,6 +204,20 @@ class World:
             if len(at.route.railways) == 0:
                 continue
                 
+            if at.wait_timer > 0:
+                at.wait_timer -= dt_seconds * time_scale
+                
+                if at.current_stop_station:
+                    capacity = at.get_passenger_capacity()
+                    free_space = capacity - at.passengers
+                    if free_space > 0 and at.current_stop_station.passengers >= 1:
+                        to_load = min(free_space, int(at.current_stop_station.passengers))
+                        at.current_stop_station.passengers -= to_load
+                        at.passengers += to_load
+
+                if at.wait_timer > 0:
+                    continue
+
             speed_m_s = at.train.locomotive.type.max_speed / 3.6
             moved_dist = speed_m_s * dt_seconds * time_scale * train_speed_multiplier
             at.leg_distance += moved_dist
@@ -225,12 +242,9 @@ class World:
                 stop_here = at.route.stop_flags[target_station_idx]
                 
                 if stop_here:
+                    at.wait_timer = 300.0
                     at.passengers = 0
-                    if target_station:
-                        capacity = at.get_passenger_capacity()
-                        to_load = min(capacity, int(target_station.passengers))
-                        target_station.passengers -= to_load
-                        at.passengers = to_load
+                    at.current_stop_station = target_station
                         
                 # přepnutí na další úsek
                 if at.forward:
