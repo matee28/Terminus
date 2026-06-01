@@ -248,6 +248,11 @@ def main():
                     else:
                         world.railways.remove(world.railways[-1])
                         RAILWAY_MODE = False
+                elif ROUTE_MODE and len(current_route_stations) > 0:
+                    current_route_stations.pop()
+                    current_route_stop_flags.pop()
+                    if len(current_route_railways) > 0:
+                        current_route_railways.pop()
 
             # pozastavení času = P
             if event.key == pygame.K_p:

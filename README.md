@@ -25,8 +25,15 @@ terminus-test
 ### Plánování spojů
 
 - **klávesa `R`** aktivuje režim plánování spojů, opětovný stisk zruší rozpracovaný spoj
+- **klávesa `Z`** během plánování spoje smaže naposledy přidanou zastávku
 - **levé tlačítko myši** přidává další zastávku do rozpracovaného spoje (stanice musí být propojeny tratí)
-- **pravé tlačítko myši** vytvoří navržený spoj
+- **pravé tlačítko myši** dokončí navržený spoj a otevře menu pro výběr a nasazení vlakové soupravy
+
+### Správa vlaků a inventář (menu)
+
+- **klávesa `M`** otevře/zavře menu (lze zavřít i klávesou `ESC`)
+- z nabídky lze nakupovat lokomotivy a vagony
+- zakoupená vozidla se ukládají do inventáře, ze kterého je lze následně sestavovat do vlakových souprav
 
 ### Čas
 
