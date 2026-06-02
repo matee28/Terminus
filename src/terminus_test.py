@@ -9,6 +9,8 @@ import TerminusEngine.Vehicles
 import os
 import math
 
+import heapq
+
 
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
@@ -20,6 +22,7 @@ current_route_railways = []
 INITIAL_BALANCE = 10000000000
 
 RAILWAY_COST_PER_METER = 10
+TRAIN_SELL_MULTIPLIER = 0.6
 
 def main():
 
@@ -124,7 +127,6 @@ def main():
                 camera.move((-event.rel[0], +event.rel[1]))
 
         def find_railway_path(start_station, end_station):
-            import heapq
             counter = 0
             queue = [(0.0, counter, start_station, [], [])]
             visited = set()
@@ -162,7 +164,10 @@ def main():
         if event.type == pygame.KEYDOWN:
             if menu_state["mode"] != "closed":
                 if event.key == pygame.K_ESCAPE:
-                    menu_state["mode"] = "closed"
+                    if menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
+                        menu_state["mode"] = "inventory_main"
+                    else:
+                        menu_state["mode"] = "closed"
                 
                 if pygame.K_1 <= event.key <= pygame.K_9:
                     idx = event.key - pygame.K_1
@@ -173,6 +178,38 @@ def main():
                             menu_state["mode"] = "assemble_loco"
                             menu_state["temp_loco"] = None
                             menu_state["temp_wagons"] = []
+                        elif idx == 3: menu_state["mode"] = "inventory_main"
+                    elif menu_state["mode"] == "inventory_main":
+                        if idx == 0: menu_state["mode"] = "inventory_locos"
+                        elif idx == 1: menu_state["mode"] = "inventory_wagons"
+                        elif idx == 2: menu_state["mode"] = "inventory_trains"
+                    elif menu_state["mode"] == "inventory_locos":
+                        types_in_inv = []
+                        for l in owned_locos:
+                            if l.type not in types_in_inv: types_in_inv.append(l.type)
+                        if idx < len(types_in_inv):
+                            t_to_sell = types_in_inv[idx]
+                            for i, l in enumerate(owned_locos):
+                                if l.type == t_to_sell:
+                                    owned_locos.pop(i)
+                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
+                                    break
+                    elif menu_state["mode"] == "inventory_wagons":
+                        types_in_inv = []
+                        for w in owned_wagons:
+                            if w.type not in types_in_inv: types_in_inv.append(w.type)
+                        if idx < len(types_in_inv):
+                            t_to_sell = types_in_inv[idx]
+                            for i, w in enumerate(owned_wagons):
+                                if w.type == t_to_sell:
+                                    owned_wagons.pop(i)
+                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
+                                    break
+                    elif menu_state["mode"] == "inventory_trains":
+                        if idx < len(assembled_trains):
+                            tr = assembled_trains.pop(idx)
+                            sell_price = (tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
+                            economy.add(sell_price)
                     elif menu_state["mode"] == "buy_loco":
                         if idx < len(available_loco_types):
                             t = available_loco_types[idx]
@@ -461,7 +498,7 @@ def main():
             y_offset += 30
             
             if menu_state["mode"] == "main":
-                opts = ["1: Koupit lokomotivu", "2: Koupit vagon", "3: Sestavit soupravu (z inventáře)"]
+                opts = ["1: Koupit lokomotivu", "2: Koupit vagon", "3: Sestavit soupravu (z inventáře)", "4: Inventář (zobrazení a prodej)"]
                 for o in opts:
                     game.render_text(o, (x_offset, y_offset))
                     y_offset += 25
@@ -502,6 +539,45 @@ def main():
                         game.render_text("... další nezobrazeny", (x_offset, y_offset))
                         break
                     game.render_text(f"{i+1}: {wag.type.name}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "inventory_main":
+                game.render_text("1: Volné lokomotivy", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text("2: Volné vagony", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text("3: Sestavené soupravy", (x_offset, y_offset))
+                y_offset += 25
+            elif menu_state["mode"] == "inventory_locos":
+                types_in_inv = []
+                for l in owned_locos:
+                    if l.type not in types_in_inv: types_in_inv.append(l.type)
+                if not types_in_inv:
+                    game.render_text("Žádné volné lokomotivy", (x_offset, y_offset), color=(255,0,0))
+                for i, t in enumerate(types_in_inv):
+                    if y_offset > screen_h/2 + 180: break
+                    count = sum(1 for l in owned_locos if l.type == t)
+                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
+                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "inventory_wagons":
+                types_in_inv = []
+                for w in owned_wagons:
+                    if w.type not in types_in_inv: types_in_inv.append(w.type)
+                if not types_in_inv:
+                    game.render_text("Žádné volné vagony", (x_offset, y_offset), color=(255,0,0))
+                for i, t in enumerate(types_in_inv):
+                    if y_offset > screen_h/2 + 180: break
+                    count = sum(1 for w in owned_wagons if w.type == t)
+                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
+                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "inventory_trains":
+                if not assembled_trains:
+                    game.render_text("Žádné sestavené soupravy", (x_offset, y_offset), color=(255,0,0))
+                for i, tr in enumerate(assembled_trains):
+                    if y_offset > screen_h/2 + 180: break
+                    sell_p = int((tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
+                    game.render_text(f"{i+1}: {tr['loco'].type.name} + {len(tr['wagons'])} vagonů - prodat za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assign_train":
                 game.render_text("Vyberte sestavenou soupravu pro spoj:", (x_offset, y_offset), color=(255,255,255))
