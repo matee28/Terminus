@@ -198,6 +198,7 @@ class Game:
         self.train_speed_multiplier = 0.5
         self.train_gap = 0.2
         self.passenger_generation_rate = 0.05 # rychlost zaplnění stanic cestujícími
+        self.cargo_generation_rate = 0.05 # rychlost zaplnění stanic nákladem
 
         # pygame
         pygame.init()

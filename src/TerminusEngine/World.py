@@ -50,6 +50,7 @@ class Station:
         self.passenger_capacity = passenger_capacity
         self.passengers = 0
         self.cargo_capacity = cargo_capacity
+        self.cargo = 0.0
         self.tracks = tracks
         
         self.city.add_station(self)
@@ -135,6 +136,7 @@ class ActiveTrain:
         self.forward = True
         self.leg_distance = 0.0
         self.passengers = 0
+        self.cargo = 0.0
         self.railway_dir = 1
         self.wait_timer = 0.0
         self.current_stop_station = None
@@ -164,6 +166,13 @@ class ActiveTrain:
             cap += getattr(wagon.type, "passenger_capacity", 0)
         return cap
 
+    def get_cargo_capacity(self):
+        """Vrátí celkovou kapacitu nákladního vlaku."""
+        cap = getattr(self.train.locomotive.type, "cargo_capacity", 0)
+        for wagon in self.train.wagons:
+            cap += getattr(wagon.type, "cargo_capacity", 0)
+        return cap
+
 class World:
     """
     Reprezentuje svět.
@@ -181,9 +190,9 @@ class World:
         self.railways = railways
         self.active_trains = active_trains
 
-    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, get_point_func: callable):
+    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, cargo_generation_rate: float, get_point_func: callable):
         """
-        Aktualizuje stav světa, generování cestujících a pohyb vlaků.
+        Aktualizuje stav světa, generování cestujících, nákladu a pohyb vlaků.
         """
         # aktualizace stanic; generování cestujících ve stanicích (kde reálně zastavuje nějaký spoj)
         served_stations = set()
@@ -198,6 +207,10 @@ class World:
                     if station.passengers < station.passenger_capacity:
                         generated = passenger_generation_rate * dt_seconds * time_scale
                         station.passengers = min(station.passenger_capacity, station.passengers + generated)
+                if station in served_stations and station.cargo_capacity > 0:
+                    if station.cargo < station.cargo_capacity:
+                        generated = cargo_generation_rate * dt_seconds * time_scale
+                        station.cargo = min(station.cargo_capacity, station.cargo + generated)
         
         # aktualizace vlaků
         for at in self.active_trains:
@@ -214,6 +227,13 @@ class World:
                         to_load = min(free_space, int(at.current_stop_station.passengers))
                         at.current_stop_station.passengers -= to_load
                         at.passengers += to_load
+
+                    c_capacity = at.get_cargo_capacity()
+                    c_free_space = c_capacity - at.cargo
+                    if c_free_space > 0 and at.current_stop_station.cargo >= 1:
+                        to_load = min(c_free_space, float(int(at.current_stop_station.cargo)))
+                        at.current_stop_station.cargo -= to_load
+                        at.cargo += to_load
 
                 if at.wait_timer > 0:
                     continue
@@ -244,6 +264,7 @@ class World:
                 if stop_here:
                     at.wait_timer = 300.0
                     at.passengers = 0
+                    at.cargo = 0.0
                     at.current_stop_station = target_station
                         
                 # přepnutí na další úsek

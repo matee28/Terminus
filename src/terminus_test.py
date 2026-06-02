@@ -390,6 +390,15 @@ def main():
                         x_alignment="center",
                         y_alignment="bottom"
                     )
+                if station.cargo_capacity > 0:
+                    game.render_text(
+                        f"{int(station.cargo)}/{int(station.cargo_capacity)}",
+                        game.screen_position((station.position[0], station.position[1] - 30)),
+                        color=(255, 128, 0),
+                        font_size=16,
+                        x_alignment="center",
+                        y_alignment="bottom"
+                    )
 
         for i, railway in enumerate(world.railways):
             if len(railway.points) > 1:
@@ -406,7 +415,7 @@ def main():
         dt_seconds = game.clock.get_time() / 1000.0
         
         if not game.time_paused:
-            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.get_point_on_path)
+            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path)
 
         for at in world.active_trains:
             if len(at.route.railways) == 0: continue
@@ -440,17 +449,27 @@ def main():
                 render_heading = heading + (180 if at.railway_dir == -1 else 0)
                 game.render_image(part.type.texture_name, pos, size=(0,0), rotation=render_heading)
                 
-                # počet cestujících a debug dot na pozici vlaku
+                # počet cestujících/nákladu a debug dot na pozici vlaku
                 if i == 0:
                     game.draw_debug_dot(pos, size=5)
-                    game.render_text(
-                        f"{int(at.passengers)}/{at.get_passenger_capacity()}",
-                        game.screen_position((pos[0], pos[1] - 30)),
-                        color=(0, 200, 255),
-                        font_size=16,
-                        x_alignment="center",
-                        y_alignment="bottom"
-                    )
+                    if at.get_passenger_capacity() > 0:
+                        game.render_text(
+                            f"{int(at.passengers)}/{at.get_passenger_capacity()}",
+                            game.screen_position((pos[0], pos[1] - 30)),
+                            color=(0, 200, 255),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="bottom"
+                        )
+                    if at.get_cargo_capacity() > 0:
+                        game.render_text(
+                            f"{int(at.cargo)}/{int(at.get_cargo_capacity())}",
+                            game.screen_position((pos[0], pos[1] - 15)),
+                            color=(255, 128, 0),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="bottom"
+                        )
 
         # game.draw_debug_dot((0, 0))
         game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))
