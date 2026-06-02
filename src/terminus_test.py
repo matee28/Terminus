@@ -372,8 +372,8 @@ def main():
             tiled=True
         )
 
-        game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
-        game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
+        # game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
+        # game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
             game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
@@ -452,7 +452,7 @@ def main():
                         y_alignment="bottom"
                     )
 
-        game.draw_debug_dot((0, 0))
+        # game.draw_debug_dot((0, 0))
         game.render_text("pos: " + str(camera.position), (0, 0), color=(255, 0, 0))
         game.render_text("zoom: " + str(camera.zoom), (0, 20), color=(255, 0, 0))
         game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
