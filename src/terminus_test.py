@@ -164,10 +164,17 @@ def main():
         if event.type == pygame.KEYDOWN:
             if menu_state["mode"] != "closed":
                 if event.key == pygame.K_ESCAPE:
-                    if menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
+                    if menu_state["mode"] in ["buy_loco", "buy_wagon", "assemble_loco", "inventory_main"]:
+                        menu_state["mode"] = "main"
+                    elif menu_state["mode"] == "assemble_wagons":
+                        menu_state["mode"] = "assemble_loco"
+                        menu_state["temp_loco"] = None
+                        menu_state["temp_wagons"] = []
+                    elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
                         menu_state["mode"] = "inventory_main"
                     else:
                         menu_state["mode"] = "closed"
+                        menu_state["temp_route"] = None
                 
                 if pygame.K_1 <= event.key <= pygame.K_9:
                     idx = event.key - pygame.K_1
