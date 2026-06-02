@@ -173,6 +173,15 @@ class ActiveTrain:
             cap += getattr(wagon.type, "cargo_capacity", 0)
         return cap
 
+    def get_total_weight(self):
+        """Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících)."""
+        weight = self.train.locomotive.type.weight
+        for wagon in self.train.wagons:
+            weight += wagon.type.weight
+        weight += self.passengers * 0.083 # 83 kg na osobu - https://en.wikipedia.org/wiki/Human_body_weight
+        weight += self.cargo
+        return weight
+
 class World:
     """
     Reprezentuje svět.
@@ -238,7 +247,15 @@ class World:
                 if at.wait_timer > 0:
                     continue
 
-            speed_m_s = at.train.locomotive.type.max_speed / 3.6
+            power_kw = getattr(at.train.locomotive.type, "power", 1000.0)
+            total_weight_t = at.get_total_weight()
+
+            # pokud má vlak alespoň 5kw na tunu, jede max. rychlostí; jinak se snižuje s odmocninou poměru
+            
+            pwr_ratio = power_kw / max(1.0, total_weight_t)
+            speed_multiplier_from_power = min(1.0, (pwr_ratio / 5.0) ** 0.5)
+            
+            speed_m_s = (at.train.locomotive.type.max_speed * speed_multiplier_from_power) / 3.6
             moved_dist = speed_m_s * dt_seconds * time_scale * train_speed_multiplier
             at.leg_distance += moved_dist
             

@@ -87,17 +87,17 @@ def main():
     game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
 
     # definice lokomotiv
-    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
-    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, price=300000.0, texture_name="loco_742")
-    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
 
     # definice osobních vagonů
-    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, price=150000.0, texture_name="wagon_p_ce")
-    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, price=100000.0, texture_name="wagon_p_b")
+    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
+    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, weight=40.0, price=100000.0, texture_name="wagon_p_b")
 
     # definice nákladních vagonů
-    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, price=80000.0, texture_name="wagon_c_single")
-    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, price=140000.0, texture_name="wagon_c_double")
+    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, weight=20.0, price=80000.0, texture_name="wagon_c_single")
+    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, weight=30.0, price=140000.0, texture_name="wagon_c_double")
 
     # seznamy pro UI
     available_loco_types = [type_loco_ce, type_loco_742, type_loco_vectron]
