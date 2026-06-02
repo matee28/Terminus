@@ -213,10 +213,16 @@ def main():
                                     economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
                                     break
                     elif menu_state["mode"] == "inventory_trains":
-                        if idx < len(assembled_trains):
-                            tr = assembled_trains.pop(idx)
-                            sell_price = (tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
-                            economy.add(sell_price)
+                        train_idx = idx // 2
+                        action = "sell" if idx % 2 == 0 else "disassemble"
+                        if train_idx < len(assembled_trains):
+                            tr = assembled_trains.pop(train_idx)
+                            if action == "sell":
+                                sell_price = (tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
+                                economy.add(sell_price)
+                            else: # disassemble
+                                owned_locos.append(tr["loco"])
+                                owned_wagons.extend(tr["wagons"])
                     elif menu_state["mode"] == "buy_loco":
                         if idx < len(available_loco_types):
                             t = available_loco_types[idx]
@@ -603,7 +609,9 @@ def main():
                 for i, tr in enumerate(assembled_trains):
                     if y_offset > screen_h/2 + 180: break
                     sell_p = int((tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{i+1}: {tr['loco'].type.name} + {len(tr['wagons'])} vagonů - prodat za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů:", (x_offset, y_offset), color=(200, 200, 200))
+                    y_offset += 20
+                    game.render_text(f"  [{i*2+1}] Prodat za {sell_p}{economy.currency_symbol} | [{i*2+2}] Rozložit", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assign_train":
                 game.render_text("Vyberte sestavenou soupravu pro spoj:", (x_offset, y_offset), color=(255,255,255))
