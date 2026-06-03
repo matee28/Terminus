@@ -19,8 +19,21 @@ terminus-test
 
 - **klávesa `T`** aktivuje režim stavby, opětovný stisk zruší rozpracovanou trať
 - **klávesa `Z`** během stavby tratě smaže naposledy přidaný bod
-- **pravé tlačítko myši** do kolejové trati přidává body
+- **levé tlačítko myši** do kolejové trati přidává body
 - první i poslední bod musí být umístěn na zastávce, jinak trať nelze dokončit
+
+### Plánování spojů
+
+- **klávesa `R`** aktivuje režim plánování spojů, opětovný stisk zruší rozpracovaný spoj
+- **klávesa `Z`** během plánování spoje smaže naposledy přidanou zastávku
+- **levé tlačítko myši** přidává další zastávku do rozpracovaného spoje (stanice musí být propojeny tratí)
+- **pravé tlačítko myši** dokončí navržený spoj a otevře menu pro výběr a nasazení vlakové soupravy
+
+### Správa vlaků a inventář (menu)
+
+- **klávesa `M`** otevře/zavře menu (lze zavřít i klávesou `ESC`)
+- z nabídky lze nakupovat lokomotivy a vagony
+- zakoupená vozidla se ukládají do inventáře, ze kterého je lze následně sestavovat do vlakových souprav
 
 ### Čas
 
@@ -62,6 +75,11 @@ Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
 
 ### Časové měřítko
 1 reálná sekunda odpovídá 3 ingame minutám.
+
+### Fyzikální jednotky v kódu
+- rychlost (`max_speed`): km/h
+- výkon lokomotivy (`power`): kW
+- kapacita nákladu (`cargo_capacity`): t
 
 ### Seznam měst s železničními stanicemi
 Dostupný [zde](https://provoz.spravazeleznic.cz/portal/ViewArticle.aspx?oid=34462).

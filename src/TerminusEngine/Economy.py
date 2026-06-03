@@ -2,14 +2,16 @@ class Economy:
     """
     Reprezentuje ekonomiku hry.
     """
-    def __init__(self, initial_balance: float):
+    def __init__(self, initial_balance: float, currency_symbol: str):
         """
         Inicializuje ekonomiku s počátečním zůstatkem.
         
         Args:
             initial_balance (float): počáteční peníze
+            currency_symbol (str): symbol měny
         """
         self.balance = initial_balance
+        self.currency_symbol = currency_symbol
 
     def can_afford(self, amount: float) -> bool:
         """
