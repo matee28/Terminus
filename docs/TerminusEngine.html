@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+<html lang="cs" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TerminusEngine package &#8212; Dokumentace pro Terminus </title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=9a9e823d"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/translations.js?v=22e1c300"></script>
+    <link rel="index" title="Rejstřík" href="genindex.html" />
+    <link rel="search" title="Vyhledávání" href="search.html" />
+    <link rel="next" title="terminus_test module" href="terminus_test.html" />
+    <link rel="prev" title="Dokumentace projektu Terminus" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="terminusengine-package">
+<h1>TerminusEngine package<a class="headerlink" href="#terminusengine-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-TerminusEngine.Economy">
+<span id="terminusengine-economy-module"></span><h2>TerminusEngine.Economy module<a class="headerlink" href="#module-TerminusEngine.Economy" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Economy.Economy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Economy.</span></span><span class="sig-name descname"><span class="pre">Economy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_balance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency_symbol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Economy.html#Economy"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Economy.Economy" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje ekonomiku hry.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Economy.Economy.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Economy.html#Economy.add"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Economy.Economy.add" title="Link to this definition">¶</a></dt>
+<dd><p>Přidá peníze do zůstatku.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Economy.Economy.can_afford">
+<span class="sig-name descname"><span class="pre">can_afford</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/TerminusEngine/Economy.html#Economy.can_afford"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Economy.Economy.can_afford" title="Link to this definition">¶</a></dt>
+<dd><p>Zkontroluje, zda si může dovolit utratit danou částku.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Economy.Economy.deduct">
+<span class="sig-name descname"><span class="pre">deduct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Economy.html#Economy.deduct"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Economy.Economy.deduct" title="Link to this definition">¶</a></dt>
+<dd><p>Strhne peníze ze zůstatku.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-TerminusEngine.Vehicles">
+<span id="terminusengine-vehicles-module"></span><h2>TerminusEngine.Vehicles module<a class="headerlink" href="#module-TerminusEngine.Vehicles" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.CargoWagon">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">CargoWagon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Vehicles.CargoWagonType" title="TerminusEngine.Vehicles.CargoWagonType"><span class="pre">CargoWagonType</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#CargoWagon"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.CargoWagon" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje instanci nákladního vagonu.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.CargoWagonType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">CargoWagonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cargo_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#CargoWagonType"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.CargoWagonType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje typ nákladního vagonu.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.Locomotive">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">Locomotive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Vehicles.LocomotiveType" title="TerminusEngine.Vehicles.LocomotiveType"><span class="pre">LocomotiveType</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#Locomotive"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.Locomotive" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje instanci lokomotivy.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.LocomotiveType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">LocomotiveType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#LocomotiveType"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.LocomotiveType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje typ lokomotivy.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.PassengerWagon">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">PassengerWagon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Vehicles.PassengerWagonType" title="TerminusEngine.Vehicles.PassengerWagonType"><span class="pre">PassengerWagonType</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#PassengerWagon"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.PassengerWagon" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje instanci osobního vagonu.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.PassengerWagonType">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">PassengerWagonType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#PassengerWagonType"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.PassengerWagonType" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje typ osobního vagonu.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Vehicles.Train">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">Train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locomotive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Vehicles.Locomotive" title="TerminusEngine.Vehicles.Locomotive"><span class="pre">Locomotive</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wagons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.Vehicles.PassengerWagon" title="TerminusEngine.Vehicles.PassengerWagon"><span class="pre">PassengerWagon</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#TerminusEngine.Vehicles.CargoWagon" title="TerminusEngine.Vehicles.CargoWagon"><span class="pre">CargoWagon</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#Train"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.Train" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje instanci vlakové soupravy.</p>
+</dd></dl>
+
+</section>
+<section id="module-TerminusEngine.World">
+<span id="terminusengine-world-module"></span><h2>TerminusEngine.World module<a class="headerlink" href="#module-TerminusEngine.World" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">ActiveTrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.Route" title="TerminusEngine.World.Route"><span class="pre">Route</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje aktivní vlak na spoji.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain.get_cargo_capacity">
+<span class="sig-name descname"><span class="pre">get_cargo_capacity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain.get_cargo_capacity"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain.get_cargo_capacity" title="Link to this definition">¶</a></dt>
+<dd><p>Vrátí celkovou kapacitu nákladního vlaku.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain.get_passenger_capacity">
+<span class="sig-name descname"><span class="pre">get_passenger_capacity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain.get_passenger_capacity"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain.get_passenger_capacity" title="Link to this definition">¶</a></dt>
+<dd><p>Vrátí celkovou kapacitu osobního vlaku.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain.get_total_weight">
+<span class="sig-name descname"><span class="pre">get_total_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain.get_total_weight"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain.get_total_weight" title="Link to this definition">¶</a></dt>
+<dd><p>Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.City">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">City</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#City"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.City" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje město.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.City.add_station">
+<span class="sig-name descname"><span class="pre">add_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#City.add_station"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.City.add_station" title="Link to this definition">¶</a></dt>
+<dd><p>Přidá stanici k městu.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.Railway">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">Railway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.Station" title="TerminusEngine.World.Station"><span class="pre">Station</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.Station" title="TerminusEngine.World.Station"><span class="pre">Station</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Railway"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Railway" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje železniční trať.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.Railway.add_point">
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Railway.add_point"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Railway.add_point" title="Link to this definition">¶</a></dt>
+<dd><p>Přidá bod na konec trati.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – bod, který se má přidat</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.Railway.remove_last_point">
+<span class="sig-name descname"><span class="pre">remove_last_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Railway.remove_last_point"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Railway.remove_last_point" title="Link to this definition">¶</a></dt>
+<dd><p>Odstraní poslední bod z trati.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.Railway.replace_points">
+<span class="sig-name descname"><span class="pre">replace_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Railway.replace_points"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Railway.replace_points" title="Link to this definition">¶</a></dt>
+<dd><p>Nahradí body trati.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_points</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – nový seznam bodů trati</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.Route">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">Route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.World.Station" title="TerminusEngine.World.Station"><span class="pre">Station</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">railways</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><span class="pre">Railway</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Route"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Route" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje vlakový spoj.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.Station">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">Station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">city</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.City" title="TerminusEngine.World.City"><span class="pre">City</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cargo_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#Station"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.Station" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje stanici.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.World.World">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">World</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.World.City" title="TerminusEngine.World.City"><span class="pre">City</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">railways</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><span class="pre">Railway</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_trains</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#TerminusEngine.World.ActiveTrain" title="TerminusEngine.World.ActiveTrain"><span class="pre">ActiveTrain</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje svět.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.World.add_active_train">
+<span class="sig-name descname"><span class="pre">add_active_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.ActiveTrain" title="TerminusEngine.World.ActiveTrain"><span class="pre">ActiveTrain</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World.add_active_train"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World.add_active_train" title="Link to this definition">¶</a></dt>
+<dd><p>Přidá aktivní vlak do světa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>train</strong> (<a class="reference internal" href="#TerminusEngine.World.ActiveTrain" title="TerminusEngine.World.ActiveTrain"><em>ActiveTrain</em></a>) – vlak, který se má přidat</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.World.add_railway">
+<span class="sig-name descname"><span class="pre">add_railway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">railway</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><span class="pre">Railway</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World.add_railway"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World.add_railway" title="Link to this definition">¶</a></dt>
+<dd><p>Přidá železniční trať do světa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>railway</strong> (<a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><em>Railway</em></a>) – trať, která se má přidat</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.World.get_closest_station">
+<span class="sig-name descname"><span class="pre">get_closest_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World.get_closest_station"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World.get_closest_station" title="Link to this definition">¶</a></dt>
+<dd><p>Najde stanici, která je nejblíže k zadanému bodu.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple</strong><strong>[</strong><strong>float</strong> – zadaný bod (x, y)</p></li>
+<li><p><strong>float</strong><strong>]</strong> – zadaný bod (x, y)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Vrací<span class="colon">:</span></dt>
+<dd class="field-even"><p>nejbližší stanice a její vzdálenost (v metrech)</p>
+</dd>
+<dt class="field-odd">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[<a class="reference internal" href="#TerminusEngine.World.Station" title="TerminusEngine.World.Station">Station</a>, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.World.remove_railway">
+<span class="sig-name descname"><span class="pre">remove_railway</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">railway</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><span class="pre">Railway</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World.remove_railway"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World.remove_railway" title="Link to this definition">¶</a></dt>
+<dd><p>Odstraní železniční trať ze světa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>railway</strong> (<a class="reference internal" href="#TerminusEngine.World.Railway" title="TerminusEngine.World.Railway"><em>Railway</em></a>) – trať, která se má odstranit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.World.World.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_speed_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_generation_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cargo_generation_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_point_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#World.update"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.World.update" title="Link to this definition">¶</a></dt>
+<dd><p>Aktualizuje stav světa, generování cestujících, nákladu a pohyb vlaků.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TerminusEngine.World.WorldGenerator">
+<span class="sig-prename descclassname"><span class="pre">TerminusEngine.World.</span></span><span class="sig-name descname"><span class="pre">WorldGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">world_boundary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">city_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_city_max_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_city_max_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_city_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_city_boundary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_stations_per_city</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_station_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cargo_station_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_city_cargo_capacity_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_city_passenger_capacity_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">large_city_max_tracks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_city_passenger_capacity_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_city_cargo_capacity_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#WorldGenerator"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.WorldGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Generuje svět.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>world_boundary</strong> (<em>int</em>) – velikost hranice světa v metrech (pro generování měst atd.)</p></li>
+<li><p><strong>city_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – seznam názvů pro města</p></li>
+<li><p><strong>cities</strong> (<em>int</em>) – počet měst, které se mají vygenerovat</p></li>
+<li><p><strong>small_city_max_population</strong> (<em>int</em>) – maximální počet obyvatel v malém městě</p></li>
+<li><p><strong>large_city_max_population</strong> (<em>int</em>) – maximální počet obyvatel v velkém městě</p></li>
+<li><p><strong>min_city_radius</strong> (<em>int</em>) – minimální poloměr města v metrech</p></li>
+<li><p><strong>max_city_boundary</strong> (<em>int</em>) – maximální velikost města v metrech (pro generování stanic atd.)</p></li>
+<li><p><strong>max_stations_per_city</strong> (<em>int</em>) – maximální počet stanic, které mohou být v jednom městě</p></li>
+<li><p><strong>passenger_station_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – seznam názvů pro osobní stanice</p></li>
+<li><p><strong>cargo_station_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – seznam názvů pro nákladní stanice</p></li>
+<li><p><strong>large_city_cargo_capacity_range</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – rozsah kapacity pro nákladní stanice ve velkých městech</p></li>
+<li><p><strong>large_city_passenger_capacity_range</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – rozsah kapacity pro osobní stanice ve velkých městech</p></li>
+<li><p><strong>large_city_max_tracks</strong> (<em>int</em>) – maximální počet kolejí ve stanicích ve velkých městech (minimum je 1)</p></li>
+<li><p><strong>small_city_passenger_capacity_range</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – rozsah kapacity pro osobní stanice v malých městech</p></li>
+<li><p><strong>small_city_cargo_capacity_range</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – rozsah kapacity pro nákladní stanice v malých městech</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-TerminusEngine">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-TerminusEngine" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Camera">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.</span></span><span class="sig-name descname"><span class="pre">Camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Inicializuje a uchovává atributy kamery.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Camera.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera.move"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera.move" title="Link to this definition">¶</a></dt>
+<dd><p>Posouvá kameru.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – vzdálenost posunu kamery z myši v px na obrazovce (x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Camera.set_position">
+<span class="sig-name descname"><span class="pre">set_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera.set_position"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera.set_position" title="Link to this definition">¶</a></dt>
+<dd><p>Přesouvá kameru na zadané souřadnice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – nové souřadnice kamery (x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Camera.set_zoom">
+<span class="sig-name descname"><span class="pre">set_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera.set_zoom"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera.set_zoom" title="Link to this definition">¶</a></dt>
+<dd><p>Nastavuje přiblížení pohledu kamery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>zoom</strong> (<em>float</em>) – nové přiblížení pohledu kamery</p>
+</dd>
+<dt class="field-even">Vrací<span class="colon">:</span></dt>
+<dd class="field-even"><p>zda bylo přiblížení upraveno</p>
+</dd>
+<dt class="field-odd">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Camera.zoom_in">
+<span class="sig-name descname"><span class="pre">zoom_in</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera.zoom_in"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera.zoom_in" title="Link to this definition">¶</a></dt>
+<dd><p>Přibližuje pohled kamery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Vrací<span class="colon">:</span></dt>
+<dd class="field-odd"><p>zda bylo přiblížení upraveno</p>
+</dd>
+<dt class="field-even">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Camera.zoom_out">
+<span class="sig-name descname"><span class="pre">zoom_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Camera.zoom_out"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Camera.zoom_out" title="Link to this definition">¶</a></dt>
+<dd><p>Oddaluje pohled kamery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Vrací<span class="colon">:</span></dt>
+<dd class="field-odd"><p>zda bylo přiblížení upraveno</p>
+</dd>
+<dt class="field-even">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Game">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">TerminusEngine.</span></span><span class="sig-name descname"><span class="pre">Game</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Camera" title="TerminusEngine.Camera"><span class="pre">Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Comic</span> <span class="pre">Sans</span> <span class="pre">MS'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Umožňuje inicializovat a spouštět hru.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.draw_debug_dot">
+<span class="sig-name descname"><span class="pre">draw_debug_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">world_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.draw_debug_dot"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.draw_debug_dot" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí debugovací bod s textem na zadané souřadnici.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>world_position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – světové souřadnice v metrech (x, y)</p></li>
+<li><p><strong>default</strong> (<em>text</em><em> (</em><em>str;</em>) – 10): velikost bodu v metrech</p></li>
+<li><p><strong>default</strong> – „“): text, který se zobrazí u bodu</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.get_font">
+<span class="sig-name descname"><span class="pre">get_font</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.get_font"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.get_font" title="Link to this definition">¶</a></dt>
+<dd><p>Vrátí font dané velikosti z paměti, nebo ho inicializuje.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – velikost fontu</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.get_point_on_path">
+<span class="sig-name descname"><span class="pre">get_point_on_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.get_point_on_path"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.get_point_on_path" title="Link to this definition">¶</a></dt>
+<dd><p>Vrátí přesnou souřadnici a úhel natočení pro zadanou vzdálenost na trati.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – seznam bodů cesty</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – vzdálenost od začátku trati</p></li>
+</ul>
+</dd>
+<dt class="field-even">Vrací<span class="colon">:</span></dt>
+<dd class="field-even"><p>(pozice (x, y), úhel (stupně))</p>
+</dd>
+<dt class="field-odd">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[tuple[float, float], float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.get_time_string">
+<span class="sig-name descname"><span class="pre">get_time_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.get_time_string"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.get_time_string" title="Link to this definition">¶</a></dt>
+<dd><p>Vrací aktuální herní čas ve formátu ‚Den X, HH:MM‘.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.load_image">
+<span class="sig-name descname"><span class="pre">load_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.load_image"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.load_image" title="Link to this definition">¶</a></dt>
+<dd><p>Načítá obrázek a ukládá ho do paměti.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – název obrázku v paměti</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – cesta k souboru (relativně k src/)</p></li>
+<li><p><strong>rotation</strong> (<em>float</em>) – rotace obrázku ve stupních</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.relative_position">
+<span class="sig-name descname"><span class="pre">relative_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.relative_position"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.relative_position" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí světové souřadnice na relativní souřadnice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – světová souřadnice (x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.render_image">
+<span class="sig-name descname"><span class="pre">render_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_alignment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_alignment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.render_image"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.render_image" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí obrázek uložený v paměti.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>texture_name</strong> (<em>str</em>) – název obrázku v slovníku</p></li>
+<li><p><strong>world_position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – světové souřadnice obrázku v metrech (x, y)</p></li>
+<li><p><strong>(</strong><strong>tuple</strong><strong>[</strong><strong>float</strong> (<em>size</em>) – (0, 0)): velikost obrázku (výška, šířka) v metrech, pro původní velikost na ose použijte velikost 0</p></li>
+<li><p><strong>default</strong> (<em>tiled</em><em> (</em><em>bool;</em>) – (0, 0)): velikost obrázku (výška, šířka) v metrech, pro původní velikost na ose použijte velikost 0</p></li>
+<li><p><strong>default</strong> – 0): rotace obrázku ve stupních</p></li>
+<li><p><strong>default</strong> – „center“): zarovnání v ose x (left, center, right)</p></li>
+<li><p><strong>default</strong> – „center“): zarovnání v ose y (top, center, bottom)</p></li>
+<li><p><strong>default</strong> – False): zda se má obrázek vykreslit jako dlaždice</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.render_image_path">
+<span class="sig-name descname"><span class="pre">render_image_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.render_image_path"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.render_image_path" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí obrázek uložený v paměti podél zadané cesty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>texture_name</strong> (<em>str</em>) – název obrázku v slovníku</p></li>
+<li><p><strong>path</strong> (<em>list</em><em>[</em><em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – seznam světových souřadnic tvořících cestu</p></li>
+<li><p><strong>(</strong><strong>tuple</strong><strong>[</strong><strong>float</strong> (<em>size</em>) – (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0</p></li>
+<li><p><strong>default</strong> (<em>cache</em><em> (</em><em>bool;</em>) – (0, 0)): velikost obrázku (výška, šířka), pro původní velikost na ose použijte velikost 0</p></li>
+<li><p><strong>default</strong> – 0): rotace obrázku ve stupních</p></li>
+<li><p><strong>default</strong> – True): zda se má cesta uložit do/volat z paměti</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.render_text">
+<span class="sig-name descname"><span class="pre">render_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">255)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_world_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_alignment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_alignment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antialias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.render_text"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.render_text" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí text na obrazovku.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – text k vykreslení</p></li>
+<li><p><strong>position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – souřadnice (x, y) na obrazovce nebo ve světě</p></li>
+<li><p><strong>(</strong><strong>tuple</strong><strong>[</strong><strong>int</strong> (<em>color</em>) – (255, 255, 255)): barva textu</p></li>
+<li><p><strong>int</strong> – (255, 255, 255)): barva textu</p></li>
+<li><p><strong>default</strong> (<em>font_size</em><em> (</em><em>int;</em>) – (255, 255, 255)): barva textu</p></li>
+<li><p><strong>default</strong> – False): zda je pozice ve světových souřadnicích</p></li>
+<li><p><strong>default</strong> – „left“): zarovnání na ose X (left, center, right)</p></li>
+<li><p><strong>default</strong> – „top“): zarovnání na ose Y (top, center, bottom)</p></li>
+<li><p><strong>default</strong> – True): zda se má použít antialiasing</p></li>
+<li><p><strong>default</strong> – 20): velikost textu</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.rotate_image">
+<span class="sig-name descname"><span class="pre">rotate_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.rotate_image"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.rotate_image" title="Link to this definition">¶</a></dt>
+<dd><p>Rotuje obrázek.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>pygame.Surface</em>) – obrázek</p></li>
+<li><p><strong>rotation</strong> (<em>float</em>) – rotace obrázku ve stupních</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_handler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.run"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.run" title="Link to this definition">¶</a></dt>
+<dd><p>Spouští hlavní smyčku hry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loop</strong> (<em>callable</em>) – funkce hlavní smyčky hry</p></li>
+<li><p><strong>event_handler</strong> (<em>callable</em>) – funkce pro zpracování událostí, dostává jako argument objekt event</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.screen_distance">
+<span class="sig-name descname"><span class="pre">screen_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.screen_distance"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.screen_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí vzdálenost ve světě (v metrech) na vzdálenost na obrazovce (v pixelech) podle aktuálního přiblížení kamery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value_m</strong> (<em>float</em>) – vzdálenost ve světě v metrech</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.screen_position">
+<span class="sig-name descname"><span class="pre">screen_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.screen_position"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.screen_position" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí světové souřadnice (v metrech) na souřadnice na obrazovce (v pixelech).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – světová souřadnice v metrech (x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Game.world_position">
+<span class="sig-name descname"><span class="pre">world_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screen_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#Game.world_position"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Game.world_position" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí souřadnice na obrazovce (v pixelech) na světové souřadnice (v metrech).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>screen_position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – souřadnice na obrazovce (x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TerminusEngine.m2px">
+<span class="sig-prename descclassname"><span class="pre">TerminusEngine.</span></span><span class="sig-name descname"><span class="pre">m2px</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#m2px"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.m2px" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí metry na pixely.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>float</em>) – hodnota v metrech</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TerminusEngine.px2m">
+<span class="sig-prename descclassname"><span class="pre">TerminusEngine.</span></span><span class="sig-name descname"><span class="pre">px2m</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#px2m"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.px2m" title="Link to this definition">¶</a></dt>
+<dd><p>Převádí pixely na metry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>float</em>) – hodnota v pixelech</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="TerminusEngine.read_src">
+<span class="sig-prename descclassname"><span class="pre">TerminusEngine.</span></span><span class="sig-name descname"><span class="pre">read_src</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine.html#read_src"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.read_src" title="Link to this definition">¶</a></dt>
+<dd><p>Vrací obsah souboru (string) ve složce src/.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Terminus</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="OK" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigace</h3>
+<p class="caption" role="heading"><span class="caption-text">Obsah:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TerminusEngine package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.Economy">TerminusEngine.Economy module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Economy.Economy"><code class="docutils literal notranslate"><span class="pre">Economy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.add"><code class="docutils literal notranslate"><span class="pre">Economy.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.can_afford"><code class="docutils literal notranslate"><span class="pre">Economy.can_afford()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.deduct"><code class="docutils literal notranslate"><span class="pre">Economy.deduct()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.Vehicles">TerminusEngine.Vehicles module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.CargoWagon"><code class="docutils literal notranslate"><span class="pre">CargoWagon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.CargoWagonType"><code class="docutils literal notranslate"><span class="pre">CargoWagonType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.Locomotive"><code class="docutils literal notranslate"><span class="pre">Locomotive</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.LocomotiveType"><code class="docutils literal notranslate"><span class="pre">LocomotiveType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.PassengerWagon"><code class="docutils literal notranslate"><span class="pre">PassengerWagon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.PassengerWagonType"><code class="docutils literal notranslate"><span class="pre">PassengerWagonType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Vehicles.Train"><code class="docutils literal notranslate"><span class="pre">Train</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.World">TerminusEngine.World module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.ActiveTrain"><code class="docutils literal notranslate"><span class="pre">ActiveTrain</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.ActiveTrain.get_cargo_capacity"><code class="docutils literal notranslate"><span class="pre">ActiveTrain.get_cargo_capacity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.ActiveTrain.get_passenger_capacity"><code class="docutils literal notranslate"><span class="pre">ActiveTrain.get_passenger_capacity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.ActiveTrain.get_total_weight"><code class="docutils literal notranslate"><span class="pre">ActiveTrain.get_total_weight()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.City"><code class="docutils literal notranslate"><span class="pre">City</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.City.add_station"><code class="docutils literal notranslate"><span class="pre">City.add_station()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.Railway"><code class="docutils literal notranslate"><span class="pre">Railway</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.Railway.add_point"><code class="docutils literal notranslate"><span class="pre">Railway.add_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.Railway.remove_last_point"><code class="docutils literal notranslate"><span class="pre">Railway.remove_last_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.Railway.replace_points"><code class="docutils literal notranslate"><span class="pre">Railway.replace_points()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.Route"><code class="docutils literal notranslate"><span class="pre">Route</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.Station"><code class="docutils literal notranslate"><span class="pre">Station</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.World"><code class="docutils literal notranslate"><span class="pre">World</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.World.add_active_train"><code class="docutils literal notranslate"><span class="pre">World.add_active_train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.World.add_railway"><code class="docutils literal notranslate"><span class="pre">World.add_railway()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.World.get_closest_station"><code class="docutils literal notranslate"><span class="pre">World.get_closest_station()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.World.remove_railway"><code class="docutils literal notranslate"><span class="pre">World.remove_railway()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.World.World.update"><code class="docutils literal notranslate"><span class="pre">World.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.World.WorldGenerator"><code class="docutils literal notranslate"><span class="pre">WorldGenerator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Camera"><code class="docutils literal notranslate"><span class="pre">Camera</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Camera.move"><code class="docutils literal notranslate"><span class="pre">Camera.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Camera.set_position"><code class="docutils literal notranslate"><span class="pre">Camera.set_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Camera.set_zoom"><code class="docutils literal notranslate"><span class="pre">Camera.set_zoom()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Camera.zoom_in"><code class="docutils literal notranslate"><span class="pre">Camera.zoom_in()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Camera.zoom_out"><code class="docutils literal notranslate"><span class="pre">Camera.zoom_out()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Game"><code class="docutils literal notranslate"><span class="pre">Game</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.draw_debug_dot"><code class="docutils literal notranslate"><span class="pre">Game.draw_debug_dot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.get_font"><code class="docutils literal notranslate"><span class="pre">Game.get_font()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.get_point_on_path"><code class="docutils literal notranslate"><span class="pre">Game.get_point_on_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.get_time_string"><code class="docutils literal notranslate"><span class="pre">Game.get_time_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.load_image"><code class="docutils literal notranslate"><span class="pre">Game.load_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.relative_position"><code class="docutils literal notranslate"><span class="pre">Game.relative_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.render_image"><code class="docutils literal notranslate"><span class="pre">Game.render_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.render_image_path"><code class="docutils literal notranslate"><span class="pre">Game.render_image_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.render_text"><code class="docutils literal notranslate"><span class="pre">Game.render_text()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.rotate_image"><code class="docutils literal notranslate"><span class="pre">Game.rotate_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.run"><code class="docutils literal notranslate"><span class="pre">Game.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.screen_distance"><code class="docutils literal notranslate"><span class="pre">Game.screen_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.screen_position"><code class="docutils literal notranslate"><span class="pre">Game.screen_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Game.world_position"><code class="docutils literal notranslate"><span class="pre">Game.world_position()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.m2px"><code class="docutils literal notranslate"><span class="pre">m2px()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.px2m"><code class="docutils literal notranslate"><span class="pre">px2m()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.read_src"><code class="docutils literal notranslate"><span class="pre">read_src()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="terminus_test.html">terminus_test module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="předchozí kapitola">Dokumentace projektu Terminus</a></li>
+      <li>Next: <a href="terminus_test.html" title="další kapitola">terminus_test module</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, matee28.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/TerminusEngine.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
