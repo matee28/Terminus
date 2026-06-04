@@ -216,14 +216,14 @@ class Game:
         """
         return os.path.join(self.src_path, relative_path)
     
-    def __ceil_tuple(self, tuple: tuple[float, float]):
+    def __round_tuple(self, tuple: tuple[float, float]):
         """
-        Zaokrouhluje souřadnice nahoru na celá čísla.
+        Zaokrouhluje souřadnice na nejbližší celá čísla.
 
         Args:
             tuple (tuple[float, float]): tuple s dvěma float hodnotami
         """
-        return (math.ceil(tuple[0]), math.ceil(tuple[1]))
+        return (round(tuple[0]), round(tuple[1]))
 
     def run(self, loop: callable, event_handler: callable):
         """
@@ -409,7 +409,7 @@ class Game:
                 size_m = (size_m[0], px2m(texture.get_size()[1]))
 
             # převod na px s ohledem na zoom
-            scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+            scaled_size = self.__round_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
 
             if not tiled:
                 pos = self.screen_position(world_position)
@@ -639,7 +639,7 @@ class Game:
             if size_m[1] == 0:
                 size_m = (size_m[0], px2m(texture.get_size()[1]))
 
-            scaled_size = self.__ceil_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
+            scaled_size = self.__round_tuple((m2px(size_m[0]) * self.camera.zoom, m2px(size_m[1]) * self.camera.zoom))
 
 
             # fade to color pokud je textura moc malá
