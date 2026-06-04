@@ -382,7 +382,7 @@ def main():
         # game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
-            game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
+            game.render_city(city.position, radius=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
             for station in city.stations:
                 game.draw_debug_dot(station.position, size=0, text=station.name)
                 
@@ -394,7 +394,9 @@ def main():
                         color=(255, 255, 0),
                         font_size=16,
                         x_alignment="center",
-                        y_alignment="bottom"
+                        y_alignment="bottom",
+                        outline_color=(0, 0, 0),
+                        outline_width=1
                     )
                 if station.cargo_capacity > 0:
                     game.render_text(
@@ -403,7 +405,9 @@ def main():
                         color=(255, 128, 0),
                         font_size=16,
                         x_alignment="center",
-                        y_alignment="bottom"
+                        y_alignment="bottom",
+                        outline_color=(0, 0, 0),
+                        outline_width=1
                     )
 
         for i, railway in enumerate(world.railways):

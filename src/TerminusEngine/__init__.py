@@ -2,6 +2,7 @@ import pygame
 import math
 import os
 import numpy as np
+import random
 
 from shapely.geometry import LineString, Point
 
@@ -328,7 +329,34 @@ class Game:
         pygame.draw.circle(self.screen, (0, 255, 0), pos, m2px(size)*self.camera.zoom)
         pygame.draw.circle(self.screen, (255, 0, 0), pos, 2)
         if text != "":
-            self.render_text(text, pos, color=(255, 255, 255))
+            self.render_text(text, pos, color=(255, 255, 255), outline_color=(0, 0, 0), outline_width=1)
+
+    def render_city(self, world_position: tuple[float, float], radius: float, text: str = ""):
+        """
+        Vykreslí město jako náhodný tvar s minimálním poloměrem.
+        
+        Args:
+            world_position (tuple[float, float]): světové souřadnice (x, y)
+            radius (float): minimální poloměr města v metrech
+            text (str; default: ""): text, který se zobrazí u města
+        """
+        rng = random.Random(int(world_position[0] * 100 + world_position[1] * 10000)) # seed pro konzistentní generaci
+        
+        num_points = 12 # počet "vrcholů"
+        points = []
+        for i in range(num_points):
+            angle = math.radians(i * (360 / num_points))
+            point_radius = radius + rng.uniform(0, radius * 0.6)
+            
+            px = world_position[0] + math.cos(angle) * point_radius
+            py = world_position[1] + math.sin(angle) * point_radius
+            points.append(self.screen_position((px, py)))
+            
+        if len(points) >= 3:
+            pygame.draw.polygon(self.screen, (50, 50, 50), points)
+            
+        if text != "":
+            self.render_text(text, self.screen_position(world_position), color=(255, 255, 255), x_alignment="center", y_alignment="center", outline_color=(0, 0, 0), outline_width=1)
 
     def load_image(self, name: str, path: str, rotation: float = 0):
         """
@@ -653,7 +681,7 @@ class Game:
             self.fonts[size] = pygame.font.SysFont(self.font_name, size)
         return self.fonts[size]
 
-    def render_text(self, text: str, position: tuple[float, float], color: tuple[int, int, int] = (255, 255, 255), is_world_position: bool = False, x_alignment: str = "left", y_alignment: str = "top", antialias: bool = True, font_size: int = 20):
+    def render_text(self, text: str, position: tuple[float, float], color: tuple[int, int, int] = (255, 255, 255), is_world_position: bool = False, x_alignment: str = "left", y_alignment: str = "top", antialias: bool = True, font_size: int = 20, outline_color: tuple[int, int, int] = None, outline_width: int = 1):
         """
         Vykreslí text na obrazovku.
 
@@ -666,30 +694,43 @@ class Game:
             y_alignment (str; default: "top"): zarovnání na ose Y (top, center, bottom)
             antialias (bool; default: True): zda se má použít antialiasing
             font_size (int; default: 20): velikost textu
+            outline_color (tuple[int, int, int]; default: None): barva obrysu textu (None = obrys se nevykreslí)
+            outline_width (int; default: 1): šířka obrysu v pixelech
         """
         
         font = self.get_font(font_size)
-        text_surface = font.render(text, antialias, color)
         
         if is_world_position:
             pos = self.screen_position(position)
         else:
             pos = position
 
-        rect = text_surface.get_rect()
-        
-        if x_alignment == "left":
-            rect.left = pos[0]
-        elif x_alignment == "center":
-            rect.centerx = pos[0]
-        elif x_alignment == "right":
-            rect.right = pos[0]
-            
-        if y_alignment == "top":
-            rect.top = pos[1]
-        elif y_alignment == "center":
-            rect.centery = pos[1]
-        elif y_alignment == "bottom":
-            rect.bottom = pos[1]
-            
-        self.screen.blit(text_surface, rect)
+        def get_rect_for_pos(surf, px, py):
+            rect = surf.get_rect()
+            if x_alignment == "left":
+                rect.left = px
+            elif x_alignment == "center":
+                rect.centerx = px
+            elif x_alignment == "right":
+                rect.right = px
+                
+            if y_alignment == "top":
+                rect.top = py
+            elif y_alignment == "center":
+                rect.centery = py
+            elif y_alignment == "bottom":
+                rect.bottom = py
+            return rect
+
+        # outline
+        if outline_color is not None:
+            outline_surface = font.render(text, antialias, outline_color)
+            for dx in [-outline_width, 0, outline_width]:
+                for dy in [-outline_width, 0, outline_width]:
+                    if dx == 0 and dy == 0:
+                        continue
+                    self.screen.blit(outline_surface, get_rect_for_pos(outline_surface, pos[0] + dx, pos[1] + dy))
+
+        # samotný text
+        text_surface = font.render(text, antialias, color)
+        self.screen.blit(text_surface, get_rect_for_pos(text_surface, pos[0], pos[1]))
