@@ -109,10 +109,15 @@ def main():
     assembled_trains = [] # {"name": str, "loco": loco, "wagons": list}
     
     menu_state = {"mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None}
+    mouse_down_pos = (0, 0)
 
 
     def event_handler(event: pygame.event.Event):
         global RAILWAY_MODE, ROUTE_MODE
+        nonlocal mouse_down_pos
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_down_pos = event.pos
 
         # zoom: zatím doprostřed obrazovky -> k myši?
         if event.type == pygame.MOUSEWHEEL:
@@ -313,7 +318,7 @@ def main():
 
         # ROUTE_MODE click handling
         if ROUTE_MODE:
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
                 if event.button == 1: # levé tlačítko = přidání stanice
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
@@ -346,7 +351,7 @@ def main():
 
         # přidávání kolejí
         if RAILWAY_MODE:
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
                 if event.button == 1: # levé tlačítko
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
