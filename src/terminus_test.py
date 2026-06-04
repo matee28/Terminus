@@ -168,6 +168,9 @@ def main():
                         menu_state["mode"] = "main"
                     elif menu_state["mode"] == "assemble_wagons":
                         menu_state["mode"] = "assemble_loco"
+                        if menu_state["temp_loco"] is not None:
+                            owned_locos.append(menu_state["temp_loco"])
+                        owned_wagons.extend(menu_state["temp_wagons"])
                         menu_state["temp_loco"] = None
                         menu_state["temp_wagons"] = []
                     elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
