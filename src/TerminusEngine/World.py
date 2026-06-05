@@ -1,5 +1,6 @@
 import random
 import math
+import colorsys
 
 
 class City:
@@ -116,6 +117,13 @@ class Route:
         self.stations = stations
         self.stop_flags = stop_flags
         self.railways = railways
+        
+        # Generování náhodné vysokokontrastní barvy - shoutout gemini
+        h = random.random()
+        s = random.uniform(0.8, 1.0)
+        v = random.uniform(0.8, 1.0)
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        self.color = (int(r * 255), int(g * 255), int(b * 255))
 
 
 class ActiveTrain:

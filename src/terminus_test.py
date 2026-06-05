@@ -15,6 +15,7 @@ import heapq
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
 ROUTE_MODE = False
+SHOW_ROUTES = False
 current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
@@ -113,7 +114,7 @@ def main():
 
 
     def event_handler(event: pygame.event.Event):
-        global RAILWAY_MODE, ROUTE_MODE
+        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES
         nonlocal mouse_down_pos
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -287,6 +288,10 @@ def main():
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
 
+            # SHOW_ROUTES toggle = S
+            if event.key == pygame.K_s:
+                SHOW_ROUTES = not SHOW_ROUTES
+
             # ROUTE_MODE toggle = R
             if event.key == pygame.K_r:
                 ROUTE_MODE = not ROUTE_MODE
@@ -456,6 +461,14 @@ def main():
                     cache=cache
                 )
 
+        if SHOW_ROUTES:
+            for at in world.active_trains:
+                if hasattr(at.route, 'color'):
+                    for rw in at.route.railways:
+                        if len(rw.points) > 1:
+                            scr_pts = [game.screen_position(p) for p in rw.points]
+                            pygame.draw.lines(game.screen, at.route.color, False, scr_pts, 4)
+
         # aktualizace a vykreslení vlaků
         dt_seconds = game.clock.get_time() / 1000.0
         
@@ -522,7 +535,8 @@ def main():
         game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
         game.render_text("stavba tratě: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
         game.render_text("plánování spoje: " + str(ROUTE_MODE), (0, 80), color=(255, 0, 0))
-        game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 100), color=(255, 0, 0))
+        game.render_text("zobrazení spojů: " + str(SHOW_ROUTES), (0, 100), color=(255, 0, 0))
+        game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 120), color=(255, 0, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
