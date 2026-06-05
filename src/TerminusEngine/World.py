@@ -143,6 +143,20 @@ class ActiveTrain:
         
         self._setup_leg()
 
+    def serves_passengers(self):
+        count = 0
+        for i, st in enumerate(self.route.stations):
+            if self.route.stop_flags[i] and st.passenger_capacity > 0:
+                count += 1
+        return count >= 2
+
+    def serves_cargo(self):
+        count = 0
+        for i, st in enumerate(self.route.stations):
+            if self.route.stop_flags[i] and st.cargo_capacity > 0:
+                count += 1
+        return count >= 2
+
     def _setup_leg(self):
         if len(self.route.railways) == 0:
             return
@@ -204,19 +218,26 @@ class World:
         Aktualizuje stav světa, generování cestujících, nákladu a pohyb vlaků.
         """
         # aktualizace stanic; generování cestujících ve stanicích (kde reálně zastavuje nějaký spoj)
-        served_stations = set()
+        served_passenger_stations = set()
+        served_cargo_stations = set()
         for at in self.active_trains:
-            for i, st in enumerate(at.route.stations):
-                if at.route.stop_flags[i]:
-                    served_stations.add(st)
+            if at.serves_passengers():
+                for i, st in enumerate(at.route.stations):
+                    if at.route.stop_flags[i] and st.passenger_capacity > 0:
+                        served_passenger_stations.add(st)
+            
+            if at.serves_cargo():
+                for i, st in enumerate(at.route.stations):
+                    if at.route.stop_flags[i] and st.cargo_capacity > 0:
+                        served_cargo_stations.add(st)
             
         for city in self.cities:
             for station in city.stations:
-                if station in served_stations and station.passenger_capacity > 0:
+                if station in served_passenger_stations:
                     if station.passengers < station.passenger_capacity:
                         generated = passenger_generation_rate * dt_seconds * time_scale
                         station.passengers = min(station.passenger_capacity, station.passengers + generated)
-                if station in served_stations and station.cargo_capacity > 0:
+                if station in served_cargo_stations:
                     if station.cargo < station.cargo_capacity:
                         generated = cargo_generation_rate * dt_seconds * time_scale
                         station.cargo = min(station.cargo_capacity, station.cargo + generated)
@@ -230,14 +251,14 @@ class World:
                 at.wait_timer -= dt_seconds * time_scale
                 
                 if at.current_stop_station:
-                    capacity = at.get_passenger_capacity()
+                    capacity = at.get_passenger_capacity() if at.serves_passengers() else 0
                     free_space = capacity - at.passengers
                     if free_space > 0 and at.current_stop_station.passengers >= 1:
                         to_load = min(free_space, int(at.current_stop_station.passengers))
                         at.current_stop_station.passengers -= to_load
                         at.passengers += to_load
 
-                    c_capacity = at.get_cargo_capacity()
+                    c_capacity = at.get_cargo_capacity() if at.serves_cargo() else 0
                     c_free_space = c_capacity - at.cargo
                     if c_free_space > 0 and at.current_stop_station.cargo >= 1:
                         to_load = min(c_free_space, float(int(at.current_stop_station.cargo)))
@@ -280,8 +301,10 @@ class World:
                 
                 if stop_here:
                     at.wait_timer = 300.0
-                    at.passengers = 0
-                    at.cargo = 0.0
+                    if target_station.passenger_capacity > 0:
+                        at.passengers = 0
+                    if target_station.cargo_capacity > 0:
+                        at.cargo = 0.0
                     at.current_stop_station = target_station
                         
                 # přepnutí na další úsek
