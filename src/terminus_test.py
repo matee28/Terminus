@@ -324,8 +324,10 @@ def main():
                     closest_station, distance = world.get_closest_station(point_position)
                     if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
                         if len(current_route_stations) == 0:
-                            current_route_stations.append(closest_station)
-                            current_route_stop_flags.append(True)
+                            has_connection = any(rw.station_a == closest_station or rw.station_b == closest_station for rw in world.railways)
+                            if has_connection:
+                                current_route_stations.append(closest_station)
+                                current_route_stop_flags.append(True)
                         else:
                             last_station = current_route_stations[-1]
                             if closest_station != last_station:
