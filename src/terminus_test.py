@@ -392,33 +392,58 @@ def main():
         # game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
-            game.render_city(city.position, radius=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
+            game.render_city(city.position, radius=city.radius)
+
             for station in city.stations:
-                game.draw_debug_dot(station.position, size=0, text=station.name)
-                
-                # zobrazení kapacity stanice
-                if station.passenger_capacity > 0:
+                game.render_station(station.position)
+                if camera.zoom > 0.01:
+                    scr_pos = game.screen_position(station.position)
                     game.render_text(
-                        f"{int(station.passengers)}/{station.passenger_capacity}",
-                        game.screen_position((station.position[0], station.position[1] - 50)),
-                        color=(255, 255, 0),
-                        font_size=16,
+                        station.name,
+                        (scr_pos[0], scr_pos[1] - 15),
+                        color=(255, 255, 255),
                         x_alignment="center",
                         y_alignment="bottom",
                         outline_color=(0, 0, 0),
                         outline_width=1
                     )
-                if station.cargo_capacity > 0:
-                    game.render_text(
-                        f"{int(station.cargo)}/{int(station.cargo_capacity)}",
-                        game.screen_position((station.position[0], station.position[1] - 30)),
-                        color=(255, 128, 0),
-                        font_size=16,
-                        x_alignment="center",
-                        y_alignment="bottom",
-                        outline_color=(0, 0, 0),
-                        outline_width=1
-                    )
+                    
+                    # zobrazení kapacity stanice
+                    cap_offset = 15
+                    if station.passenger_capacity > 0:
+                        game.render_text(
+                            f"{int(station.passengers)}/{station.passenger_capacity}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
+                            color=(255, 255, 0),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
+                        )
+                        cap_offset += 20
+                        
+                    if station.cargo_capacity > 0:
+                        game.render_text(
+                            f"{int(station.cargo)}/{int(station.cargo_capacity)}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
+                            color=(255, 128, 0),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
+                        )
+            if camera.zoom <= 0.01:
+                game.render_text(
+                    city.name, # + " (" + str(int(city.radius)) + ")",
+                    game.screen_position(city.position),
+                    color=(255, 255, 255),
+                    x_alignment="center",
+                    y_alignment="center",
+                    outline_color=(0, 0, 0),
+                    outline_width=1
+                )
 
         for i, railway in enumerate(world.railways):
             if len(railway.points) > 1:

@@ -358,6 +358,16 @@ class Game:
         if text != "":
             self.render_text(text, self.screen_position(world_position), color=(255, 255, 255), x_alignment="center", y_alignment="center", outline_color=(0, 0, 0), outline_width=1)
 
+    def render_station(self, world_position: tuple[float, float]):
+        """
+        Vykreslí stanici jako malou modrou tečku.
+        
+        Args:
+            world_position (tuple[float, float]): světové souřadnice (x, y)
+        """
+        pos = self.screen_position(world_position)
+        pygame.draw.circle(self.screen, (0, 100, 255), pos, 2)
+
     def load_image(self, name: str, path: str, rotation: float = 0):
         """
         Načítá obrázek a ukládá ho do paměti.
