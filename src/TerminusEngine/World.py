@@ -2,6 +2,14 @@ import random
 import math
 import colorsys
 
+def __round_tuple(tuple: tuple[float, float]):
+    """
+    Zaokrouhluje souřadnice na nejbližší celá čísla.
+
+    Args:
+        tuple (tuple[float, float]): tuple s dvěma float hodnotami
+    """
+    return (round(tuple[0]), round(tuple[1]))
 
 class City:
     """
@@ -460,8 +468,9 @@ def WorldGenerator(
 
     def generate_station_position(city_pass: City): # generuje pozici stanice náhodně uvnitř města
         angle = random.uniform(0, 2 * math.pi)
-        r = random.uniform(city_pass.radius * 0.2, city_pass.radius)
-        return (city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle))
+        safe_radius = max(0.0, city_pass.radius - 1.0) # safe radius kvůli zaokrouhlování pozice
+        r = random.uniform(min(city_pass.radius * 0.2, safe_radius), safe_radius)
+        return __round_tuple((city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle)))
 
     # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
     grid_size = math.ceil(math.sqrt(cities))
@@ -496,10 +505,10 @@ def WorldGenerator(
         # o kolik se město může náhodně odchýlit od středu, aby nezasáhlo do sousední buňky
         jitter = max(0.0, (cell_size / 2) - city_radius)
         
-        position = (
+        position = __round_tuple((
             center_x + random.uniform(-jitter, jitter),
             center_y + random.uniform(-jitter, jitter)
-        )
+        ))
 
         city = City(name=city_name, position=position, radius=city_radius, population=population)
 
