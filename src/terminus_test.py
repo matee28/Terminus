@@ -4,6 +4,7 @@ import TerminusEngine
 import TerminusEngine.World
 import TerminusEngine.Economy
 import TerminusEngine.Vehicles
+import TerminusEngine.SaveLoad
 
 
 import os
@@ -12,10 +13,14 @@ import math
 import heapq
 
 
+GAME_SAVE_FILE = "game.json"
+
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
 ROUTE_MODE = False
 SHOW_ROUTES = False
+notification_text = ""
+notification_timer = 0.0
 current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
@@ -51,7 +56,7 @@ def main():
         small_city_cargo_capacity_range=(50.0, 300.0)
     )
 
-    print(world)
+    # print(world)
 
 
 
@@ -92,17 +97,17 @@ def main():
     game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
 
     # definice lokomotiv
-    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
-    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
-    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("loco_ce", "CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("loco_742", "Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("loco_vectron", "Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
 
     # definice osobních vagonů
-    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
-    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, weight=40.0, price=100000.0, texture_name="wagon_p_b")
+    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("wagon_p_ce", "CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
+    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("wagon_p_b", "Vůz třídy B", passenger_capacity=80, weight=40.0, price=100000.0, texture_name="wagon_p_b")
 
     # definice nákladních vagonů
-    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, weight=20.0, price=80000.0, texture_name="wagon_c_single")
-    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, weight=30.0, price=140000.0, texture_name="wagon_c_double")
+    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("wagon_c_single", "Kontejnerový vagon (Single)", cargo_capacity=30.0, weight=20.0, price=80000.0, texture_name="wagon_c_single")
+    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("wagon_c_double", "Kontejnerový vagon (Double)", cargo_capacity=60.0, weight=30.0, price=140000.0, texture_name="wagon_c_double")
 
     # seznamy pro UI
     available_loco_types = [type_loco_ce, type_loco_742, type_loco_vectron]
@@ -118,7 +123,7 @@ def main():
 
 
     def event_handler(event: pygame.event.Event):
-        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES
+        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, notification_text, notification_timer
         nonlocal mouse_down_pos
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -279,6 +284,19 @@ def main():
             if event.key == pygame.K_m:
                 menu_state["mode"] = "main"
 
+            if event.key == pygame.K_s and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                if TerminusEngine.SaveLoad.save_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains):
+                    notification_text = "hra byla úspěšně uložena"
+                    notification_timer = 3.0
+
+            if event.key == pygame.K_o and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                if TerminusEngine.SaveLoad.load_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains, available_loco_types, available_wagon_types):
+                    notification_text = "hra byla úspěšně načtena"
+                    notification_timer = 3.0
+                else:
+                    notification_text = "soubor s uloženou hrou nenalezen"
+                    notification_timer = 3.0
+
             # RAILWAY_MODE toggle = T
             if event.key == pygame.K_t:
                 RAILWAY_MODE = not RAILWAY_MODE
@@ -293,7 +311,7 @@ def main():
                         world.railways.remove(world.railways[-1])
 
             # SHOW_ROUTES toggle = S
-            if event.key == pygame.K_s:
+            if event.key == pygame.K_s and not (pygame.key.get_mods() & pygame.KMOD_CTRL):
                 SHOW_ROUTES = not SHOW_ROUTES
 
             # ROUTE_MODE toggle = R
@@ -390,6 +408,8 @@ def main():
 
 
     def loop():
+        global notification_text, notification_timer
+        
         game.render_image(
             texture_name="terrain",
             world_position=(0, 0),
@@ -475,6 +495,8 @@ def main():
 
         # aktualizace a vykreslení vlaků
         dt_seconds = game.clock.get_time() / 1000.0
+        if notification_timer > 0:
+            notification_timer -= dt_seconds
         
         if not game.time_paused:
             world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
@@ -541,6 +563,7 @@ def main():
         game.render_text("plánování spoje: " + str(ROUTE_MODE), (0, 80), color=(255, 0, 0))
         game.render_text("zobrazení spojů: " + str(SHOW_ROUTES), (0, 100), color=(255, 0, 0))
         game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 120), color=(255, 0, 0))
+        game.render_text("(ctrl+s) uložit hru | (ctrl+o) načíst hru", (0, 140), color=(255, 255, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -574,6 +597,9 @@ def main():
         screen_w = game.screen.get_width()
         screen_h = game.screen.get_height()
         game.render_text(time_str, (screen_w - 10, screen_h - 10), color=(255, 255, 255), x_alignment="right", y_alignment="bottom", font_size=24)
+
+        if notification_timer > 0:
+            game.render_text(notification_text, (screen_w / 2, screen_h - 30), color=(255, 255, 255), x_alignment="center", y_alignment="bottom", font_size=32)
 
         if menu_state["mode"] != "closed":
             menu_surface = pygame.Surface((400, 400))

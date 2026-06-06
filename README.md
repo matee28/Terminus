@@ -40,6 +40,11 @@ terminus-test
 
 - **klávesa `P`** pozastaví nebo opětovně spustí běh herního času
 
+### Ukládání a načítání hry
+
+- **klávesová zkratka `Ctrl + S`** uloží aktuální stav hry
+- **klávesová zkratka `Ctrl + O`** načte dříve uloženou hru
+
 
 ## Specifikace projektu
 

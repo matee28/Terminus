@@ -1,12 +1,15 @@
+import uuid
+
 class LocomotiveType:
     """
     Reprezentuje typ lokomotivy.
     """
-    def __init__(self, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0):
+    def __init__(self, id: str, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0):
         """
         Inicializuje typ lokomotivy.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             max_speed (float): maximální rychlost
             power (float): výkon
@@ -15,6 +18,7 @@ class LocomotiveType:
             texture_name (str): název textury
             passenger_capacity (int; default: 0): kapacita cestujících
         """
+        self.id = id
         self.name = name
         self.max_speed = max_speed
         self.power = power
@@ -27,17 +31,19 @@ class PassengerWagonType:
     """
     Reprezentuje typ osobního vagonu.
     """
-    def __init__(self, name: str, passenger_capacity: int, weight: float, price: float = 0.0, texture_name: str = ""):
+    def __init__(self, id: str, name: str, passenger_capacity: int, weight: float, price: float = 0.0, texture_name: str = ""):
         """
         Inicializuje typ osobního vagonu.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             passenger_capacity (int): kapacita
             weight (float): hmotnost v tunách
             price (float): cena
             texture_name (str): název textury
         """
+        self.id = id
         self.name = name
         self.passenger_capacity = passenger_capacity
         self.price = price
@@ -48,17 +54,19 @@ class CargoWagonType:
     """
     Reprezentuje typ nákladního vagonu.
     """
-    def __init__(self, name: str, cargo_capacity: float, weight: float, price: float = 0.0, texture_name: str = ""):
+    def __init__(self, id: str, name: str, cargo_capacity: float, weight: float, price: float = 0.0, texture_name: str = ""):
         """
         Inicializuje typ nákladního vagonu.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             cargo_capacity (float): kapacita
             weight (float): hmotnost v tunách
             price (float): cena
             texture_name (str): název textury
         """
+        self.id = id
         self.name = name
         self.cargo_capacity = cargo_capacity
         self.price = price
@@ -78,6 +86,7 @@ class Locomotive:
         """
         self.type = type_
         self.health = 100.0
+        self.id = uuid.uuid4().hex
 
 class PassengerWagon:
     """
@@ -92,6 +101,7 @@ class PassengerWagon:
         """
         self.type = type_
         self.health = 100.0
+        self.id = uuid.uuid4().hex
 
 class CargoWagon:
     """
@@ -106,6 +116,7 @@ class CargoWagon:
         """
         self.type = type_
         self.health = 100.0
+        self.id = uuid.uuid4().hex
 
 class Train:
     """
@@ -124,3 +135,4 @@ class Train:
         self.locomotive = locomotive
         self.wagons = wagons
         self.health = 100.0
+        self.id = uuid.uuid4().hex

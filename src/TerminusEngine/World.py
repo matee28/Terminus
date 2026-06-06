@@ -1,6 +1,7 @@
 import random
 import math
 import colorsys
+import uuid
 
 def __round_tuple(tuple: tuple[float, float]):
     """
@@ -30,6 +31,7 @@ class City:
         self.radius = radius
         self.population = population
         self.stations = []
+        self.id = uuid.uuid4().hex
 
     def add_station(self, station):
         """
@@ -61,6 +63,7 @@ class Station:
         self.cargo_capacity = cargo_capacity
         self.cargo = 0.0
         self.tracks = tracks
+        self.id = uuid.uuid4().hex
         
         self.city.add_station(self)
 
@@ -80,6 +83,7 @@ class Railway:
         self.station_a = station_a
         self.station_b = station_b
         self.points = points
+        self.id = uuid.uuid4().hex
 
     def replace_points(self, new_points: list[tuple[float, float]]):
         """
@@ -132,6 +136,7 @@ class Route:
         v = random.uniform(0.8, 1.0)
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
         self.color = (int(r * 255), int(g * 255), int(b * 255))
+        self.id = uuid.uuid4().hex
 
 
 class ActiveTrain:
@@ -156,6 +161,7 @@ class ActiveTrain:
         self.railway_dir = 1
         self.wait_timer = 0.0
         self.current_stop_station = None
+        self.id = uuid.uuid4().hex
         
         self._setup_leg()
 
