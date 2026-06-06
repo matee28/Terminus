@@ -25,6 +25,10 @@ INITIAL_BALANCE = 10000000000
 RAILWAY_COST_PER_METER = 10
 TRAIN_SELL_MULTIPLIER = 0.6
 
+# výdělek
+PASSENGER_REWARD = 25
+CARGO_REWARD = 50
+
 def main():
 
     world_boundary = 20000
@@ -473,7 +477,7 @@ def main():
         dt_seconds = game.clock.get_time() / 1000.0
         
         if not game.time_paused:
-            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path)
+            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
 
         for at in world.active_trains:
             if len(at.route.railways) == 0: continue

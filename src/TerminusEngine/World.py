@@ -221,9 +221,20 @@ class World:
         self.railways = railways
         self.active_trains = active_trains
 
-    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, cargo_generation_rate: float, get_point_func: callable):
+    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, cargo_generation_rate: float, get_point_func: callable, economy, passenger_reward: float=0.0, cargo_reward: float=0.0):
         """
         Aktualizuje stav světa, generování cestujících, nákladu a pohyb vlaků.
+
+        Args:
+            dt_seconds (float): časový krok v reálných sekundách (delta time)
+            time_scale (float): měřítko ingame času
+            train_speed_multiplier (float): násobič rychlosti vlaků
+            passenger_generation_rate (float): rychlost generování cestujících ve stanicích
+            cargo_generation_rate (float): rychlost generování nákladu ve stanicích
+            get_point_func (callable): funkce pro výpočet pozice na trati
+            economy (Economy): instance ekonomiky
+            passenger_reward (float; default: 0.0): odměna za jednoho cestujícího
+            cargo_reward (float; default: 0.0): odměna za jednu tunu nákladu
         """
         # aktualizace stanic; generování cestujících ve stanicích (kde reálně zastavuje nějaký spoj)
         served_passenger_stations = set()
@@ -309,6 +320,12 @@ class World:
                 
                 if stop_here:
                     at.wait_timer = 300.0
+                    
+                    if target_station.passenger_capacity > 0 and at.passengers > 0:
+                        economy.add(at.passengers * passenger_reward)
+                    if target_station.cargo_capacity > 0 and at.cargo > 0:
+                        economy.add(at.cargo * cargo_reward)
+
                     if target_station.passenger_capacity > 0:
                         at.passengers = 0
                     if target_station.cargo_capacity > 0:
