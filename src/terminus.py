@@ -385,7 +385,8 @@ def main():
 
             for station in city.stations:
                 game.render_image("station", station.position)
-                game.render_station(station.position)
+                if camera.zoom < 0.02:
+                    game.render_station(station.position)
                 if camera.zoom > 0.01:
                     scr_pos = game.screen_position(station.position)
                     game.render_text(
@@ -521,7 +522,8 @@ def main():
                     if at.wait_timer <= 0 and random.random() < 0.0001 * game.time_scale * dt_seconds:
                         game.audio.play_sound("horn", lambda at=at: at.position, loop=False, base_volume=1.0, panning=True)
 
-                    game.draw_debug_dot(pos, size=5)
+                    if camera.zoom <= 0.2:
+                        pygame.draw.circle(game.screen, (255, 50, 50), game.screen_position(pos), 2)
                     if at.get_passenger_capacity() > 0:
                         game.render_text(
                             f"{int(at.passengers)}/{at.get_passenger_capacity()}",
