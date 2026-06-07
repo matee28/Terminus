@@ -22,6 +22,11 @@ terminus
 - **levé tlačítko myši** do kolejové trati přidává body
 - první i poslední bod musí být umístěn na zastávce, jinak trať nelze dokončit
 
+### Demolice tratí
+
+- **klávesa `D`** aktivuje režim demolice tratí
+- v režimu demolice lze **levým tlačítkem myši** kliknout na existující trať pro její odstranění
+
 ### Plánování spojů
 
 - **klávesa `R`** aktivuje režim plánování spojů, opětovný stisk zruší rozpracovaný spoj
@@ -29,6 +34,7 @@ terminus
 - **klávesa `Z`** během plánování spoje smaže naposledy přidanou zastávku
 - **levé tlačítko myši** přidává další zastávku do rozpracovaného spoje (stanice musí být propojeny tratí)
 - **pravé tlačítko myši** dokončí navržený spoj a otevře menu pro výběr a nasazení vlakové soupravy
+- pro **zrušení aktivního spoje** je nutné mít aktivní **zároveň režim zobrazení spojů (`S`) a režim demolice (`D`)**, pak stačí **levým tlačítkem myši** kliknout na barevnou čáru daného spoje; souprava se vrátí do inventáře
 
 ### Správa vlaků a inventář (menu)
 
@@ -76,6 +82,10 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 
 
 ## Poznámky
+
+### Co jsem nestihl
+- info o soupravě/lokomotivě/vagonu při hoveru nebo kliknutí
+- validní exe build
 
 ### Měřítko
 Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
