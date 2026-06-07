@@ -4,6 +4,7 @@ import TerminusEngine
 import TerminusEngine.World
 import TerminusEngine.Economy
 import TerminusEngine.Vehicles
+import TerminusEngine.SaveLoad
 
 
 import os
@@ -12,9 +13,14 @@ import math
 import heapq
 
 
+GAME_SAVE_FILE = "game.json"
+
 RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
 ROUTE_MODE = False
+SHOW_ROUTES = False
+notification_text = ""
+notification_timer = 0.0
 current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
@@ -23,6 +29,10 @@ INITIAL_BALANCE = 10000000000
 
 RAILWAY_COST_PER_METER = 10
 TRAIN_SELL_MULTIPLIER = 0.6
+
+# výdělek
+PASSENGER_REWARD = 25
+CARGO_REWARD = 50
 
 def main():
 
@@ -46,7 +56,7 @@ def main():
         small_city_cargo_capacity_range=(50.0, 300.0)
     )
 
-    print(world)
+    # print(world)
 
 
 
@@ -87,17 +97,17 @@ def main():
     game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
 
     # definice lokomotiv
-    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
-    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
-    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("loco_ce", "CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("loco_742", "Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("loco_vectron", "Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
 
     # definice osobních vagonů
-    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
-    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("Vůz třídy B", passenger_capacity=80, weight=40.0, price=100000.0, texture_name="wagon_p_b")
+    type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("wagon_p_ce", "CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
+    type_wagon_p_b = TerminusEngine.Vehicles.PassengerWagonType("wagon_p_b", "Vůz třídy B", passenger_capacity=80, weight=40.0, price=100000.0, texture_name="wagon_p_b")
 
     # definice nákladních vagonů
-    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Single)", cargo_capacity=30.0, weight=20.0, price=80000.0, texture_name="wagon_c_single")
-    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("Kontejnerový vagon (Double)", cargo_capacity=60.0, weight=30.0, price=140000.0, texture_name="wagon_c_double")
+    type_wagon_c_single = TerminusEngine.Vehicles.CargoWagonType("wagon_c_single", "Kontejnerový vagon (Single)", cargo_capacity=30.0, weight=20.0, price=80000.0, texture_name="wagon_c_single")
+    type_wagon_c_double = TerminusEngine.Vehicles.CargoWagonType("wagon_c_double", "Kontejnerový vagon (Double)", cargo_capacity=60.0, weight=30.0, price=140000.0, texture_name="wagon_c_double")
 
     # seznamy pro UI
     available_loco_types = [type_loco_ce, type_loco_742, type_loco_vectron]
@@ -109,10 +119,15 @@ def main():
     assembled_trains = [] # {"name": str, "loco": loco, "wagons": list}
     
     menu_state = {"mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None}
+    mouse_down_pos = (0, 0)
 
 
     def event_handler(event: pygame.event.Event):
-        global RAILWAY_MODE, ROUTE_MODE
+        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, notification_text, notification_timer
+        nonlocal mouse_down_pos
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_down_pos = event.pos
 
         # zoom: zatím doprostřed obrazovky -> k myši?
         if event.type == pygame.MOUSEWHEEL:
@@ -168,9 +183,12 @@ def main():
                         menu_state["mode"] = "main"
                     elif menu_state["mode"] == "assemble_wagons":
                         menu_state["mode"] = "assemble_loco"
+                        if menu_state["temp_loco"] is not None:
+                            owned_locos.append(menu_state["temp_loco"])
+                        owned_wagons.extend(menu_state["temp_wagons"])
                         menu_state["temp_loco"] = None
                         menu_state["temp_wagons"] = []
-                    elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
+                    elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains", "inventory_active"]:
                         menu_state["mode"] = "inventory_main"
                     else:
                         menu_state["mode"] = "closed"
@@ -190,39 +208,93 @@ def main():
                         if idx == 0: menu_state["mode"] = "inventory_locos"
                         elif idx == 1: menu_state["mode"] = "inventory_wagons"
                         elif idx == 2: menu_state["mode"] = "inventory_trains"
+                        elif idx == 3: menu_state["mode"] = "inventory_active"
                     elif menu_state["mode"] == "inventory_locos":
                         types_in_inv = []
                         for l in owned_locos:
                             if l.type not in types_in_inv: types_in_inv.append(l.type)
-                        if idx < len(types_in_inv):
-                            t_to_sell = types_in_inv[idx]
+                        if idx < len(types_in_inv) * 2:
+                            item_idx = idx // 2
+                            action = "sell" if idx % 2 == 0 else "repair"
+                            t_to_act = types_in_inv[item_idx]
+                            most_damaged_idx = -1
+                            min_health = 2.0
                             for i, l in enumerate(owned_locos):
-                                if l.type == t_to_sell:
-                                    owned_locos.pop(i)
-                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
-                                    break
+                                if l.type == t_to_act and l.health < min_health:
+                                    min_health = l.health
+                                    most_damaged_idx = i
+                            if most_damaged_idx != -1:
+                                l = owned_locos[most_damaged_idx]
+                                if action == "sell":
+                                    sold_l = owned_locos.pop(most_damaged_idx)
+                                    economy.add(sold_l.get_sell_price() * TRAIN_SELL_MULTIPLIER)
+                                else:
+                                    repair_cost = l.get_repair_cost()
+                                    if economy.can_afford(repair_cost):
+                                        economy.deduct(repair_cost)
+                                        l.repair()
                     elif menu_state["mode"] == "inventory_wagons":
                         types_in_inv = []
                         for w in owned_wagons:
                             if w.type not in types_in_inv: types_in_inv.append(w.type)
-                        if idx < len(types_in_inv):
-                            t_to_sell = types_in_inv[idx]
+                        if idx < len(types_in_inv) * 2:
+                            item_idx = idx // 2
+                            action = "sell" if idx % 2 == 0 else "repair"
+                            t_to_act = types_in_inv[item_idx]
+                            most_damaged_idx = -1
+                            min_health = 2.0
                             for i, w in enumerate(owned_wagons):
-                                if w.type == t_to_sell:
-                                    owned_wagons.pop(i)
-                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
-                                    break
+                                if w.type == t_to_act and w.health < min_health:
+                                    min_health = w.health
+                                    most_damaged_idx = i
+                            if most_damaged_idx != -1:
+                                w = owned_wagons[most_damaged_idx]
+                                if action == "sell":
+                                    sold_w = owned_wagons.pop(most_damaged_idx)
+                                    economy.add(sold_w.get_sell_price() * TRAIN_SELL_MULTIPLIER)
+                                else:
+                                    repair_cost = w.get_repair_cost()
+                                    if economy.can_afford(repair_cost):
+                                        economy.deduct(repair_cost)
+                                        w.repair()
                     elif menu_state["mode"] == "inventory_trains":
-                        train_idx = idx // 2
-                        action = "sell" if idx % 2 == 0 else "disassemble"
+                        train_idx = idx // 3
+                        action = "sell" if idx % 3 == 0 else ("disassemble" if idx % 3 == 1 else "repair")
                         if train_idx < len(assembled_trains):
-                            tr = assembled_trains.pop(train_idx)
+                            tr = assembled_trains[train_idx]
                             if action == "sell":
-                                sell_price = (tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
+                                assembled_trains.pop(train_idx)
+                                sell_price = (tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
                                 economy.add(sell_price)
-                            else: # disassemble
+                            elif action == "disassemble":
+                                assembled_trains.pop(train_idx)
                                 owned_locos.append(tr["loco"])
                                 owned_wagons.extend(tr["wagons"])
+                            elif action == "repair":
+                                repair_cost = tr["loco"].get_repair_cost() + sum(w.get_repair_cost() for w in tr["wagons"])
+                                if economy.can_afford(repair_cost):
+                                    economy.deduct(repair_cost)
+                                    tr["loco"].repair()
+                                    for w in tr["wagons"]:
+                                        w.repair()
+                    elif menu_state["mode"] == "inventory_active":
+                        train_idx = idx // 2
+                        action = "withdraw" if idx % 2 == 0 else "repair"
+                        if train_idx < len(world.active_trains):
+                            at = world.active_trains[train_idx]
+                            if action == "withdraw":
+                                world.active_trains.pop(train_idx)
+                                assembled_trains.append({
+                                    "loco": at.train.locomotive,
+                                    "wagons": at.train.wagons
+                                })
+                            elif action == "repair":
+                                repair_cost = at.train.locomotive.get_repair_cost() + sum(w.get_repair_cost() for w in at.train.wagons)
+                                if economy.can_afford(repair_cost):
+                                    economy.deduct(repair_cost)
+                                    at.train.locomotive.repair()
+                                    for w in at.train.wagons:
+                                        w.repair()
                     elif menu_state["mode"] == "buy_loco":
                         if idx < len(available_loco_types):
                             t = available_loco_types[idx]
@@ -266,6 +338,19 @@ def main():
             if event.key == pygame.K_m:
                 menu_state["mode"] = "main"
 
+            if event.key == pygame.K_s and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                if TerminusEngine.SaveLoad.save_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains):
+                    notification_text = "hra byla úspěšně uložena"
+                    notification_timer = 3.0
+
+            if event.key == pygame.K_o and (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                if TerminusEngine.SaveLoad.load_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains, available_loco_types, available_wagon_types):
+                    notification_text = "hra byla úspěšně načtena"
+                    notification_timer = 3.0
+                else:
+                    notification_text = "soubor s uloženou hrou nenalezen"
+                    notification_timer = 3.0
+
             # RAILWAY_MODE toggle = T
             if event.key == pygame.K_t:
                 RAILWAY_MODE = not RAILWAY_MODE
@@ -278,6 +363,10 @@ def main():
                 else:
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
+
+            # SHOW_ROUTES toggle = S
+            if event.key == pygame.K_s and not (pygame.key.get_mods() & pygame.KMOD_CTRL):
+                SHOW_ROUTES = not SHOW_ROUTES
 
             # ROUTE_MODE toggle = R
             if event.key == pygame.K_r:
@@ -310,14 +399,16 @@ def main():
 
         # ROUTE_MODE click handling
         if ROUTE_MODE:
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
                 if event.button == 1: # levé tlačítko = přidání stanice
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
                     if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX:
                         if len(current_route_stations) == 0:
-                            current_route_stations.append(closest_station)
-                            current_route_stop_flags.append(True)
+                            has_connection = any(rw.station_a == closest_station or rw.station_b == closest_station for rw in world.railways)
+                            if has_connection:
+                                current_route_stations.append(closest_station)
+                                current_route_stop_flags.append(True)
                         else:
                             last_station = current_route_stations[-1]
                             if closest_station != last_station:
@@ -343,7 +434,7 @@ def main():
 
         # přidávání kolejí
         if RAILWAY_MODE:
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
                 if event.button == 1: # levé tlačítko
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
@@ -371,6 +462,8 @@ def main():
 
 
     def loop():
+        global notification_text, notification_timer
+        
         game.render_image(
             texture_name="terrain",
             world_position=(0, 0),
@@ -382,29 +475,58 @@ def main():
         # game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
 
         for city in world.cities:
-            game.draw_debug_dot(city.position, size=city.radius, text=city.name + " (" + str(int(city.radius)) + ")")
+            game.render_city(city.position, radius=city.radius)
+
             for station in city.stations:
-                game.draw_debug_dot(station.position, size=0, text=station.name)
-                
-                # zobrazení kapacity stanice
-                if station.passenger_capacity > 0:
+                game.render_station(station.position)
+                if camera.zoom > 0.01:
+                    scr_pos = game.screen_position(station.position)
                     game.render_text(
-                        f"{int(station.passengers)}/{station.passenger_capacity}",
-                        game.screen_position((station.position[0], station.position[1] - 50)),
-                        color=(255, 255, 0),
-                        font_size=16,
+                        station.name,
+                        (scr_pos[0], scr_pos[1] - 15),
+                        color=(255, 255, 255),
                         x_alignment="center",
-                        y_alignment="bottom"
+                        y_alignment="bottom",
+                        outline_color=(0, 0, 0),
+                        outline_width=1
                     )
-                if station.cargo_capacity > 0:
-                    game.render_text(
-                        f"{int(station.cargo)}/{int(station.cargo_capacity)}",
-                        game.screen_position((station.position[0], station.position[1] - 30)),
-                        color=(255, 128, 0),
-                        font_size=16,
-                        x_alignment="center",
-                        y_alignment="bottom"
-                    )
+                    
+                    # zobrazení kapacity stanice
+                    cap_offset = 15
+                    if station.passenger_capacity > 0:
+                        game.render_text(
+                            f"{int(station.passengers)}/{station.passenger_capacity}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
+                            color=(255, 255, 0),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
+                        )
+                        cap_offset += 20
+                        
+                    if station.cargo_capacity > 0:
+                        game.render_text(
+                            f"{int(station.cargo)}/{int(station.cargo_capacity)}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
+                            color=(255, 128, 0),
+                            font_size=16,
+                            x_alignment="center",
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
+                        )
+            if camera.zoom <= 0.01:
+                game.render_text(
+                    city.name, # + " (" + str(int(city.radius)) + ")",
+                    game.screen_position(city.position),
+                    color=(255, 255, 255),
+                    x_alignment="center",
+                    y_alignment="center",
+                    outline_color=(0, 0, 0),
+                    outline_width=1
+                )
 
         for i, railway in enumerate(world.railways):
             if len(railway.points) > 1:
@@ -417,11 +539,21 @@ def main():
                     cache=cache
                 )
 
+        if SHOW_ROUTES:
+            for at in world.active_trains:
+                if hasattr(at.route, 'color'):
+                    for rw in at.route.railways:
+                        if len(rw.points) > 1:
+                            scr_pts = [game.screen_position(p) for p in rw.points]
+                            pygame.draw.lines(game.screen, at.route.color, False, scr_pts, 4)
+
         # aktualizace a vykreslení vlaků
         dt_seconds = game.clock.get_time() / 1000.0
+        if notification_timer > 0:
+            notification_timer -= dt_seconds
         
         if not game.time_paused:
-            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path)
+            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
 
         for at in world.active_trains:
             if len(at.route.railways) == 0: continue
@@ -483,7 +615,9 @@ def main():
         game.render_text("mouse pos: " + str(game.world_position(pygame.mouse.get_pos())), (0, 40), color=(255, 0, 0))
         game.render_text("stavba tratě: " + str(RAILWAY_MODE), (0, 60), color=(255, 0, 0))
         game.render_text("plánování spoje: " + str(ROUTE_MODE), (0, 80), color=(255, 0, 0))
-        game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 100), color=(255, 0, 0))
+        game.render_text("zobrazení spojů: " + str(SHOW_ROUTES), (0, 100), color=(255, 0, 0))
+        game.render_text("balance: " + str(int(economy.balance)) + economy.currency_symbol, (0, 120), color=(255, 0, 0))
+        game.render_text("(ctrl+s) uložit hru | (ctrl+o) načíst hru", (0, 140), color=(255, 255, 0))
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -517,6 +651,9 @@ def main():
         screen_w = game.screen.get_width()
         screen_h = game.screen.get_height()
         game.render_text(time_str, (screen_w - 10, screen_h - 10), color=(255, 255, 255), x_alignment="right", y_alignment="bottom", font_size=24)
+
+        if notification_timer > 0:
+            game.render_text(notification_text, (screen_w / 2, screen_h - 30), color=(255, 255, 255), x_alignment="center", y_alignment="bottom", font_size=32)
 
         if menu_state["mode"] != "closed":
             menu_surface = pygame.Surface((400, 400))
@@ -557,7 +694,8 @@ def main():
                 game.render_text("Vyberte lokomotivu pro novou soupravu:", (x_offset, y_offset), color=(255,255,255))
                 y_offset += 25
                 for i, loc in enumerate(owned_locos):
-                    game.render_text(f"{i+1}: {loc.type.name}", (x_offset, y_offset))
+                    health_pct = int(loc.health * 100)
+                    game.render_text(f"{i+1}: {loc.type.name} [zdraví: {health_pct}%]", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assemble_wagons":
                 game.render_text(f"Loko: {menu_state['temp_loco'].type.name}", (x_offset, y_offset), color=(0,255,255))
@@ -570,7 +708,8 @@ def main():
                     if y_offset > screen_h/2 + 180:
                         game.render_text("... další nezobrazeny", (x_offset, y_offset))
                         break
-                    game.render_text(f"{i+1}: {wag.type.name}", (x_offset, y_offset))
+                    health_pct = int(wag.health * 100)
+                    game.render_text(f"{i+1}: {wag.type.name} [zdraví: {health_pct}%]", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_main":
                 game.render_text("1: Volné lokomotivy", (x_offset, y_offset))
@@ -578,6 +717,8 @@ def main():
                 game.render_text("2: Volné vagony", (x_offset, y_offset))
                 y_offset += 25
                 game.render_text("3: Sestavené soupravy", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text("4: Aktivní soupravy na tratích", (x_offset, y_offset))
                 y_offset += 25
             elif menu_state["mode"] == "inventory_locos":
                 types_in_inv = []
@@ -588,8 +729,11 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for l in owned_locos if l.type == t)
-                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    first_loco = min((l for l in owned_locos if l.type == t), key=lambda x: x.health)
+                    sell_p = int(first_loco.get_sell_price() * TRAIN_SELL_MULTIPLIER)
+                    repair_c = int(first_loco.get_repair_cost())
+                    health_pct = int(first_loco.health * 100)
+                    game.render_text(f"{t.name} ({count}x) [zdraví: {health_pct}%] - [{i*2+1}] prodat (1ks) za {sell_p}{economy.currency_symbol} | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_wagons":
                 types_in_inv = []
@@ -600,18 +744,34 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for w in owned_wagons if w.type == t)
-                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    first_wagon = min((w for w in owned_wagons if w.type == t), key=lambda x: x.health)
+                    sell_p = int(first_wagon.get_sell_price() * TRAIN_SELL_MULTIPLIER)
+                    repair_c = int(first_wagon.get_repair_cost())
+                    health_pct = int(first_wagon.health * 100)
+                    game.render_text(f"{t.name} ({count}x) [zdraví: {health_pct}%] - [{i*2+1}] prodat (1ks) za {sell_p}{economy.currency_symbol} | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_trains":
                 if not assembled_trains:
                     game.render_text("Žádné sestavené soupravy", (x_offset, y_offset), color=(255,0,0))
                 for i, tr in enumerate(assembled_trains):
                     if y_offset > screen_h/2 + 180: break
-                    sell_p = int((tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů:", (x_offset, y_offset), color=(200, 200, 200))
+                    sell_p = int((tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
+                    repair_c = int(tr["loco"].get_repair_cost() + sum(w.get_repair_cost() for w in tr["wagons"]))
+                    health_pct = int((tr["loco"].health + sum(w.health for w in tr["wagons"])) / (1 + len(tr["wagons"])) * 100)
+                    game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů [průměrné zdraví: {health_pct}%]:", (x_offset, y_offset), color=(200, 200, 200))
                     y_offset += 20
-                    game.render_text(f"  [{i*2+1}] Prodat za {sell_p}{economy.currency_symbol} | [{i*2+2}] Rozložit", (x_offset, y_offset))
+                    game.render_text(f"  [{i*3+1}] prodat za {sell_p}{economy.currency_symbol} | [{i*3+2}] rozložit | [{i*3+3}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "inventory_active":
+                if not world.active_trains:
+                    game.render_text("Žádné aktivní soupravy na tratích", (x_offset, y_offset), color=(255,0,0))
+                for i, at in enumerate(world.active_trains):
+                    if y_offset > screen_h/2 + 180: break
+                    repair_c = int(at.train.locomotive.get_repair_cost() + sum(w.get_repair_cost() for w in at.train.wagons))
+                    health_pct = int((at.train.locomotive.health + sum(w.health for w in at.train.wagons)) / (1 + len(at.train.wagons)) * 100)
+                    game.render_text(f"{at.train.locomotive.type.name} + {len(at.train.wagons)} vagonů na cestě k {at.route.stations[-1].name} [zdraví: {health_pct}%]:", (x_offset, y_offset), color=(200, 200, 200))
+                    y_offset += 20
+                    game.render_text(f"  [{i*2+1}] stáhnout do depa | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assign_train":
                 game.render_text("Vyberte sestavenou soupravu pro spoj:", (x_offset, y_offset), color=(255,255,255))

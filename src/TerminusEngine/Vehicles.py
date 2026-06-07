@@ -1,12 +1,16 @@
+import math
+import uuid
+
 class LocomotiveType:
     """
     Reprezentuje typ lokomotivy.
     """
-    def __init__(self, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0):
+    def __init__(self, id: str, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0):
         """
         Inicializuje typ lokomotivy.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             max_speed (float): maximální rychlost
             power (float): výkon
@@ -14,32 +18,38 @@ class LocomotiveType:
             price (float): cena
             texture_name (str): název textury
             passenger_capacity (int; default: 0): kapacita cestujících
+            cargo_capacity (float; default: 0.0): kapacita nákladu
         """
+        self.id = id
         self.name = name
         self.max_speed = max_speed
         self.power = power
         self.price = price
         self.texture_name = texture_name
         self.passenger_capacity = passenger_capacity
+        self.cargo_capacity = 0.0
         self.weight = weight
 
 class PassengerWagonType:
     """
     Reprezentuje typ osobního vagonu.
     """
-    def __init__(self, name: str, passenger_capacity: int, weight: float, price: float = 0.0, texture_name: str = ""):
+    def __init__(self, id: str, name: str, passenger_capacity: int, weight: float, price: float = 0.0, texture_name: str = ""):
         """
         Inicializuje typ osobního vagonu.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             passenger_capacity (int): kapacita
             weight (float): hmotnost v tunách
             price (float): cena
             texture_name (str): název textury
         """
+        self.id = id
         self.name = name
         self.passenger_capacity = passenger_capacity
+        self.cargo_capacity = 0.0
         self.price = price
         self.texture_name = texture_name
         self.weight = weight
@@ -48,19 +58,22 @@ class CargoWagonType:
     """
     Reprezentuje typ nákladního vagonu.
     """
-    def __init__(self, name: str, cargo_capacity: float, weight: float, price: float = 0.0, texture_name: str = ""):
+    def __init__(self, id: str, name: str, cargo_capacity: float, weight: float, price: float = 0.0, texture_name: str = ""):
         """
         Inicializuje typ nákladního vagonu.
 
         Args:
+            id (str): unikátní identifikátor typu
             name (str): název
             cargo_capacity (float): kapacita
             weight (float): hmotnost v tunách
             price (float): cena
             texture_name (str): název textury
         """
+        self.id = id
         self.name = name
         self.cargo_capacity = cargo_capacity
+        self.passenger_capacity = 0
         self.price = price
         self.texture_name = texture_name
         self.weight = weight
@@ -77,7 +90,36 @@ class Locomotive:
             type_ (LocomotiveType): typ lokomotivy
         """
         self.type = type_
-        self.health = 100.0
+        self.health = 1.0
+        self.id = uuid.uuid4().hex
+
+    def get_max_speed(self):
+        """Vrátí aktuální maximální rychlost s ohledem na poškození."""
+        return self.type.max_speed * self.health
+
+    def get_power(self):
+        """Vrátí aktuální výkon s ohledem na poškození."""
+        return self.type.power * self.health
+        
+    def get_passenger_capacity(self):
+        """Vrátí aktuální kapacitu cestujících s ohledem na poškození."""
+        return math.floor(self.type.passenger_capacity * self.health)
+
+    def get_cargo_capacity(self):
+        """Vrátí aktuální kapacitu nákladu s ohledem na poškození."""
+        return self.type.cargo_capacity * self.health
+
+    def get_repair_cost(self):
+        """Vypočítá cenu opravy."""
+        return (1.0 - self.health) * (0.25 * self.type.price)
+
+    def get_sell_price(self):
+        """Vrátí prodejní cenu s ohledem na poškození."""
+        return self.type.price * self.health
+
+    def repair(self):
+        """Opraví lokomotivu."""
+        self.health = 1.0
 
 class PassengerWagon:
     """
@@ -91,7 +133,28 @@ class PassengerWagon:
             type_ (PassengerWagonType): typ vagonu
         """
         self.type = type_
-        self.health = 100.0
+        self.health = 1.0
+        self.id = uuid.uuid4().hex
+
+    def get_passenger_capacity(self):
+        """Vrátí aktuální kapacitu cestujících s ohledem na poškození."""
+        return math.floor(self.type.passenger_capacity * self.health)
+
+    def get_cargo_capacity(self):
+        """Vrátí aktuální kapacitu nákladu s ohledem na poškození."""
+        return self.type.cargo_capacity * self.health
+
+    def get_repair_cost(self):
+        """Vypočítá cenu opravy."""
+        return (1.0 - self.health) * (0.25 * self.type.price)
+
+    def get_sell_price(self):
+        """Vrátí prodejní cenu s ohledem na poškození."""
+        return self.type.price * self.health
+
+    def repair(self):
+        """Opraví vagon."""
+        self.health = 1.0
 
 class CargoWagon:
     """
@@ -105,7 +168,28 @@ class CargoWagon:
             type_ (CargoWagonType): typ vagonu
         """
         self.type = type_
-        self.health = 100.0
+        self.health = 1.0
+        self.id = uuid.uuid4().hex
+
+    def get_cargo_capacity(self):
+        """Vrátí aktuální kapacitu nákladu s ohledem na poškození."""
+        return self.type.cargo_capacity * self.health
+
+    def get_passenger_capacity(self):
+        """Vrátí aktuální kapacitu cestujících s ohledem na poškození."""
+        return math.floor(self.type.passenger_capacity * self.health)
+
+    def get_repair_cost(self):
+        """Vypočítá cenu opravy."""
+        return (1.0 - self.health) * (0.25 * self.type.price)
+
+    def get_sell_price(self):
+        """Vrátí prodejní cenu s ohledem na poškození."""
+        return self.type.price * self.health
+
+    def repair(self):
+        """Opraví vagon."""
+        self.health = 1.0
 
 class Train:
     """
@@ -123,4 +207,5 @@ class Train:
         self.name = name
         self.locomotive = locomotive
         self.wagons = wagons
-        self.health = 100.0
+        self.health = 1.0
+        self.id = uuid.uuid4().hex

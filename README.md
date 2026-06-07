@@ -25,6 +25,7 @@ terminus-test
 ### Plánování spojů
 
 - **klávesa `R`** aktivuje režim plánování spojů, opětovný stisk zruší rozpracovaný spoj
+- **klávesa `S`** zapíná/vypíná barevné zobrazení spojů
 - **klávesa `Z`** během plánování spoje smaže naposledy přidanou zastávku
 - **levé tlačítko myši** přidává další zastávku do rozpracovaného spoje (stanice musí být propojeny tratí)
 - **pravé tlačítko myši** dokončí navržený spoj a otevře menu pro výběr a nasazení vlakové soupravy
@@ -38,6 +39,11 @@ terminus-test
 ### Čas
 
 - **klávesa `P`** pozastaví nebo opětovně spustí běh herního času
+
+### Ukládání a načítání hry
+
+- **klávesová zkratka `Ctrl + S`** uloží aktuální stav hry
+- **klávesová zkratka `Ctrl + O`** načte dříve uloženou hru
 
 
 ## Specifikace projektu
@@ -63,9 +69,10 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 
 ### Použité knihovny
 
-- pygame
-- json
-- random
+- pygame-ce
+- numpy
+- shapely
+- knihovny z Python Standard Library (json, os, uuid, random, math, colorsys, heapq)
 
 
 ## Poznámky

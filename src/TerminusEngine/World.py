@@ -1,6 +1,21 @@
 import random
 import math
+import colorsys
+import uuid
 
+# rychlost degradace health
+LOCOMOTIVE_DEGRADATION_RATE = 0.000001
+PASSENGER_WAGON_DEGRADATION_RATE = 0.0001
+CARGO_WAGON_DEGRADATION_RATE = 0.0001
+
+def __round_tuple(tuple: tuple[float, float]):
+    """
+    Zaokrouhluje souřadnice na nejbližší celá čísla.
+
+    Args:
+        tuple (tuple[float, float]): tuple s dvěma float hodnotami
+    """
+    return (round(tuple[0]), round(tuple[1]))
 
 class City:
     """
@@ -21,6 +36,7 @@ class City:
         self.radius = radius
         self.population = population
         self.stations = []
+        self.id = uuid.uuid4().hex
 
     def add_station(self, station):
         """
@@ -52,6 +68,7 @@ class Station:
         self.cargo_capacity = cargo_capacity
         self.cargo = 0.0
         self.tracks = tracks
+        self.id = uuid.uuid4().hex
         
         self.city.add_station(self)
 
@@ -71,6 +88,7 @@ class Railway:
         self.station_a = station_a
         self.station_b = station_b
         self.points = points
+        self.id = uuid.uuid4().hex
 
     def replace_points(self, new_points: list[tuple[float, float]]):
         """
@@ -116,6 +134,14 @@ class Route:
         self.stations = stations
         self.stop_flags = stop_flags
         self.railways = railways
+        
+        # Generování náhodné vysokokontrastní barvy - shoutout gemini
+        h = random.random()
+        s = random.uniform(0.8, 1.0)
+        v = random.uniform(0.8, 1.0)
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        self.color = (int(r * 255), int(g * 255), int(b * 255))
+        self.id = uuid.uuid4().hex
 
 
 class ActiveTrain:
@@ -140,8 +166,23 @@ class ActiveTrain:
         self.railway_dir = 1
         self.wait_timer = 0.0
         self.current_stop_station = None
+        self.id = uuid.uuid4().hex
         
         self._setup_leg()
+
+    def serves_passengers(self):
+        count = 0
+        for i, st in enumerate(self.route.stations):
+            if self.route.stop_flags[i] and st.passenger_capacity > 0:
+                count += 1
+        return count >= 2
+
+    def serves_cargo(self):
+        count = 0
+        for i, st in enumerate(self.route.stations):
+            if self.route.stop_flags[i] and st.cargo_capacity > 0:
+                count += 1
+        return count >= 2
 
     def _setup_leg(self):
         if len(self.route.railways) == 0:
@@ -161,16 +202,16 @@ class ActiveTrain:
 
     def get_passenger_capacity(self):
         """Vrátí celkovou kapacitu osobního vlaku."""
-        cap = getattr(self.train.locomotive.type, "passenger_capacity", 0)
+        cap = self.train.locomotive.get_passenger_capacity()
         for wagon in self.train.wagons:
-            cap += getattr(wagon.type, "passenger_capacity", 0)
+            cap += wagon.get_passenger_capacity()
         return cap
 
     def get_cargo_capacity(self):
         """Vrátí celkovou kapacitu nákladního vlaku."""
-        cap = getattr(self.train.locomotive.type, "cargo_capacity", 0)
+        cap = self.train.locomotive.get_cargo_capacity()
         for wagon in self.train.wagons:
-            cap += getattr(wagon.type, "cargo_capacity", 0)
+            cap += wagon.get_cargo_capacity()
         return cap
 
     def get_total_weight(self):
@@ -199,24 +240,42 @@ class World:
         self.railways = railways
         self.active_trains = active_trains
 
-    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, cargo_generation_rate: float, get_point_func: callable):
+    def update(self, dt_seconds: float, time_scale: float, train_speed_multiplier: float, passenger_generation_rate: float, cargo_generation_rate: float, get_point_func: callable, economy, passenger_reward: float=0.0, cargo_reward: float=0.0):
         """
         Aktualizuje stav světa, generování cestujících, nákladu a pohyb vlaků.
+
+        Args:
+            dt_seconds (float): časový krok v reálných sekundách (delta time)
+            time_scale (float): měřítko ingame času
+            train_speed_multiplier (float): násobič rychlosti vlaků
+            passenger_generation_rate (float): rychlost generování cestujících ve stanicích
+            cargo_generation_rate (float): rychlost generování nákladu ve stanicích
+            get_point_func (callable): funkce pro výpočet pozice na trati
+            economy (Economy): instance ekonomiky
+            passenger_reward (float; default: 0.0): odměna za jednoho cestujícího
+            cargo_reward (float; default: 0.0): odměna za jednu tunu nákladu
         """
         # aktualizace stanic; generování cestujících ve stanicích (kde reálně zastavuje nějaký spoj)
-        served_stations = set()
+        served_passenger_stations = set()
+        served_cargo_stations = set()
         for at in self.active_trains:
-            for i, st in enumerate(at.route.stations):
-                if at.route.stop_flags[i]:
-                    served_stations.add(st)
+            if at.serves_passengers():
+                for i, st in enumerate(at.route.stations):
+                    if at.route.stop_flags[i] and st.passenger_capacity > 0:
+                        served_passenger_stations.add(st)
+            
+            if at.serves_cargo():
+                for i, st in enumerate(at.route.stations):
+                    if at.route.stop_flags[i] and st.cargo_capacity > 0:
+                        served_cargo_stations.add(st)
             
         for city in self.cities:
             for station in city.stations:
-                if station in served_stations and station.passenger_capacity > 0:
+                if station in served_passenger_stations:
                     if station.passengers < station.passenger_capacity:
                         generated = passenger_generation_rate * dt_seconds * time_scale
                         station.passengers = min(station.passenger_capacity, station.passengers + generated)
-                if station in served_stations and station.cargo_capacity > 0:
+                if station in served_cargo_stations:
                     if station.cargo < station.cargo_capacity:
                         generated = cargo_generation_rate * dt_seconds * time_scale
                         station.cargo = min(station.cargo_capacity, station.cargo + generated)
@@ -230,24 +289,38 @@ class World:
                 at.wait_timer -= dt_seconds * time_scale
                 
                 if at.current_stop_station:
-                    capacity = at.get_passenger_capacity()
+                    capacity = at.get_passenger_capacity() if at.serves_passengers() else 0
                     free_space = capacity - at.passengers
                     if free_space > 0 and at.current_stop_station.passengers >= 1:
                         to_load = min(free_space, int(at.current_stop_station.passengers))
                         at.current_stop_station.passengers -= to_load
                         at.passengers += to_load
 
-                    c_capacity = at.get_cargo_capacity()
+                        num_pass_wagons = sum(1 for w in at.train.wagons if w.get_passenger_capacity() > 0)
+                        if num_pass_wagons > 0:
+                            deg_per_wagon = (to_load / num_pass_wagons) * PASSENGER_WAGON_DEGRADATION_RATE
+                            for w in at.train.wagons:
+                                if w.get_passenger_capacity() > 0:
+                                    w.health = max(0.0, w.health - deg_per_wagon)
+
+                    c_capacity = at.get_cargo_capacity() if at.serves_cargo() else 0
                     c_free_space = c_capacity - at.cargo
                     if c_free_space > 0 and at.current_stop_station.cargo >= 1:
                         to_load = min(c_free_space, float(int(at.current_stop_station.cargo)))
                         at.current_stop_station.cargo -= to_load
                         at.cargo += to_load
 
+                        num_cargo_wagons = sum(1 for w in at.train.wagons if w.get_cargo_capacity() > 0)
+                        if num_cargo_wagons > 0:
+                            deg_per_wagon = (to_load / num_cargo_wagons) * CARGO_WAGON_DEGRADATION_RATE
+                            for w in at.train.wagons:
+                                if w.get_cargo_capacity() > 0:
+                                    w.health = max(0.0, w.health - deg_per_wagon)
+
                 if at.wait_timer > 0:
                     continue
 
-            power_kw = getattr(at.train.locomotive.type, "power", 1000.0)
+            power_kw = at.train.locomotive.get_power()
             total_weight_t = at.get_total_weight()
 
             # pokud má vlak alespoň 5kw na tunu, jede max. rychlostí; jinak se snižuje s odmocninou poměru
@@ -255,9 +328,13 @@ class World:
             pwr_ratio = power_kw / max(1.0, total_weight_t)
             speed_multiplier_from_power = min(1.0, (pwr_ratio / 5.0) ** 0.5)
             
-            speed_m_s = (at.train.locomotive.type.max_speed * speed_multiplier_from_power) / 3.6
+            loc_speed = at.train.locomotive.get_max_speed()
+                
+            speed_m_s = (loc_speed * speed_multiplier_from_power) / 3.6
             moved_dist = speed_m_s * dt_seconds * time_scale * train_speed_multiplier
             at.leg_distance += moved_dist
+
+            at.train.locomotive.health = max(0.0, at.train.locomotive.health - moved_dist * LOCOMOTIVE_DEGRADATION_RATE)
             
             rw = at.route.railways[at.current_leg_index]
             pts = rw.points
@@ -280,8 +357,16 @@ class World:
                 
                 if stop_here:
                     at.wait_timer = 300.0
-                    at.passengers = 0
-                    at.cargo = 0.0
+                    
+                    if target_station.passenger_capacity > 0 and at.passengers > 0:
+                        economy.add(at.passengers * passenger_reward)
+                    if target_station.cargo_capacity > 0 and at.cargo > 0:
+                        economy.add(at.cargo * cargo_reward)
+
+                    if target_station.passenger_capacity > 0:
+                        at.passengers = 0
+                    if target_station.cargo_capacity > 0:
+                        at.cargo = 0.0
                     at.current_stop_station = target_station
                         
                 # přepnutí na další úsek
@@ -412,8 +497,9 @@ def WorldGenerator(
 
     def generate_station_position(city_pass: City): # generuje pozici stanice náhodně uvnitř města
         angle = random.uniform(0, 2 * math.pi)
-        r = random.uniform(city_pass.radius * 0.2, city_pass.radius)
-        return (city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle))
+        safe_radius = max(0.0, city_pass.radius - 1.0) # safe radius kvůli zaokrouhlování pozice
+        r = random.uniform(min(city_pass.radius * 0.2, safe_radius), safe_radius)
+        return __round_tuple((city_pass.position[0] + r * math.cos(angle), city_pass.position[1] + r * math.sin(angle)))
 
     # rozdělení mapy do mřížky pro rovnoměrné rozprostření měst (= Jittered Grid)
     grid_size = math.ceil(math.sqrt(cities))
@@ -448,10 +534,10 @@ def WorldGenerator(
         # o kolik se město může náhodně odchýlit od středu, aby nezasáhlo do sousední buňky
         jitter = max(0.0, (cell_size / 2) - city_radius)
         
-        position = (
+        position = __round_tuple((
             center_x + random.uniform(-jitter, jitter),
             center_y + random.uniform(-jitter, jitter)
-        )
+        ))
 
         city = City(name=city_name, position=position, radius=city_radius, population=population)
 
