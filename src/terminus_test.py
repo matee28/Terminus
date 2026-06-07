@@ -82,6 +82,7 @@ def main():
 
     game.load_image("terrain", "assets/terrain/seamless_2048.png")
     game.load_image("rail_tile", "assets/rails/rail_tile_1.png", rotation=90)
+    game.load_image("station", "assets/buildings/station.png")
 
     # textury lokomotiv
     game.load_image("loco_ce", "assets/vehicles/locomotives/cityelefant.png", rotation=-90)
@@ -511,6 +512,7 @@ def main():
             game.render_city(city.position, radius=city.radius)
 
             for station in city.stations:
+                game.render_image("station", station.position)
                 game.render_station(station.position)
                 if camera.zoom > 0.01:
                     scr_pos = game.screen_position(station.position)
