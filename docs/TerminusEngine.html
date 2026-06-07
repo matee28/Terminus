@@ -193,6 +193,12 @@
 <dd><p>Strhne peníze ze zůstatku.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Economy.Economy.format_money">
+<span class="sig-name descname"><span class="pre">format_money</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Economy.html#Economy.format_money"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Economy.Economy.format_money" title="Link to this definition">¶</a></dt>
+<dd><p>Naformátuje částku (mezery pro tisíce, čárka pro desetinná místa).</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -272,6 +278,72 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-TerminusEngine.UI">
+<span id="terminusengine-ui-module"></span><h2>TerminusEngine.UI module<a class="headerlink" href="#module-TerminusEngine.UI" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.UI.UIManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">TerminusEngine.UI.</span></span><span class="sig-name descname"><span class="pre">UIManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/UI.html#UIManager"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.UI.UIManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Správce uživatelského rozhraní.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.UI.UIManager.button">
+<span class="sig-name descname"><span class="pre">button</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(45,</span> <span class="pre">90,</span> <span class="pre">160)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hover_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(60,</span> <span class="pre">115,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">255)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/UI.html#UIManager.button"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.UI.UIManager.button" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí interaktivní tlačítko a vrátí True, pokud bylo stisknuto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rect</strong> (<em>tuple nebo pygame.Rect</em>) – pozice a velikost tlačítka (x, y, šířka, výška)</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – text zobrazený na tlačítku</p></li>
+<li><p><strong>color</strong> (<em>tuple</em>) – barva pozadí</p></li>
+<li><p><strong>hover_color</strong> (<em>tuple</em>) – barva pozadí při hoveru</p></li>
+<li><p><strong>text_color</strong> (<em>tuple</em>) – barva textu</p></li>
+<li><p><strong>disabled</strong> (<em>bool</em>) – zda je tlačítko neaktivní</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.UI.UIManager.label">
+<span class="sig-name descname"><span class="pre">label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(240,</span> <span class="pre">240,</span> <span class="pre">240)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/UI.html#UIManager.label"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.UI.UIManager.label" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>tuple</em>) – pozice ukotvení textu (x, y)</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – text</p></li>
+<li><p><strong>color</strong> (<em>tuple</em>) – barva textu</p></li>
+<li><p><strong>align</strong> (<em>str</em>) – zarovnání textu („left“, „center“, „right“)</p></li>
+<li><p><strong>size</strong> (<em>str</em>) – velikost písma („small“, „normal“, „large“)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.UI.UIManager.panel">
+<span class="sig-name descname"><span class="pre">panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(30,</span> <span class="pre">32,</span> <span class="pre">38,</span> <span class="pre">240)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/UI.html#UIManager.panel"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.UI.UIManager.panel" title="Link to this definition">¶</a></dt>
+<dd><p>Vykreslí panel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rect</strong> (<em>tuple nebo pygame.Rect</em>) – pozice a velikost panelu (x, y, šířka, výška).</p></li>
+<li><p><strong>color</strong> (<em>tuple</em>) – barva pozadí (R, G, B, A)</p></li>
+<li><p><strong>border_radius</strong> (<em>int</em>) – poloměr zaoblení rohů</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.UI.UIManager.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/UI.html#UIManager.update"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.UI.UIManager.update" title="Link to this definition">¶</a></dt>
+<dd><p>Aktualizuje stav myši (kliknutí a uvolnění tlačítka).</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -1039,6 +1111,7 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 <li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.add"><code class="docutils literal notranslate"><span class="pre">Economy.add()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.can_afford"><code class="docutils literal notranslate"><span class="pre">Economy.can_afford()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.deduct"><code class="docutils literal notranslate"><span class="pre">Economy.deduct()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.format_money"><code class="docutils literal notranslate"><span class="pre">Economy.format_money()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1048,6 +1121,16 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 <li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.SaveLoad.get_wagon_type_by_id"><code class="docutils literal notranslate"><span class="pre">get_wagon_type_by_id()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.SaveLoad.load_game"><code class="docutils literal notranslate"><span class="pre">load_game()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.SaveLoad.save_game"><code class="docutils literal notranslate"><span class="pre">save_game()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.UI">TerminusEngine.UI module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.UI.UIManager"><code class="docutils literal notranslate"><span class="pre">UIManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.UI.UIManager.button"><code class="docutils literal notranslate"><span class="pre">UIManager.button()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.UI.UIManager.label"><code class="docutils literal notranslate"><span class="pre">UIManager.label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.UI.UIManager.panel"><code class="docutils literal notranslate"><span class="pre">UIManager.panel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.UI.UIManager.update"><code class="docutils literal notranslate"><span class="pre">UIManager.update()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.Vehicles">TerminusEngine.Vehicles module</a><ul>

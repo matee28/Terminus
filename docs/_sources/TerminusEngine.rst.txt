@@ -28,6 +28,14 @@ TerminusEngine.SaveLoad module
    :undoc-members:
    :show-inheritance:
 
+TerminusEngine.UI module
+------------------------
+
+.. automodule:: TerminusEngine.UI
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 TerminusEngine.Vehicles module
 ------------------------------
 

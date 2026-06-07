@@ -83,6 +83,10 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 
 ## Poznámky
 
+### Co jsem nestihl
+- info o soupravě/lokomotivě/vagonu při hoveru nebo kliknutí
+- validní exe build
+
 ### Měřítko
 Velikost pixelu použitých ortofot ČR je `0.125 m`, tzn. `1 m = 8 px`.
 

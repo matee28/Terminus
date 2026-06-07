@@ -27,14 +27,14 @@ current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
 
-INITIAL_BALANCE = 10000000000
+INITIAL_BALANCE = 5000000.0
 
 RAILWAY_COST_PER_METER = 10
 TRAIN_SELL_MULTIPLIER = 0.6
 
 # výdělek
-PASSENGER_REWARD = 25
-CARGO_REWARD = 50
+PASSENGER_REWARD = 40
+CARGO_REWARD = 80
 
 def main():
 
