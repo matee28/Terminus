@@ -9,7 +9,7 @@ import TerminusEngine.SaveLoad
 
 import os
 import math
-
+import random
 import heapq
 
 
@@ -96,10 +96,27 @@ def main():
     game.load_image("wagon_c_single", "assets/vehicles/cargo_wagons/single_container.png", rotation=-90)
     game.load_image("wagon_c_double", "assets/vehicles/cargo_wagons/double_container.png", rotation=-90)
 
+    # zvuky
+    game.audio.load_sound("amb_p_station", "assets/sounds/amb_p_station_loop_stereo.ogg")
+    game.audio.load_sound("amb_c_station", "assets/sounds/amb_c_station_loop_stereo.ogg")
+    game.audio.load_sound("amb_train", "assets/sounds/amb_train_loop_stereo.ogg")
+    game.audio.load_sound("diesel_loop", "assets/sounds/diesel_loop_stereo.ogg")
+    game.audio.load_sound("electric_loop", "assets/sounds/electric_loop_stereo.ogg")
+    game.audio.load_sound("gong", "assets/sounds/gong.ogg")
+    game.audio.load_sound("horn", "assets/sounds/horn.ogg")
+
+    # přiřazení zvuků stanic
+    for c in world.cities:
+        for st in c.stations:
+            if st.passenger_capacity > 0:
+                game.audio.play_sound("amb_p_station", lambda s=st: s.position, loop=True, base_volume=0.3, panning=False)
+            if st.cargo_capacity > 0:
+                game.audio.play_sound("amb_c_station", lambda s=st: s.position, loop=True, base_volume=0.3, panning=False)
+
     # definice lokomotiv
-    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("loco_ce", "CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59)
-    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("loco_742", "Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742")
-    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("loco_vectron", "Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
+    type_loco_ce = TerminusEngine.Vehicles.LocomotiveType("loco_ce", "CityElefant (lokomotiva)", max_speed=140.0, power=2000.0, weight=62.7, price=500000.0, texture_name="loco_ce", passenger_capacity=59, engine_sound_name="electric_loop")
+    type_loco_742 = TerminusEngine.Vehicles.LocomotiveType("loco_742", "Lokomotiva řady 742", max_speed=90.0, power=883.0, weight=64.0, price=300000.0, texture_name="loco_742", engine_sound_name="diesel_loop")
+    type_loco_vectron = TerminusEngine.Vehicles.LocomotiveType("loco_vectron", "Siemens Vectron", max_speed=180.0, power=6400.0, weight=90.0, price=1000000.0, texture_name="loco_vectron", engine_sound_name="electric_loop") # nákladní verze má max 160 km/h, osobní 200 km/h -> kompromis
 
     # definice osobních vagonů
     type_wagon_p_ce = TerminusEngine.Vehicles.PassengerWagonType("wagon_p_ce", "CityElefant (vložený vůz)", passenger_capacity=134, weight=45.4, price=150000.0, texture_name="wagon_p_ce")
@@ -284,6 +301,8 @@ def main():
                             at = world.active_trains[train_idx]
                             if action == "withdraw":
                                 world.active_trains.pop(train_idx)
+                                for src in at.audio_sources:
+                                    game.audio.stop_source(src)
                                 assembled_trains.append({
                                     "loco": at.train.locomotive,
                                     "wagons": at.train.wagons
@@ -558,6 +577,22 @@ def main():
         for at in world.active_trains:
             if len(at.route.railways) == 0: continue
             
+            if not hasattr(at, "audio_sources"):
+                at.audio_sources = []
+                engine_snd = at.train.locomotive.type.engine_sound_name or "diesel_loop"
+                at.audio_sources.append(game.audio.play_sound(
+                    engine_snd, 
+                    lambda at=at: at.position, 
+                    loop=True, base_volume=0.8, panning=True,
+                    get_volume_multiplier=lambda at=at: 0.0 if at.wait_timer > 0 else 1.0
+                ))
+                at.audio_sources.append(game.audio.play_sound(
+                    "amb_train", 
+                    lambda at=at: at.position, 
+                    loop=True, base_volume=0.5, panning=True,
+                    get_volume_multiplier=lambda at=at: 0.0 if at.wait_timer > 0 else 1.0
+                ))
+
             rw = at.route.railways[at.current_leg_index]
             pts = rw.points
             if len(pts) < 2: continue
@@ -589,6 +624,13 @@ def main():
                 
                 # počet cestujících/nákladu a debug dot na pozici vlaku
                 if i == 0:
+                    at.position = pos
+                    if at.just_stopped_for_passengers:
+                        at.just_stopped_for_passengers = False
+                        game.audio.play_sound("gong", lambda at=at: at.position, loop=False, base_volume=1.0, panning=True)
+                    if at.wait_timer <= 0 and random.random() < 0.0001 * game.time_scale * dt_seconds:
+                        game.audio.play_sound("horn", lambda at=at: at.position, loop=False, base_volume=1.0, panning=True)
+
                     game.draw_debug_dot(pos, size=5)
                     if at.get_passenger_capacity() > 0:
                         game.render_text(

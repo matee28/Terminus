@@ -5,7 +5,7 @@ class LocomotiveType:
     """
     Reprezentuje typ lokomotivy.
     """
-    def __init__(self, id: str, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0):
+    def __init__(self, id: str, name: str, max_speed: float, power: float, weight: float, price: float = 0.0, texture_name: str = "", passenger_capacity: int = 0, engine_sound_name: str = ""):
         """
         Inicializuje typ lokomotivy.
 
@@ -26,6 +26,7 @@ class LocomotiveType:
         self.power = power
         self.price = price
         self.texture_name = texture_name
+        self.engine_sound_name = engine_sound_name
         self.passenger_capacity = passenger_capacity
         self.cargo_capacity = 0.0
         self.weight = weight
