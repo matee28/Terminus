@@ -146,7 +146,19 @@ def main():
     game.camera.position = (0, 0)
     game.camera.zoom = game.camera.min_zoom
 
-
+    def undo_action():
+        global RAILWAY_MODE, ROUTE_MODE
+        if RAILWAY_MODE and len(world.railways) > 0:
+            if len(world.railways[-1].points) > 2:
+                del world.railways[-1].points[-2] # -2, protože poslední je poloha kurzoru
+            else:
+                world.railways.remove(world.railways[-1])
+                RAILWAY_MODE = False
+        elif ROUTE_MODE and len(current_route_stations) > 0:
+            current_route_stations.pop()
+            current_route_stop_flags.pop()
+            if len(current_route_railways) > 0:
+                current_route_railways.pop()
     def event_handler(event: pygame.event.Event):
         global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, notification_text, notification_timer
         nonlocal mouse_down_pos
@@ -275,17 +287,7 @@ def main():
 
             # smazání posledního bodu tratě = Z
             if event.key == pygame.K_z:
-                if RAILWAY_MODE and len(world.railways) > 0:
-                    if len(world.railways[-1].points) > 2:
-                        del world.railways[-1].points[-2] # -2, protože poslední je poloha kurzoru
-                    else:
-                        world.railways.remove(world.railways[-1])
-                        RAILWAY_MODE = False
-                elif ROUTE_MODE and len(current_route_stations) > 0:
-                    current_route_stations.pop()
-                    current_route_stop_flags.pop()
-                    if len(current_route_railways) > 0:
-                        current_route_railways.pop()
+                undo_action()
 
             # pozastavení času = P
             if event.key == pygame.K_p:
@@ -346,7 +348,7 @@ def main():
                                     break
 
                             if route_exists:
-                                notification_text = "trať mezi těmito stanicemi už existuje"
+                                notification_text = "Trať mezi těmito stanicemi již existuje"
                                 notification_timer = 3.0
                             else:
                                 temp_points = world.railways[-1].points[:-1] + [closest_station.position]
@@ -609,6 +611,16 @@ def main():
 
             if ui.button((370, 10, 180, 40), "Zobrazit spoje (S)", color=(60, 160, 80) if SHOW_ROUTES else (50, 50, 50)):
                 SHOW_ROUTES = not SHOW_ROUTES
+
+            show_undo = False
+            if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
+                show_undo = True
+            elif ROUTE_MODE and len(current_route_stations) > 0:
+                show_undo = True
+                
+            if show_undo:
+                if ui.button((560, 10, 100, 40), "Zpět (Z)", color=(180, 60, 60), hover_color=(200, 80, 80)):
+                    undo_action()
 
             if ui.button((screen_w - 120, 10, 110, 40), "Menu (M)", color=(50, 50, 50)):
                 menu_state["mode"] = "main"
