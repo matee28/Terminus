@@ -95,7 +95,8 @@ class UIManager:
             rect = pygame.Rect(rect)
             
         mouse_pos = pygame.mouse.get_pos()
-        hovered = rect.collidepoint(mouse_pos)
+        clip = self.game.screen.get_clip()
+        hovered = rect.collidepoint(mouse_pos) and clip.collidepoint(mouse_pos)
         clicked = hovered and self.mouse_released and not disabled
 
         if disabled:

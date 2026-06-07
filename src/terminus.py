@@ -139,7 +139,7 @@ def main():
     owned_wagons = []
     assembled_trains = [] # {"name": str, "loco": loco, "wagons": list}
     
-    menu_state = {"mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None}
+    menu_state = {"mode": "closed", "last_mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None, "scroll_y": 0, "max_scroll": 0}
     mouse_down_pos = (0, 0)
 
 
@@ -154,12 +154,19 @@ def main():
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_down_pos = event.pos
 
-        # zoom: zatím doprostřed obrazovky -> k myši?
+        # zoom nebo scroll
         if event.type == pygame.MOUSEWHEEL:
-            if event.y > 0:
-                camera.zoom_in()
+            if menu_state["mode"] not in ["closed", "main", "inventory_main"]:
+                menu_state["scroll_y"] -= event.y * 40
+                if menu_state["scroll_y"] < 0:
+                    menu_state["scroll_y"] = 0
+                elif menu_state["scroll_y"] > menu_state.get("max_scroll", 0):
+                    menu_state["scroll_y"] = menu_state.get("max_scroll", 0)
             else:
-                camera.zoom_out()
+                if event.y > 0:
+                    camera.zoom_in()
+                else:
+                    camera.zoom_out()
 
         # pohyb kamery
         if event.type == pygame.MOUSEMOTION:
@@ -571,6 +578,11 @@ def main():
 
         ui.update()
         
+        if menu_state["mode"] != menu_state.get("last_mode"):
+            menu_state["scroll_y"] = 0
+            menu_state["max_scroll"] = 0
+            menu_state["last_mode"] = menu_state["mode"]
+        
         if menu_state["mode"] == "closed":
             if ui.button((10, 10, 160, 40), "Stavba tratí (T)", color=(60, 160, 80) if RAILWAY_MODE else (50, 50, 50)):
                 RAILWAY_MODE = not RAILWAY_MODE
@@ -649,6 +661,14 @@ def main():
 
             y_offset += 60
             
+            start_y_offset = y_offset
+            clip_rect = pygame.Rect(screen_w/2 - 310, start_y_offset, 620, screen_h/2 + 260 - start_y_offset)
+            old_clip = game.screen.get_clip()
+            game.screen.set_clip(clip_rect)
+            
+            if menu_state["mode"] not in ["main", "inventory_main"]:
+                y_offset -= menu_state["scroll_y"]
+            
             if menu_state["mode"] == "main":
                 if ui.button((x_offset, y_offset, 290, 40), "Koupit lokomotivu"):
                     menu_state["mode"] = "buy_loco"
@@ -714,7 +734,7 @@ def main():
                         break
                     y_offset += 40
             elif menu_state["mode"] == "assemble_wagons":
-                ui.label((x_offset, y_offset), f"Loko: {menu_state['temp_loco'].type.name}", color=(0,255,255))
+                ui.label((x_offset, y_offset), f"Lokomotiva: {menu_state['temp_loco'].type.name}", color=(0,255,255))
                 y_offset += 30
                 ui.label((x_offset, y_offset), f"Vagony: {len(menu_state['temp_wagons'])}", color=(0,255,255))
                 y_offset += 30
@@ -726,9 +746,7 @@ def main():
                     menu_state["mode"] = "main"
                 y_offset += 50
                 for i, wag in enumerate(owned_wagons):
-                    if y_offset > screen_h/2 + 200:
-                        ui.label((x_offset, y_offset), "... další nezobrazeny")
-                        break
+
                     health_pct = int(wag.health * 100)
                     if ui.button((x_offset, y_offset, 600, 35), f"Přidat: {wag.type.name} [zdraví: {health_pct}%]"):
                         menu_state["temp_wagons"].append(owned_wagons.pop(i))
@@ -752,8 +770,7 @@ def main():
                 if not types_in_inv:
                     ui.label((x_offset, y_offset), "Žádné volné lokomotivy", color=(255,100,100))
                 for t in types_in_inv:
-                    if y_offset > screen_h/2 + 200:
-                        break
+
                     count = sum(1 for l in owned_locos if l.type == t)
                     first_loco = min((l for l in owned_locos if l.type == t), key=lambda x: x.health)
                     sell_p = int(first_loco.get_sell_price() * TRAIN_SELL_MULTIPLIER)
@@ -776,8 +793,7 @@ def main():
                 if not types_in_inv:
                     ui.label((x_offset, y_offset), "Žádné volné vagony", color=(255,100,100))
                 for t in types_in_inv:
-                    if y_offset > screen_h/2 + 200:
-                        break
+
                     count = sum(1 for w in owned_wagons if w.type == t)
                     first_wagon = min((w for w in owned_wagons if w.type == t), key=lambda x: x.health)
                     sell_p = int(first_wagon.get_sell_price() * TRAIN_SELL_MULTIPLIER)
@@ -799,8 +815,7 @@ def main():
                 if not assembled_trains:
                     ui.label((x_offset, y_offset), "Žádné sestavené soupravy", color=(255,100,100))
                 for i, tr in enumerate(assembled_trains):
-                    if y_offset > screen_h/2 + 200:
-                        break
+
                     sell_p = int((tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
                     repair_c = int(tr["loco"].get_repair_cost() + sum(w.get_repair_cost() for w in tr["wagons"]))
                     health_pct = int((tr["loco"].health + sum(w.health for w in tr["wagons"])) / (1 + len(tr["wagons"])) * 100)
@@ -827,8 +842,7 @@ def main():
                 if not world.active_trains:
                     ui.label((x_offset, y_offset), "Žádné aktivní soupravy", color=(255,100,100))
                 for i, at in enumerate(world.active_trains):
-                    if y_offset > screen_h/2 + 200:
-                        break
+
                     repair_c = int(at.train.locomotive.get_repair_cost() + sum(w.get_repair_cost() for w in at.train.wagons))
                     health_pct = int((at.train.locomotive.health + sum(w.health for w in at.train.wagons)) / (1 + len(at.train.wagons)) * 100)
                     ui.label((x_offset, y_offset), f"{at.train.locomotive.type.name} -> {at.route.stations[-1].name} [zdraví: {health_pct}%]", color=(200, 200, 200))
@@ -853,8 +867,7 @@ def main():
                 if not assembled_trains:
                     ui.label((x_offset, y_offset), "Žádné volné sestavené soupravy!", color=(255,100,100))
                 for i, tr in enumerate(assembled_trains):
-                    if y_offset > screen_h/2 + 200:
-                        break
+
                     if ui.button((x_offset, y_offset, 600, 35), f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů"):
                         train_info = assembled_trains.pop(i)
                         new_train = TerminusEngine.Vehicles.Train("Vlak", train_info["loco"], train_info["wagons"])
@@ -863,6 +876,11 @@ def main():
                         menu_state["temp_route"] = None
                         break
                     y_offset += 45
+                        
+            game.screen.set_clip(old_clip)
+            if menu_state["mode"] not in ["main", "inventory_main"]:
+                content_height = (y_offset + menu_state["scroll_y"]) - start_y_offset
+                menu_state["max_scroll"] = max(0, content_height - clip_rect.height)
 
     game.run(
         loop=loop,
