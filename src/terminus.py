@@ -20,6 +20,7 @@ RAILWAY_MODE = False
 RAILWAY_MODE_SNAP_DIST_PX = 20
 ROUTE_MODE = False
 SHOW_ROUTES = False
+DEMOLISH_MODE = False
 notification_text = ""
 notification_timer = 0.0
 current_route_stations = []
@@ -146,6 +147,18 @@ def main():
     game.camera.position = (0, 0)
     game.camera.zoom = game.camera.min_zoom
 
+    def point_to_segment_dist(p, a, b):
+        p = pygame.math.Vector2(p)
+        a = pygame.math.Vector2(a)
+        b = pygame.math.Vector2(b)
+        ab = b - a
+        ap = p - a
+        if ab.length_squared() == 0:
+            return ap.length()
+        t = max(0, min(1, ap.dot(ab) / ab.length_squared()))
+        proj = a + t * ab
+        return (p - proj).length()
+
     def undo_action():
         global RAILWAY_MODE, ROUTE_MODE
         if RAILWAY_MODE and len(world.railways) > 0:
@@ -160,7 +173,7 @@ def main():
             if len(current_route_railways) > 0:
                 current_route_railways.pop()
     def event_handler(event: pygame.event.Event):
-        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, notification_text, notification_timer
+        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE, notification_text, notification_timer
         nonlocal mouse_down_pos
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -262,6 +275,7 @@ def main():
                 RAILWAY_MODE = not RAILWAY_MODE
                 if RAILWAY_MODE:
                     ROUTE_MODE = False
+                    DEMOLISH_MODE = False
                     current_route_stations.clear()
                     current_route_stop_flags.clear()
                     current_route_railways.clear()
@@ -282,6 +296,19 @@ def main():
                 current_route_railways.clear()
                 if ROUTE_MODE:
                     RAILWAY_MODE = False
+                    DEMOLISH_MODE = False
+                    if len(world.railways) > 0 and world.railways[-1].station_b is None:
+                        world.railways.remove(world.railways[-1])
+
+            # DEMOLISH_MODE toggle = D
+            if event.key == pygame.K_d:
+                DEMOLISH_MODE = not DEMOLISH_MODE
+                if DEMOLISH_MODE:
+                    RAILWAY_MODE = False
+                    ROUTE_MODE = False
+                    current_route_stations.clear()
+                    current_route_stop_flags.clear()
+                    current_route_railways.clear()
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
 
@@ -292,6 +319,70 @@ def main():
             # pozastavení času = P
             if event.key == pygame.K_p:
                 game.time_paused = not game.time_paused
+
+        # demolice a rušení spoju
+        if DEMOLISH_MODE and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and menu_state["mode"] == "closed":
+            mpos = event.pos
+            action_taken = False
+            
+            if SHOW_ROUTES and not ROUTE_MODE and not RAILWAY_MODE:
+                route_clicked = -1
+                for i, at in enumerate(world.active_trains):
+                    if hasattr(at.route, 'railways'):
+                        hit = False
+                        for rw in at.route.railways:
+                            for j in range(len(rw.points)-1):
+                                p1 = game.screen_position(rw.points[j])
+                                p2 = game.screen_position(rw.points[j+1])
+                                if point_to_segment_dist(mpos, p1, p2) < RAILWAY_MODE_SNAP_DIST_PX:
+                                    hit = True
+                                    break
+                            if hit: break
+                        if hit:
+                            route_clicked = i
+                            break
+                if route_clicked != -1:
+                    at = world.active_trains.pop(route_clicked)
+                    for src in at.audio_sources:
+                        game.audio.stop_source(src)
+                    assembled_trains.append({"loco": at.train.locomotive, "wagons": at.train.wagons})
+                    notification_text = "Spoj byl zrušen a vlak se vrátil do depa"
+                    notification_timer = 3.0
+                    action_taken = True
+
+            if DEMOLISH_MODE and not action_taken:
+                rw_clicked = -1
+                for i, rw in enumerate(world.railways):
+                    if RAILWAY_MODE and i == len(world.railways) - 1:
+                        continue
+                    hit = False
+                    for j in range(len(rw.points)-1):
+                        p1 = game.screen_position(rw.points[j])
+                        p2 = game.screen_position(rw.points[j+1])
+                        if point_to_segment_dist(mpos, p1, p2) < RAILWAY_MODE_SNAP_DIST_PX:
+                            hit = True
+                            break
+                    if hit:
+                        rw_clicked = i
+                        break
+                        
+                if rw_clicked != -1:
+                    clicked_rw = world.railways[rw_clicked]
+                    trains_to_remove = []
+                    for i, at in enumerate(world.active_trains):
+                        if clicked_rw in at.route.railways:
+                            trains_to_remove.append(i)
+                            
+                    for i in reversed(trains_to_remove):
+                        at = world.active_trains.pop(i)
+                        for src in at.audio_sources:
+                            game.audio.stop_source(src)
+                        assembled_trains.append({"loco": at.train.locomotive, "wagons": at.train.wagons})
+                        
+                    world.railways.pop(rw_clicked)
+                    notification_text = "Trať byla zbourána"
+                    notification_timer = 3.0
+                    action_taken = True
 
         # ROUTE_MODE click handling
         if ROUTE_MODE:
@@ -368,13 +459,50 @@ def main():
 
 
     def loop():
-        global notification_text, notification_timer, RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES
+        global notification_text, notification_timer, RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE
         dt_seconds = game.clock.get_time() / 1000.0
         if notification_timer > 0:
             notification_timer -= dt_seconds
         
         if not game.time_paused:
             world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
+
+        hovered_route_idx = -1
+        hovered_rw_idx = -1
+        
+        if menu_state["mode"] == "closed":
+            mpos = pygame.mouse.get_pos()
+            
+            if SHOW_ROUTES and DEMOLISH_MODE and not ROUTE_MODE and not RAILWAY_MODE:
+                for i, at in enumerate(world.active_trains):
+                    if hasattr(at.route, 'railways'):
+                        hit = False
+                        for rw in at.route.railways:
+                            for j in range(len(rw.points)-1):
+                                p1 = game.screen_position(rw.points[j])
+                                p2 = game.screen_position(rw.points[j+1])
+                                if point_to_segment_dist(mpos, p1, p2) < RAILWAY_MODE_SNAP_DIST_PX:
+                                    hit = True
+                                    break
+                            if hit: break
+                        if hit:
+                            hovered_route_idx = i
+                            break
+                            
+            if DEMOLISH_MODE and hovered_route_idx == -1:
+                for i, rw in enumerate(world.railways):
+                    if RAILWAY_MODE and i == len(world.railways) - 1:
+                        continue
+                    hit = False
+                    for j in range(len(rw.points)-1):
+                        p1 = game.screen_position(rw.points[j])
+                        p2 = game.screen_position(rw.points[j+1])
+                        if point_to_segment_dist(mpos, p1, p2) < RAILWAY_MODE_SNAP_DIST_PX:
+                            hit = True
+                            break
+                    if hit:
+                        hovered_rw_idx = i
+                        break
 
         game.render_image(
             texture_name="terrain",
@@ -396,14 +524,19 @@ def main():
                     path=railway.points,
                     cache=cache
                 )
+                if i == hovered_rw_idx:
+                    scr_pts = [game.screen_position(p) for p in railway.points]
+                    pygame.draw.lines(game.screen, (255, 0, 0), False, scr_pts, 8)
 
         if SHOW_ROUTES:
-            for at in world.active_trains:
+            for i, at in enumerate(world.active_trains):
                 if hasattr(at.route, 'color'):
                     for rw in at.route.railways:
                         if len(rw.points) > 1:
                             scr_pts = [game.screen_position(p) for p in rw.points]
-                            pygame.draw.lines(game.screen, at.route.color, False, scr_pts, 4)
+                            color = (255, 0, 0) if i == hovered_route_idx else at.route.color
+                            width = 8 if i == hovered_route_idx else 4
+                            pygame.draw.lines(game.screen, color, False, scr_pts, width)
 
         for at in world.active_trains:
             if len(at.route.railways) == 0:
@@ -594,6 +727,7 @@ def main():
                 RAILWAY_MODE = not RAILWAY_MODE
                 if RAILWAY_MODE:
                     ROUTE_MODE = False
+                    DEMOLISH_MODE = False
                     current_route_stations.clear()
                     current_route_stop_flags.clear()
                     current_route_railways.clear()
@@ -609,11 +743,23 @@ def main():
                 current_route_railways.clear()
                 if ROUTE_MODE:
                     RAILWAY_MODE = False
+                    DEMOLISH_MODE = False
                     if len(world.railways) > 0 and world.railways[-1].station_b is None:
                         world.railways.remove(world.railways[-1])
 
             if ui.button((370, 10, 180, 40), "Zobrazit spoje (S)", color=(60, 160, 80) if SHOW_ROUTES else (50, 50, 50)):
                 SHOW_ROUTES = not SHOW_ROUTES
+
+            if ui.button((560, 10, 140, 40), "Demolice (D)", color=(180, 60, 60) if DEMOLISH_MODE else (50, 50, 50)):
+                DEMOLISH_MODE = not DEMOLISH_MODE
+                if DEMOLISH_MODE:
+                    RAILWAY_MODE = False
+                    ROUTE_MODE = False
+                    current_route_stations.clear()
+                    current_route_stop_flags.clear()
+                    current_route_railways.clear()
+                    if len(world.railways) > 0 and world.railways[-1].station_b is None:
+                        world.railways.remove(world.railways[-1])
 
             show_undo = False
             if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
@@ -622,7 +768,7 @@ def main():
                 show_undo = True
                 
             if show_undo:
-                if ui.button((560, 10, 100, 40), "Zpět (Z)", color=(180, 60, 60), hover_color=(200, 80, 80)):
+                if ui.button((710, 10, 100, 40), "Zpět (Z)", color=(180, 60, 60), hover_color=(200, 80, 80)):
                     undo_action()
 
             if ui.button((screen_w - 120, 10, 110, 40), "Menu (M)", color=(50, 50, 50)):
