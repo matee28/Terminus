@@ -31,6 +31,7 @@ class AudioManager:
         pygame.mixer.set_num_channels(32)
         self.sounds = {}
         self.active_sources = []
+        self._is_paused = False
 
     def load_sound(self, name: str, path: str):
         """
@@ -83,6 +84,10 @@ class AudioManager:
         )
         self.active_sources.append(source)
         self._update_source(source)
+        
+        if self.game.time_paused:
+            channel.pause()
+            
         return source
 
     def play_oneshot(self, name: str, position: tuple[float, float], base_volume: float = 1.0, panning: bool = True, max_distance: float = 2000):
@@ -113,6 +118,18 @@ class AudioManager:
         """
         Aktualizuje hlasitosti všech aktivních zvuků.
         """
+        is_game_paused = self.game.time_paused
+        
+        if is_game_paused:
+            if not self._is_paused:
+                pygame.mixer.pause()
+                self._is_paused = True
+            return # pokud je hra pozastavená tak se neupdateuje
+        else:
+            if self._is_paused:
+                pygame.mixer.unpause()
+                self._is_paused = False
+
         self.active_sources = [s for s in self.active_sources if s.channel.get_busy()] # odstranění dohraných zdrojů
         
         for source in self.active_sources:
