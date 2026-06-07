@@ -577,7 +577,7 @@ def main():
         for at in world.active_trains:
             if len(at.route.railways) == 0: continue
             
-            if not hasattr(at, "audio_sources"):
+            if at.audio_sources is None:
                 at.audio_sources = []
                 engine_snd = at.train.locomotive.type.engine_sound_name or "diesel_loop"
                 at.audio_sources.append(game.audio.play_sound(
