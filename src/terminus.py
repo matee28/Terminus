@@ -531,7 +531,7 @@ def main():
                             y_alignment="bottom"
                         )
 
-        ui.label((10, game.screen.get_height() - 40), f"{int(economy.balance)}{economy.currency_symbol}", color=(100, 255, 100), size="large")
+        ui.label((10, game.screen.get_height() - 40), economy.format_money(economy.balance), color=(100, 255, 100), size="large")
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
@@ -542,7 +542,7 @@ def main():
             current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * RAILWAY_COST_PER_METER
             mouse_pos = pygame.mouse.get_pos()
             color = (0, 255, 0) if economy.can_afford(current_cost) else (255, 0, 0)
-            game.render_text(str(int(current_cost)) + economy.currency_symbol, (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
+            game.render_text(economy.format_money(current_cost), (mouse_pos[0] + 15, mouse_pos[1] + 15), color=color)
 
         if ROUTE_MODE:
             if len(current_route_stations) > 0:
@@ -663,7 +663,7 @@ def main():
                     menu_state["mode"] = "inventory_main"
                 y_offset += 60
                 
-                ui.label((x_offset, y_offset), f"Zůstatek: {int(economy.balance)}{economy.currency_symbol}", color=(100, 255, 100))
+                ui.label((x_offset, y_offset), f"Zůstatek: {economy.format_money(economy.balance)}", color=(100, 255, 100))
                 y_offset += 30
                 ui.label((x_offset, y_offset), f"Volné lokomotivy: {len(owned_locos)}")
                 y_offset += 30
@@ -687,7 +687,7 @@ def main():
             elif menu_state["mode"] == "buy_loco":
                 for t in available_loco_types:
                     can_afford = economy.can_afford(t.price)
-                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {int(t.price)}{economy.currency_symbol}", disabled=not can_afford):
+                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
                         if can_afford:
                             economy.deduct(t.price)
                             owned_locos.append(TerminusEngine.Vehicles.Locomotive(t))
@@ -695,7 +695,7 @@ def main():
             elif menu_state["mode"] == "buy_wagon":
                 for t in available_wagon_types:
                     can_afford = economy.can_afford(t.price)
-                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {int(t.price)}{economy.currency_symbol}", disabled=not can_afford):
+                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
                         if can_afford:
                             economy.deduct(t.price)
                             if isinstance(t, TerminusEngine.Vehicles.PassengerWagonType):
@@ -761,11 +761,11 @@ def main():
                     health_pct = int(first_loco.health * 100)
                     ui.label((x_offset, y_offset), f"{t.name} ({count}x) [zdraví: {health_pct}%]")
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat za {sell_p}"):
+                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         owned_locos.remove(first_loco)
                         economy.add(sell_p)
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit za {repair_c}", disabled=not economy.can_afford(repair_c) or first_loco.health == 1.0):
+                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_loco.health == 1.0):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             first_loco.repair()
@@ -785,11 +785,11 @@ def main():
                     health_pct = int(first_wagon.health * 100)
                     ui.label((x_offset, y_offset), f"{t.name} ({count}x) [zdraví: {health_pct}%]")
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat za {sell_p}"):
+                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         owned_wagons.remove(first_wagon)
                         economy.add(sell_p)
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit za {repair_c}", disabled=not economy.can_afford(repair_c) or first_wagon.health == 1.0):
+                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_wagon.health == 1.0):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             first_wagon.repair()
@@ -806,7 +806,7 @@ def main():
                     health_pct = int((tr["loco"].health + sum(w.health for w in tr["wagons"])) / (1 + len(tr["wagons"])) * 100)
                     ui.label((x_offset, y_offset), f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů [zdraví: {health_pct}%]", color=(200, 200, 200))
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 150, 30), f"Prodat: {sell_p}"):
+                    if ui.button((x_offset, y_offset, 150, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         assembled_trains.pop(i)
                         economy.add(sell_p)
                         break
@@ -815,7 +815,7 @@ def main():
                         owned_locos.append(tr["loco"])
                         owned_wagons.extend(tr["wagons"])
                         break
-                    if ui.button((x_offset + 320, y_offset, 150, 30), f"Opravit: {repair_c}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
+                    if ui.button((x_offset + 320, y_offset, 150, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             tr["loco"].repair()
@@ -839,7 +839,7 @@ def main():
                             game.audio.stop_source(src)
                         assembled_trains.append({"loco": at.train.locomotive, "wagons": at.train.wagons})
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {repair_c}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
+                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             at.train.locomotive.repair()

@@ -31,3 +31,15 @@ class Economy:
         """
         self.balance += amount
         
+    def format_money(self, amount: float):
+        """
+        Naformátuje částku (mezery pro tisíce, čárka pro desetinná místa).
+        """
+        if isinstance(amount, int) or float(amount).is_integer():
+            s = f"{int(amount):,}".replace(",", " ")
+        else:
+            s = f"{amount:,.2f}"
+            s = s.replace(",", "X")
+            s = s.replace(".", ",")
+            s = s.replace("X", " ")
+        return f"{s} {self.currency_symbol}"
