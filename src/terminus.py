@@ -650,16 +650,16 @@ def main():
             y_offset += 60
             
             if menu_state["mode"] == "main":
-                if ui.button((x_offset, y_offset, 280, 40), "Koupit lokomotivu"):
+                if ui.button((x_offset, y_offset, 290, 40), "Koupit lokomotivu"):
                     menu_state["mode"] = "buy_loco"
-                if ui.button((x_offset + 300, y_offset, 280, 40), "Koupit vagon"):
+                if ui.button((x_offset + 310, y_offset, 290, 40), "Koupit vagon"):
                     menu_state["mode"] = "buy_wagon"
                 y_offset += 50
-                if ui.button((x_offset, y_offset, 280, 40), "Sestavit soupravu"):
+                if ui.button((x_offset, y_offset, 290, 40), "Sestavit soupravu"):
                     menu_state["mode"] = "assemble_loco"
                     menu_state["temp_loco"] = None
                     menu_state["temp_wagons"] = []
-                if ui.button((x_offset + 300, y_offset, 280, 40), "Inventář"):
+                if ui.button((x_offset + 310, y_offset, 290, 40), "Inventář"):
                     menu_state["mode"] = "inventory_main"
                 y_offset += 60
                 
@@ -672,11 +672,11 @@ def main():
                 ui.label((x_offset, y_offset), f"Sestavené soupravy: {len(assembled_trains)}")
                 y_offset += 50
                 
-                if ui.button((x_offset, y_offset, 280, 40), "Uložit hru"):
+                if ui.button((x_offset, y_offset, 290, 40), "Uložit hru"):
                     if TerminusEngine.SaveLoad.save_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains):
                         notification_text = "Hra byla úspěšně uložena"
                         notification_timer = 3.0
-                if ui.button((x_offset + 300, y_offset, 280, 40), "Načíst hru"):
+                if ui.button((x_offset + 310, y_offset, 290, 40), "Načíst hru"):
                     if TerminusEngine.SaveLoad.load_game(GAME_SAVE_FILE, economy, game, world, owned_locos, owned_wagons, assembled_trains, available_loco_types, available_wagon_types):
                         notification_text = "Hra byla úspěšně načtena"
                         notification_timer = 3.0
@@ -687,7 +687,7 @@ def main():
             elif menu_state["mode"] == "buy_loco":
                 for t in available_loco_types:
                     can_afford = economy.can_afford(t.price)
-                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
+                    if ui.button((x_offset, y_offset, 600, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
                         if can_afford:
                             economy.deduct(t.price)
                             owned_locos.append(TerminusEngine.Vehicles.Locomotive(t))
@@ -695,7 +695,7 @@ def main():
             elif menu_state["mode"] == "buy_wagon":
                 for t in available_wagon_types:
                     can_afford = economy.can_afford(t.price)
-                    if ui.button((x_offset, y_offset, 400, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
+                    if ui.button((x_offset, y_offset, 600, 40), f"{t.name} - {economy.format_money(t.price)}", disabled=not can_afford):
                         if can_afford:
                             economy.deduct(t.price)
                             if isinstance(t, TerminusEngine.Vehicles.PassengerWagonType):
@@ -708,7 +708,7 @@ def main():
                 y_offset += 30
                 for i, loc in enumerate(owned_locos):
                     health_pct = int(loc.health * 100)
-                    if ui.button((x_offset, y_offset, 400, 35), f"{loc.type.name} [zdraví: {health_pct}%]"):
+                    if ui.button((x_offset, y_offset, 600, 35), f"{loc.type.name} [zdraví: {health_pct}%]"):
                         menu_state["temp_loco"] = owned_locos.pop(i)
                         menu_state["mode"] = "assemble_wagons"
                         break
@@ -718,7 +718,7 @@ def main():
                 y_offset += 30
                 ui.label((x_offset, y_offset), f"Vagony: {len(menu_state['temp_wagons'])}", color=(0,255,255))
                 y_offset += 30
-                if ui.button((x_offset, y_offset, 250, 40), "Dokončit soupravu", color=(50, 150, 50)):
+                if ui.button((x_offset, y_offset, 600, 40), "Dokončit soupravu", color=(50, 150, 50)):
                     assembled_trains.append({
                         "loco": menu_state["temp_loco"],
                         "wagons": menu_state["temp_wagons"].copy()
@@ -730,21 +730,21 @@ def main():
                         ui.label((x_offset, y_offset), "... další nezobrazeny")
                         break
                     health_pct = int(wag.health * 100)
-                    if ui.button((x_offset, y_offset, 400, 35), f"Přidat: {wag.type.name} [zdraví: {health_pct}%]"):
+                    if ui.button((x_offset, y_offset, 600, 35), f"Přidat: {wag.type.name} [zdraví: {health_pct}%]"):
                         menu_state["temp_wagons"].append(owned_wagons.pop(i))
                         break
                     y_offset += 40
             elif menu_state["mode"] == "inventory_main":
-                if ui.button((x_offset, y_offset, 400, 40), "Volné lokomotivy"):
+                if ui.button((x_offset, y_offset, 600, 40), "Volné lokomotivy"):
                     menu_state["mode"] = "inventory_locos"
                 y_offset += 50
-                if ui.button((x_offset, y_offset, 400, 40), "Volné vagony"):
+                if ui.button((x_offset, y_offset, 600, 40), "Volné vagony"):
                     menu_state["mode"] = "inventory_wagons"
                 y_offset += 50
-                if ui.button((x_offset, y_offset, 400, 40), "Sestavené soupravy"):
+                if ui.button((x_offset, y_offset, 600, 40), "Sestavené soupravy"):
                     menu_state["mode"] = "inventory_trains"
                 y_offset += 50
-                if ui.button((x_offset, y_offset, 400, 40), "Aktivní soupravy na tratích"):
+                if ui.button((x_offset, y_offset, 600, 40), "Aktivní soupravy na tratích"):
                     menu_state["mode"] = "inventory_active"
                 y_offset += 50
             elif menu_state["mode"] == "inventory_locos":
@@ -761,11 +761,11 @@ def main():
                     health_pct = int(first_loco.health * 100)
                     ui.label((x_offset, y_offset), f"{t.name} ({count}x) [zdraví: {health_pct}%]")
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat: {economy.format_money(sell_p)}"):
+                    if ui.button((x_offset, y_offset, 290, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         owned_locos.remove(first_loco)
                         economy.add(sell_p)
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_loco.health == 1.0):
+                    if ui.button((x_offset + 310, y_offset, 290, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_loco.health == 1.0):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             first_loco.repair()
@@ -785,11 +785,11 @@ def main():
                     health_pct = int(first_wagon.health * 100)
                     ui.label((x_offset, y_offset), f"{t.name} ({count}x) [zdraví: {health_pct}%]")
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 200, 30), f"Prodat: {economy.format_money(sell_p)}"):
+                    if ui.button((x_offset, y_offset, 290, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         owned_wagons.remove(first_wagon)
                         economy.add(sell_p)
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_wagon.health == 1.0):
+                    if ui.button((x_offset + 310, y_offset, 290, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or first_wagon.health == 1.0):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             first_wagon.repair()
@@ -806,16 +806,16 @@ def main():
                     health_pct = int((tr["loco"].health + sum(w.health for w in tr["wagons"])) / (1 + len(tr["wagons"])) * 100)
                     ui.label((x_offset, y_offset), f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů [zdraví: {health_pct}%]", color=(200, 200, 200))
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 150, 30), f"Prodat: {economy.format_money(sell_p)}"):
+                    if ui.button((x_offset, y_offset, 190, 30), f"Prodat: {economy.format_money(sell_p)}"):
                         assembled_trains.pop(i)
                         economy.add(sell_p)
                         break
-                    if ui.button((x_offset + 160, y_offset, 150, 30), "Rozložit"):
+                    if ui.button((x_offset + 205, y_offset, 190, 30), "Rozložit"):
                         assembled_trains.pop(i)
                         owned_locos.append(tr["loco"])
                         owned_wagons.extend(tr["wagons"])
                         break
-                    if ui.button((x_offset + 320, y_offset, 150, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
+                    if ui.button((x_offset + 410, y_offset, 190, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             tr["loco"].repair()
@@ -833,13 +833,13 @@ def main():
                     health_pct = int((at.train.locomotive.health + sum(w.health for w in at.train.wagons)) / (1 + len(at.train.wagons)) * 100)
                     ui.label((x_offset, y_offset), f"{at.train.locomotive.type.name} -> {at.route.stations[-1].name} [zdraví: {health_pct}%]", color=(200, 200, 200))
                     y_offset += 30
-                    if ui.button((x_offset, y_offset, 200, 30), "Stáhnout do depa"):
+                    if ui.button((x_offset, y_offset, 290, 30), "Stáhnout do depa"):
                         world.active_trains.pop(i)
                         for src in at.audio_sources:
                             game.audio.stop_source(src)
                         assembled_trains.append({"loco": at.train.locomotive, "wagons": at.train.wagons})
                         break
-                    if ui.button((x_offset + 220, y_offset, 200, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
+                    if ui.button((x_offset + 310, y_offset, 290, 30), f"Opravit: {economy.format_money(repair_c)}", disabled=not economy.can_afford(repair_c) or health_pct == 100):
                         if economy.can_afford(repair_c):
                             economy.deduct(repair_c)
                             at.train.locomotive.repair()
@@ -855,7 +855,7 @@ def main():
                 for i, tr in enumerate(assembled_trains):
                     if y_offset > screen_h/2 + 200:
                         break
-                    if ui.button((x_offset, y_offset, 400, 35), f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů"):
+                    if ui.button((x_offset, y_offset, 600, 35), f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů"):
                         train_info = assembled_trains.pop(i)
                         new_train = TerminusEngine.Vehicles.Train("Vlak", train_info["loco"], train_info["wagons"])
                         world.add_active_train(TerminusEngine.World.ActiveTrain(new_train, menu_state["temp_route"]))
