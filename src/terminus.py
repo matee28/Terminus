@@ -369,7 +369,13 @@ def main():
 
     def loop():
         global notification_text, notification_timer, RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES
+        dt_seconds = game.clock.get_time() / 1000.0
+        if notification_timer > 0:
+            notification_timer -= dt_seconds
         
+        if not game.time_paused:
+            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
+
         game.render_image(
             texture_name="terrain",
             world_position=(0, 0),
@@ -377,64 +383,8 @@ def main():
             tiled=True
         )
 
-        # game.draw_debug_dot(game.world_position(pygame.mouse.get_pos()))
-        # game.draw_debug_dot(game.world_position((pygame.display.get_surface().get_width()/2, pygame.display.get_surface().get_height()/2)), 5)
-
         for city in world.cities:
             game.render_city(city.position, radius=city.radius)
-
-            for station in city.stations:
-                game.render_image("station", station.position)
-                if camera.zoom < 0.02:
-                    game.render_station(station.position)
-                if camera.zoom > 0.01:
-                    scr_pos = game.screen_position(station.position)
-                    game.render_text(
-                        station.name,
-                        (scr_pos[0], scr_pos[1] - 15),
-                        color=(255, 255, 255),
-                        x_alignment="center",
-                        y_alignment="bottom",
-                        outline_color=(0, 0, 0),
-                        outline_width=1
-                    )
-                    
-                    # zobrazení kapacity stanice
-                    cap_offset = 15
-                    if station.passenger_capacity > 0:
-                        game.render_text(
-                            f"{int(station.passengers)}/{station.passenger_capacity}",
-                            (scr_pos[0], scr_pos[1] + cap_offset),
-                            color=(255, 255, 0),
-                            font_size=16,
-                            x_alignment="center",
-                            y_alignment="top",
-                            outline_color=(0, 0, 0),
-                            outline_width=1
-                        )
-                        cap_offset += 20
-                        
-                    if station.cargo_capacity > 0:
-                        game.render_text(
-                            f"{int(station.cargo)}/{int(station.cargo_capacity)}",
-                            (scr_pos[0], scr_pos[1] + cap_offset),
-                            color=(255, 128, 0),
-                            font_size=16,
-                            x_alignment="center",
-                            y_alignment="top",
-                            outline_color=(0, 0, 0),
-                            outline_width=1
-                        )
-            if camera.zoom <= 0.01:
-                game.render_text(
-                    city.name, # + " (" + str(int(city.radius)) + ")",
-                    game.screen_position(city.position),
-                    color=(255, 255, 255),
-                    x_alignment="center",
-                    y_alignment="center",
-                    outline_color=(0, 0, 0),
-                    outline_width=1
-                )
 
         for i, railway in enumerate(world.railways):
             if len(railway.points) > 1:
@@ -454,14 +404,6 @@ def main():
                         if len(rw.points) > 1:
                             scr_pts = [game.screen_position(p) for p in rw.points]
                             pygame.draw.lines(game.screen, at.route.color, False, scr_pts, 4)
-
-        # aktualizace a vykreslení vlaků
-        dt_seconds = game.clock.get_time() / 1000.0
-        if notification_timer > 0:
-            notification_timer -= dt_seconds
-        
-        if not game.time_paused:
-            world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
 
         for at in world.active_trains:
             if len(at.route.railways) == 0:
@@ -488,7 +430,7 @@ def main():
             if len(pts) < 2:
                 continue
             
-            all_parts = at.train.wagons + [at.train.locomotive]  # zkombinování částí
+            all_parts = at.train.wagons + [at.train.locomotive] # zkombinování částí
             current_offset = 0.0
             prev_len = 0.0
             
@@ -523,26 +465,85 @@ def main():
                         game.audio.play_sound("horn", lambda at=at: at.position, loop=False, base_volume=1.0, panning=True)
 
                     if camera.zoom <= 0.2:
-                        pygame.draw.circle(game.screen, (255, 50, 50), game.screen_position(pos), 2)
-                    if at.get_passenger_capacity() > 0:
+                        pygame.draw.circle(game.screen, (255, 50, 50), game.screen_position(pos), 3)
+
+        for city in world.cities:
+            for station in city.stations:
+                game.render_image("station", station.position)
+                if camera.zoom <= 0.01:
+                    game.render_station(station.position)
+
+        for city in world.cities:
+            if camera.zoom <= 0.01:
+                game.render_text(
+                    city.name,
+                    game.screen_position(city.position),
+                    color=(255, 255, 255),
+                    x_alignment="center",
+                    y_alignment="center",
+                    outline_color=(0, 0, 0),
+                    outline_width=1
+                )
+            if camera.zoom > 0.01:
+                for station in city.stations:
+                    scr_pos = game.screen_position(station.position)
+                    game.render_text(
+                        station.name,
+                        (scr_pos[0], scr_pos[1] - 15),
+                        color=(255, 255, 255),
+                        x_alignment="center",
+                        y_alignment="bottom",
+                        outline_color=(0, 0, 0),
+                        outline_width=1
+                    )
+                    
+                    cap_offset = 15
+                    if station.passenger_capacity > 0:
                         game.render_text(
-                            f"{int(at.passengers)}/{at.get_passenger_capacity()}",
-                            game.screen_position((pos[0], pos[1] - 30)),
-                            color=(0, 200, 255),
+                            f"{int(station.passengers)}/{station.passenger_capacity}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
+                            color=(255, 255, 0),
                             font_size=16,
                             x_alignment="center",
-                            y_alignment="bottom"
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
                         )
-                    if at.get_cargo_capacity() > 0:
+                        cap_offset += 20
+                        
+                    if station.cargo_capacity > 0:
                         game.render_text(
-                            f"{int(at.cargo)}/{int(at.get_cargo_capacity())}",
-                            game.screen_position((pos[0], pos[1] - 15)),
+                            f"{int(station.cargo)}/{int(station.cargo_capacity)}",
+                            (scr_pos[0], scr_pos[1] + cap_offset),
                             color=(255, 128, 0),
                             font_size=16,
                             x_alignment="center",
-                            y_alignment="bottom"
+                            y_alignment="top",
+                            outline_color=(0, 0, 0),
+                            outline_width=1
                         )
-
+                        
+        for at in world.active_trains:
+            if hasattr(at, 'position'):
+                pos = at.position
+                if at.get_passenger_capacity() > 0:
+                    game.render_text(
+                        f"{int(at.passengers)}/{at.get_passenger_capacity()}",
+                        game.screen_position((pos[0], pos[1] - 30)),
+                        color=(0, 200, 255),
+                        font_size=16,
+                        x_alignment="center",
+                        y_alignment="bottom"
+                    )
+                if at.get_cargo_capacity() > 0:
+                    game.render_text(
+                        f"{int(at.cargo)}/{int(at.get_cargo_capacity())}",
+                        game.screen_position((pos[0], pos[1] - 15)),
+                        color=(255, 128, 0),
+                        font_size=16,
+                        x_alignment="center",
+                        y_alignment="bottom"
+                    )
         ui.label((10, game.screen.get_height() - 40), economy.format_money(economy.balance), color=(100, 255, 100), size="large")
 
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
