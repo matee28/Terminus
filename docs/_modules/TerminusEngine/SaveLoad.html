@@ -96,7 +96,11 @@
             <span class="s2">&quot;balance&quot;</span><span class="p">:</span> <span class="n">economy</span><span class="o">.</span><span class="n">balance</span>
         <span class="p">},</span>
         <span class="s2">&quot;game&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">game</span><span class="o">.</span><span class="n">time</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">game</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+            <span class="s2">&quot;camera&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="n">game</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                <span class="s2">&quot;zoom&quot;</span><span class="p">:</span> <span class="n">game</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span>
+            <span class="p">}</span>
         <span class="p">},</span>
         <span class="s2">&quot;world&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;cities&quot;</span><span class="p">:</span> <span class="p">[],</span>
@@ -216,6 +220,9 @@
         
     <span class="n">economy</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;economy&quot;</span><span class="p">][</span><span class="s2">&quot;balance&quot;</span><span class="p">]</span>
     <span class="n">game</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;game&quot;</span><span class="p">][</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;camera&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;game&quot;</span><span class="p">]:</span>
+        <span class="n">game</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;game&quot;</span><span class="p">][</span><span class="s2">&quot;camera&quot;</span><span class="p">][</span><span class="s2">&quot;position&quot;</span><span class="p">])</span>
+        <span class="n">game</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;game&quot;</span><span class="p">][</span><span class="s2">&quot;camera&quot;</span><span class="p">][</span><span class="s2">&quot;zoom&quot;</span><span class="p">]</span>
     
     <span class="n">owned_locos</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="n">owned_wagons</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>

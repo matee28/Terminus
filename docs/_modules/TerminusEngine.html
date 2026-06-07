@@ -40,6 +40,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">TerminusEngine.Audio</span>
+
 
 <span class="c1"># systém souřadnic enginu: +y je nahoru; +x je doprava</span>
 
@@ -246,6 +248,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">image_colors</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">texture_cache</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_texture_cache_size</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># limit pro počet cachovaných textur</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">audio</span> <span class="o">=</span> <span class="n">TerminusEngine</span><span class="o">.</span><span class="n">Audio</span><span class="o">.</span><span class="n">AudioManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span> <span class="o">=</span> <span class="p">{}</span>
         
@@ -315,6 +319,7 @@
                 
                 <span class="n">event_handler</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             <span class="n">loop</span><span class="p">()</span>
             <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
