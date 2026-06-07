@@ -139,6 +139,10 @@ def main():
     mouse_down_pos = (0, 0)
 
 
+    game.camera.position = (0, 0)
+    game.camera.zoom = game.camera.min_zoom
+
+
     def event_handler(event: pygame.event.Event):
         global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, notification_text, notification_timer
         nonlocal mouse_down_pos
