@@ -211,6 +211,9 @@ class Game:
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         pygame.display.set_caption("Terminus")
 
+        icon = pygame.image.load(self.__abs_path("assets/icon.png"))
+        pygame.display.set_icon(icon)
+
     def __abs_path(self, relative_path: str):
         """
         Vrací absolutní cestu k souboru.
