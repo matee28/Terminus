@@ -3,6 +3,11 @@ import math
 import colorsys
 import uuid
 
+# rychlost degradace health
+LOCOMOTIVE_DEGRADATION_RATE = 0.000001
+PASSENGER_WAGON_DEGRADATION_RATE = 0.0001
+CARGO_WAGON_DEGRADATION_RATE = 0.0001
+
 def __round_tuple(tuple: tuple[float, float]):
     """
     Zaokrouhluje souřadnice na nejbližší celá čísla.
@@ -197,16 +202,16 @@ class ActiveTrain:
 
     def get_passenger_capacity(self):
         """Vrátí celkovou kapacitu osobního vlaku."""
-        cap = getattr(self.train.locomotive.type, "passenger_capacity", 0)
+        cap = self.train.locomotive.get_passenger_capacity()
         for wagon in self.train.wagons:
-            cap += getattr(wagon.type, "passenger_capacity", 0)
+            cap += wagon.get_passenger_capacity()
         return cap
 
     def get_cargo_capacity(self):
         """Vrátí celkovou kapacitu nákladního vlaku."""
-        cap = getattr(self.train.locomotive.type, "cargo_capacity", 0)
+        cap = self.train.locomotive.get_cargo_capacity()
         for wagon in self.train.wagons:
-            cap += getattr(wagon.type, "cargo_capacity", 0)
+            cap += wagon.get_cargo_capacity()
         return cap
 
     def get_total_weight(self):
@@ -291,6 +296,13 @@ class World:
                         at.current_stop_station.passengers -= to_load
                         at.passengers += to_load
 
+                        num_pass_wagons = sum(1 for w in at.train.wagons if w.get_passenger_capacity() > 0)
+                        if num_pass_wagons > 0:
+                            deg_per_wagon = (to_load / num_pass_wagons) * PASSENGER_WAGON_DEGRADATION_RATE
+                            for w in at.train.wagons:
+                                if w.get_passenger_capacity() > 0:
+                                    w.health = max(0.0, w.health - deg_per_wagon)
+
                     c_capacity = at.get_cargo_capacity() if at.serves_cargo() else 0
                     c_free_space = c_capacity - at.cargo
                     if c_free_space > 0 and at.current_stop_station.cargo >= 1:
@@ -298,10 +310,17 @@ class World:
                         at.current_stop_station.cargo -= to_load
                         at.cargo += to_load
 
+                        num_cargo_wagons = sum(1 for w in at.train.wagons if w.get_cargo_capacity() > 0)
+                        if num_cargo_wagons > 0:
+                            deg_per_wagon = (to_load / num_cargo_wagons) * CARGO_WAGON_DEGRADATION_RATE
+                            for w in at.train.wagons:
+                                if w.get_cargo_capacity() > 0:
+                                    w.health = max(0.0, w.health - deg_per_wagon)
+
                 if at.wait_timer > 0:
                     continue
 
-            power_kw = getattr(at.train.locomotive.type, "power", 1000.0)
+            power_kw = at.train.locomotive.get_power()
             total_weight_t = at.get_total_weight()
 
             # pokud má vlak alespoň 5kw na tunu, jede max. rychlostí; jinak se snižuje s odmocninou poměru
@@ -309,9 +328,13 @@ class World:
             pwr_ratio = power_kw / max(1.0, total_weight_t)
             speed_multiplier_from_power = min(1.0, (pwr_ratio / 5.0) ** 0.5)
             
-            speed_m_s = (at.train.locomotive.type.max_speed * speed_multiplier_from_power) / 3.6
+            loc_speed = at.train.locomotive.get_max_speed()
+                
+            speed_m_s = (loc_speed * speed_multiplier_from_power) / 3.6
             moved_dist = speed_m_s * dt_seconds * time_scale * train_speed_multiplier
             at.leg_distance += moved_dist
+
+            at.train.locomotive.health = max(0.0, at.train.locomotive.health - moved_dist * LOCOMOTIVE_DEGRADATION_RATE)
             
             rw = at.route.railways[at.current_leg_index]
             pts = rw.points

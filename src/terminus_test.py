@@ -216,8 +216,8 @@ def main():
                             t_to_sell = types_in_inv[idx]
                             for i, l in enumerate(owned_locos):
                                 if l.type == t_to_sell:
-                                    owned_locos.pop(i)
-                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
+                                    sold_l = owned_locos.pop(i)
+                                    economy.add(sold_l.get_sell_price() * TRAIN_SELL_MULTIPLIER)
                                     break
                     elif menu_state["mode"] == "inventory_wagons":
                         types_in_inv = []
@@ -227,8 +227,8 @@ def main():
                             t_to_sell = types_in_inv[idx]
                             for i, w in enumerate(owned_wagons):
                                 if w.type == t_to_sell:
-                                    owned_wagons.pop(i)
-                                    economy.add(t_to_sell.price * TRAIN_SELL_MULTIPLIER)
+                                    sold_w = owned_wagons.pop(i)
+                                    economy.add(sold_w.get_sell_price() * TRAIN_SELL_MULTIPLIER)
                                     break
                     elif menu_state["mode"] == "inventory_trains":
                         train_idx = idx // 2
@@ -236,7 +236,7 @@ def main():
                         if train_idx < len(assembled_trains):
                             tr = assembled_trains.pop(train_idx)
                             if action == "sell":
-                                sell_price = (tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
+                                sell_price = (tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
                                 economy.add(sell_price)
                             else: # disassemble
                                 owned_locos.append(tr["loco"])
@@ -671,7 +671,8 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for l in owned_locos if l.type == t)
-                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
+                    first_loco = next(l for l in owned_locos if l.type == t)
+                    sell_p = int(first_loco.get_sell_price() * TRAIN_SELL_MULTIPLIER)
                     game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_wagons":
@@ -683,7 +684,8 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for w in owned_wagons if w.type == t)
-                    sell_p = int(t.price * TRAIN_SELL_MULTIPLIER)
+                    first_wagon = next(w for w in owned_wagons if w.type == t)
+                    sell_p = int(first_wagon.get_sell_price() * TRAIN_SELL_MULTIPLIER)
                     game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_trains":
@@ -691,7 +693,7 @@ def main():
                     game.render_text("Žádné sestavené soupravy", (x_offset, y_offset), color=(255,0,0))
                 for i, tr in enumerate(assembled_trains):
                     if y_offset > screen_h/2 + 180: break
-                    sell_p = int((tr["loco"].type.price + sum(w.type.price for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
+                    sell_p = int((tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
                     game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů:", (x_offset, y_offset), color=(200, 200, 200))
                     y_offset += 20
                     game.render_text(f"  [{i*2+1}] Prodat za {sell_p}{economy.currency_symbol} | [{i*2+2}] Rozložit", (x_offset, y_offset))
