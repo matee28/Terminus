@@ -156,12 +156,13 @@ def main():
 
         # zoom nebo scroll
         if event.type == pygame.MOUSEWHEEL:
-            if menu_state["mode"] not in ["closed", "main", "inventory_main"]:
-                menu_state["scroll_y"] -= event.y * 40
-                if menu_state["scroll_y"] < 0:
-                    menu_state["scroll_y"] = 0
-                elif menu_state["scroll_y"] > menu_state.get("max_scroll", 0):
-                    menu_state["scroll_y"] = menu_state.get("max_scroll", 0)
+            if menu_state["mode"] != "closed":
+                if menu_state["mode"] not in ["main", "inventory_main"]:
+                    menu_state["scroll_y"] -= event.y * 40
+                    if menu_state["scroll_y"] < 0:
+                        menu_state["scroll_y"] = 0
+                    elif menu_state["scroll_y"] > menu_state.get("max_scroll", 0):
+                        menu_state["scroll_y"] = menu_state.get("max_scroll", 0)
             else:
                 if event.y > 0:
                     camera.zoom_in()
@@ -170,7 +171,7 @@ def main():
 
         # pohyb kamery
         if event.type == pygame.MOUSEMOTION:
-            if event.buttons[0]:
+            if event.buttons[0] and menu_state["mode"] == "closed":
                 camera.move((-event.rel[0], +event.rel[1]))
 
         def find_railway_path(start_station, end_station):
