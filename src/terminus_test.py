@@ -188,7 +188,7 @@ def main():
                         owned_wagons.extend(menu_state["temp_wagons"])
                         menu_state["temp_loco"] = None
                         menu_state["temp_wagons"] = []
-                    elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains"]:
+                    elif menu_state["mode"] in ["inventory_locos", "inventory_wagons", "inventory_trains", "inventory_active"]:
                         menu_state["mode"] = "inventory_main"
                     else:
                         menu_state["mode"] = "closed"
@@ -208,39 +208,93 @@ def main():
                         if idx == 0: menu_state["mode"] = "inventory_locos"
                         elif idx == 1: menu_state["mode"] = "inventory_wagons"
                         elif idx == 2: menu_state["mode"] = "inventory_trains"
+                        elif idx == 3: menu_state["mode"] = "inventory_active"
                     elif menu_state["mode"] == "inventory_locos":
                         types_in_inv = []
                         for l in owned_locos:
                             if l.type not in types_in_inv: types_in_inv.append(l.type)
-                        if idx < len(types_in_inv):
-                            t_to_sell = types_in_inv[idx]
+                        if idx < len(types_in_inv) * 2:
+                            item_idx = idx // 2
+                            action = "sell" if idx % 2 == 0 else "repair"
+                            t_to_act = types_in_inv[item_idx]
+                            most_damaged_idx = -1
+                            min_health = 2.0
                             for i, l in enumerate(owned_locos):
-                                if l.type == t_to_sell:
-                                    sold_l = owned_locos.pop(i)
+                                if l.type == t_to_act and l.health < min_health:
+                                    min_health = l.health
+                                    most_damaged_idx = i
+                            if most_damaged_idx != -1:
+                                l = owned_locos[most_damaged_idx]
+                                if action == "sell":
+                                    sold_l = owned_locos.pop(most_damaged_idx)
                                     economy.add(sold_l.get_sell_price() * TRAIN_SELL_MULTIPLIER)
-                                    break
+                                else:
+                                    repair_cost = l.get_repair_cost()
+                                    if economy.can_afford(repair_cost):
+                                        economy.deduct(repair_cost)
+                                        l.repair()
                     elif menu_state["mode"] == "inventory_wagons":
                         types_in_inv = []
                         for w in owned_wagons:
                             if w.type not in types_in_inv: types_in_inv.append(w.type)
-                        if idx < len(types_in_inv):
-                            t_to_sell = types_in_inv[idx]
+                        if idx < len(types_in_inv) * 2:
+                            item_idx = idx // 2
+                            action = "sell" if idx % 2 == 0 else "repair"
+                            t_to_act = types_in_inv[item_idx]
+                            most_damaged_idx = -1
+                            min_health = 2.0
                             for i, w in enumerate(owned_wagons):
-                                if w.type == t_to_sell:
-                                    sold_w = owned_wagons.pop(i)
+                                if w.type == t_to_act and w.health < min_health:
+                                    min_health = w.health
+                                    most_damaged_idx = i
+                            if most_damaged_idx != -1:
+                                w = owned_wagons[most_damaged_idx]
+                                if action == "sell":
+                                    sold_w = owned_wagons.pop(most_damaged_idx)
                                     economy.add(sold_w.get_sell_price() * TRAIN_SELL_MULTIPLIER)
-                                    break
+                                else:
+                                    repair_cost = w.get_repair_cost()
+                                    if economy.can_afford(repair_cost):
+                                        economy.deduct(repair_cost)
+                                        w.repair()
                     elif menu_state["mode"] == "inventory_trains":
-                        train_idx = idx // 2
-                        action = "sell" if idx % 2 == 0 else "disassemble"
+                        train_idx = idx // 3
+                        action = "sell" if idx % 3 == 0 else ("disassemble" if idx % 3 == 1 else "repair")
                         if train_idx < len(assembled_trains):
-                            tr = assembled_trains.pop(train_idx)
+                            tr = assembled_trains[train_idx]
                             if action == "sell":
+                                assembled_trains.pop(train_idx)
                                 sell_price = (tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER
                                 economy.add(sell_price)
-                            else: # disassemble
+                            elif action == "disassemble":
+                                assembled_trains.pop(train_idx)
                                 owned_locos.append(tr["loco"])
                                 owned_wagons.extend(tr["wagons"])
+                            elif action == "repair":
+                                repair_cost = tr["loco"].get_repair_cost() + sum(w.get_repair_cost() for w in tr["wagons"])
+                                if economy.can_afford(repair_cost):
+                                    economy.deduct(repair_cost)
+                                    tr["loco"].repair()
+                                    for w in tr["wagons"]:
+                                        w.repair()
+                    elif menu_state["mode"] == "inventory_active":
+                        train_idx = idx // 2
+                        action = "withdraw" if idx % 2 == 0 else "repair"
+                        if train_idx < len(world.active_trains):
+                            at = world.active_trains[train_idx]
+                            if action == "withdraw":
+                                world.active_trains.pop(train_idx)
+                                assembled_trains.append({
+                                    "loco": at.train.locomotive,
+                                    "wagons": at.train.wagons
+                                })
+                            elif action == "repair":
+                                repair_cost = at.train.locomotive.get_repair_cost() + sum(w.get_repair_cost() for w in at.train.wagons)
+                                if economy.can_afford(repair_cost):
+                                    economy.deduct(repair_cost)
+                                    at.train.locomotive.repair()
+                                    for w in at.train.wagons:
+                                        w.repair()
                     elif menu_state["mode"] == "buy_loco":
                         if idx < len(available_loco_types):
                             t = available_loco_types[idx]
@@ -640,7 +694,8 @@ def main():
                 game.render_text("Vyberte lokomotivu pro novou soupravu:", (x_offset, y_offset), color=(255,255,255))
                 y_offset += 25
                 for i, loc in enumerate(owned_locos):
-                    game.render_text(f"{i+1}: {loc.type.name}", (x_offset, y_offset))
+                    health_pct = int(loc.health * 100)
+                    game.render_text(f"{i+1}: {loc.type.name} [zdraví: {health_pct}%]", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assemble_wagons":
                 game.render_text(f"Loko: {menu_state['temp_loco'].type.name}", (x_offset, y_offset), color=(0,255,255))
@@ -653,7 +708,8 @@ def main():
                     if y_offset > screen_h/2 + 180:
                         game.render_text("... další nezobrazeny", (x_offset, y_offset))
                         break
-                    game.render_text(f"{i+1}: {wag.type.name}", (x_offset, y_offset))
+                    health_pct = int(wag.health * 100)
+                    game.render_text(f"{i+1}: {wag.type.name} [zdraví: {health_pct}%]", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_main":
                 game.render_text("1: Volné lokomotivy", (x_offset, y_offset))
@@ -661,6 +717,8 @@ def main():
                 game.render_text("2: Volné vagony", (x_offset, y_offset))
                 y_offset += 25
                 game.render_text("3: Sestavené soupravy", (x_offset, y_offset))
+                y_offset += 25
+                game.render_text("4: Aktivní soupravy na tratích", (x_offset, y_offset))
                 y_offset += 25
             elif menu_state["mode"] == "inventory_locos":
                 types_in_inv = []
@@ -671,9 +729,11 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for l in owned_locos if l.type == t)
-                    first_loco = next(l for l in owned_locos if l.type == t)
+                    first_loco = min((l for l in owned_locos if l.type == t), key=lambda x: x.health)
                     sell_p = int(first_loco.get_sell_price() * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    repair_c = int(first_loco.get_repair_cost())
+                    health_pct = int(first_loco.health * 100)
+                    game.render_text(f"{t.name} ({count}x) [zdraví: {health_pct}%] - [{i*2+1}] prodat (1ks) za {sell_p}{economy.currency_symbol} | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_wagons":
                 types_in_inv = []
@@ -684,9 +744,11 @@ def main():
                 for i, t in enumerate(types_in_inv):
                     if y_offset > screen_h/2 + 180: break
                     count = sum(1 for w in owned_wagons if w.type == t)
-                    first_wagon = next(w for w in owned_wagons if w.type == t)
+                    first_wagon = min((w for w in owned_wagons if w.type == t), key=lambda x: x.health)
                     sell_p = int(first_wagon.get_sell_price() * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{i+1}: {t.name} ({count}x) - prodat 1ks za {sell_p}{economy.currency_symbol}", (x_offset, y_offset))
+                    repair_c = int(first_wagon.get_repair_cost())
+                    health_pct = int(first_wagon.health * 100)
+                    game.render_text(f"{t.name} ({count}x) [zdraví: {health_pct}%] - [{i*2+1}] prodat (1ks) za {sell_p}{economy.currency_symbol} | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "inventory_trains":
                 if not assembled_trains:
@@ -694,9 +756,22 @@ def main():
                 for i, tr in enumerate(assembled_trains):
                     if y_offset > screen_h/2 + 180: break
                     sell_p = int((tr["loco"].get_sell_price() + sum(w.get_sell_price() for w in tr["wagons"])) * TRAIN_SELL_MULTIPLIER)
-                    game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů:", (x_offset, y_offset), color=(200, 200, 200))
+                    repair_c = int(tr["loco"].get_repair_cost() + sum(w.get_repair_cost() for w in tr["wagons"]))
+                    health_pct = int((tr["loco"].health + sum(w.health for w in tr["wagons"])) / (1 + len(tr["wagons"])) * 100)
+                    game.render_text(f"{tr['loco'].type.name} + {len(tr['wagons'])} vagonů [průměrné zdraví: {health_pct}%]:", (x_offset, y_offset), color=(200, 200, 200))
                     y_offset += 20
-                    game.render_text(f"  [{i*2+1}] Prodat za {sell_p}{economy.currency_symbol} | [{i*2+2}] Rozložit", (x_offset, y_offset))
+                    game.render_text(f"  [{i*3+1}] prodat za {sell_p}{economy.currency_symbol} | [{i*3+2}] rozložit | [{i*3+3}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
+                    y_offset += 25
+            elif menu_state["mode"] == "inventory_active":
+                if not world.active_trains:
+                    game.render_text("Žádné aktivní soupravy na tratích", (x_offset, y_offset), color=(255,0,0))
+                for i, at in enumerate(world.active_trains):
+                    if y_offset > screen_h/2 + 180: break
+                    repair_c = int(at.train.locomotive.get_repair_cost() + sum(w.get_repair_cost() for w in at.train.wagons))
+                    health_pct = int((at.train.locomotive.health + sum(w.health for w in at.train.wagons)) / (1 + len(at.train.wagons)) * 100)
+                    game.render_text(f"{at.train.locomotive.type.name} + {len(at.train.wagons)} vagonů na cestě k {at.route.stations[-1].name} [zdraví: {health_pct}%]:", (x_offset, y_offset), color=(200, 200, 200))
+                    y_offset += 20
+                    game.render_text(f"  [{i*2+1}] stáhnout do depa | [{i*2+2}] opravit za {repair_c}{economy.currency_symbol}", (x_offset, y_offset))
                     y_offset += 25
             elif menu_state["mode"] == "assign_train":
                 game.render_text("Vyberte sestavenou soupravu pro spoj:", (x_offset, y_offset), color=(255,255,255))
