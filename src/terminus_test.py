@@ -678,8 +678,8 @@ def main():
         if RAILWAY_MODE and len(world.railways) > 0 and len(world.railways[-1].points) > 1:
             pts = world.railways[-1].points
             
-            for point in pts[:-1]:
-                game.draw_debug_dot(point, 3)
+            # for point in pts[:-1]:
+            #    game.draw_debug_dot(point, 3)
 
             current_cost = sum(math.dist(pts[i-1], pts[i]) for i in range(1, len(pts))) * RAILWAY_COST_PER_METER
             mouse_pos = pygame.mouse.get_pos()
