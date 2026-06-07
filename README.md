@@ -69,9 +69,10 @@ Hráč se pohybuje na 2D mapě s náhodně vygenerovanými městy, mezi kterými
 
 ### Použité knihovny
 
-- pygame
-- json
-- random
+- pygame-ce
+- numpy
+- shapely
+- knihovny z Python Standard Library (json, os, uuid, random, math, colorsys, heapq)
 
 
 ## Poznámky
