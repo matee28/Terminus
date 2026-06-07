@@ -6,6 +6,8 @@ import random
 
 from shapely.geometry import LineString, Point
 
+import TerminusEngine.Audio
+
 
 # systém souřadnic enginu: +y je nahoru; +x je doprava
 
@@ -183,6 +185,8 @@ class Game:
         self.image_colors = {}
         self.texture_cache = {}
         self.max_texture_cache_size = 100  # limit pro počet cachovaných textur
+        
+        self.audio = TerminusEngine.Audio.AudioManager(self)
 
         self.path_cache = {}
         
@@ -250,6 +254,7 @@ class Game:
                 
                 event_handler(event)
 
+            self.audio.update()
             self.screen.fill((0, 0, 0))
             loop()
             pygame.display.flip()

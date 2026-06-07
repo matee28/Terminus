@@ -39,6 +39,135 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
+<section id="module-TerminusEngine.Audio">
+<span id="terminusengine-audio-module"></span><h2>TerminusEngine.Audio module<a class="headerlink" href="#module-TerminusEngine.Audio" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Audio.</span></span><span class="sig-name descname"><span class="pre">AudioManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager.load_sound">
+<span class="sig-name descname"><span class="pre">load_sound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager.load_sound"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager.load_sound" title="Link to this definition">¶</a></dt>
+<dd><p>Načte zvukový soubor do paměti a uloží ho pod zadaným jménem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – název zvuku</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – relativní cesta ke zvukovému souboru</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager.play_oneshot">
+<span class="sig-name descname"><span class="pre">play_oneshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager.play_oneshot"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager.play_oneshot" title="Link to this definition">¶</a></dt>
+<dd><p>Zahraje zvuk jednorázově na statické pozici.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – název zvuku v paměti</p></li>
+<li><p><strong>position</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – statická pozice zdroje ve světě (x, y)</p></li>
+<li><p><strong>base_volume</strong> (<em>float; default = 1.0</em>) – základní hlasitost (0.0-1.0)</p></li>
+<li><p><strong>panning</strong> (<em>bool; default = True</em>) – zda povolit panning zvuku</p></li>
+<li><p><strong>max_distance</strong> (<em>float; default = 2000</em>) – max. dosah zvuku v metrech</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager.play_sound">
+<span class="sig-name descname"><span class="pre">play_sound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_volume:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panning:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_volume_multiplier=&lt;function</span> <span class="pre">AudioManager.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager.play_sound"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager.play_sound" title="Link to this definition">¶</a></dt>
+<dd><p>Přehraje zvuk na dané pozici a vytvoří aktivní zdroj zvuku.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – název zvuku v paměti</p></li>
+<li><p><strong>get_position</strong> (<em>callable</em>) – funkce/lambda vracející aktuální pozici zdroje ve světě</p></li>
+<li><p><strong>loop</strong> (<em>bool; default = False</em>) – zda se má zvuk přehrávat v loopu</p></li>
+<li><p><strong>base_volume</strong> (<em>float; default = 1.0</em>) – základní hlasitost (0.0-1.0)</p></li>
+<li><p><strong>panning</strong> (<em>bool; default = True</em>) – zda povolit panning zvuku</p></li>
+<li><p><strong>max_distance</strong> (<em>float; default = 2000</em>) – max. dosah zvuku v metrech</p></li>
+<li><p><strong>lambda</strong> (<em>get_volume_multiplier</em><em> (</em><em>callable; default =</em>) – 1.0): funkce/lambda vracející násobič hlasitosti pro daný frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Vrací<span class="colon">:</span></dt>
+<dd class="field-even"><p>zdroj zvuku</p>
+</dd>
+<dt class="field-odd">Typ návratové hodnoty<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#TerminusEngine.Audio.AudioSource" title="TerminusEngine.Audio.AudioSource">AudioSource</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager.stop_source">
+<span class="sig-name descname"><span class="pre">stop_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource" title="TerminusEngine.Audio.AudioSource"><span class="pre">AudioSource</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager.stop_source"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager.stop_source" title="Link to this definition">¶</a></dt>
+<dd><p>Zastaví přehrávání konkrétního aktivního zdroje zvuku a odstraní jej ze sledování.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parametry<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> (<a class="reference internal" href="#TerminusEngine.Audio.AudioSource" title="TerminusEngine.Audio.AudioSource"><em>AudioSource</em></a>) – aktivní zdroj zvuku</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioManager.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioManager.update"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioManager.update" title="Link to this definition">¶</a></dt>
+<dd><p>Aktualizuje hlasitosti všech aktivních zvuků.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Audio.</span></span><span class="sig-name descname"><span class="pre">AudioSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_volume_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Audio.html#AudioSource"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Audio.AudioSource" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reprezentuje aktivní zdroj zvuku.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.base_volume">
+<span class="sig-name descname"><span class="pre">base_volume</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.base_volume" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.channel">
+<span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Channel</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.get_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.get_volume_multiplier">
+<span class="sig-name descname"><span class="pre">get_volume_multiplier</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.get_volume_multiplier" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.loop">
+<span class="sig-name descname"><span class="pre">loop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.loop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.max_distance">
+<span class="sig-name descname"><span class="pre">max_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.max_distance" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.panning">
+<span class="sig-name descname"><span class="pre">panning</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.panning" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="TerminusEngine.Audio.AudioSource.sound_name">
+<span class="sig-name descname"><span class="pre">sound_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#TerminusEngine.Audio.AudioSource.sound_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-TerminusEngine.Economy">
 <span id="terminusengine-economy-module"></span><h2>TerminusEngine.Economy module<a class="headerlink" href="#module-TerminusEngine.Economy" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -243,7 +372,7 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="TerminusEngine.Vehicles.LocomotiveType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">LocomotiveType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#LocomotiveType"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.LocomotiveType" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">TerminusEngine.Vehicles.</span></span><span class="sig-name descname"><span class="pre">LocomotiveType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passenger_capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine_sound_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/Vehicles.html#LocomotiveType"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.Vehicles.LocomotiveType" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Reprezentuje typ lokomotivy.</p>
 </dd></dl>
@@ -328,12 +457,14 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain.serves_cargo">
 <span class="sig-name descname"><span class="pre">serves_cargo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain.serves_cargo"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain.serves_cargo" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Zjišťuje, zda vlak na své lince obsluhuje náklad (zastavuje alespoň na dvou nákladních stanicích).</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="TerminusEngine.World.ActiveTrain.serves_passengers">
 <span class="sig-name descname"><span class="pre">serves_passengers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TerminusEngine/World.html#ActiveTrain.serves_passengers"><span class="viewcode-link"><span class="pre">[zdroj]</span></span></a><a class="headerlink" href="#TerminusEngine.World.ActiveTrain.serves_passengers" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Zjišťuje, zda vlak na své lince obsluhuje cestující (zastavuje alespoň na dvou osobních stanicích).</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -881,6 +1012,28 @@ Pokud nenalezne, vrátí první dostupný typ, jinak None.</p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">TerminusEngine package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.Audio">TerminusEngine.Audio module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager"><code class="docutils literal notranslate"><span class="pre">AudioManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager.load_sound"><code class="docutils literal notranslate"><span class="pre">AudioManager.load_sound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager.play_oneshot"><code class="docutils literal notranslate"><span class="pre">AudioManager.play_oneshot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager.play_sound"><code class="docutils literal notranslate"><span class="pre">AudioManager.play_sound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager.stop_source"><code class="docutils literal notranslate"><span class="pre">AudioManager.stop_source()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioManager.update"><code class="docutils literal notranslate"><span class="pre">AudioManager.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource"><code class="docutils literal notranslate"><span class="pre">AudioSource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.base_volume"><code class="docutils literal notranslate"><span class="pre">AudioSource.base_volume</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.channel"><code class="docutils literal notranslate"><span class="pre">AudioSource.channel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.get_position"><code class="docutils literal notranslate"><span class="pre">AudioSource.get_position</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.get_volume_multiplier"><code class="docutils literal notranslate"><span class="pre">AudioSource.get_volume_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.loop"><code class="docutils literal notranslate"><span class="pre">AudioSource.loop</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.max_distance"><code class="docutils literal notranslate"><span class="pre">AudioSource.max_distance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.panning"><code class="docutils literal notranslate"><span class="pre">AudioSource.panning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Audio.AudioSource.sound_name"><code class="docutils literal notranslate"><span class="pre">AudioSource.sound_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-TerminusEngine.Economy">TerminusEngine.Economy module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#TerminusEngine.Economy.Economy"><code class="docutils literal notranslate"><span class="pre">Economy</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#TerminusEngine.Economy.Economy.add"><code class="docutils literal notranslate"><span class="pre">Economy.add()</span></code></a></li>

@@ -166,11 +166,37 @@ class ActiveTrain:
         self.railway_dir = 1
         self.wait_timer = 0.0
         self.current_stop_station = None
+        self.just_stopped_for_passengers = False
+        self.gong_played_this_stop = False
         self.id = uuid.uuid4().hex
+        self.position = None
+        self.audio_sources = None
         
         self._setup_leg()
 
+    def __getstate__(self):
+        """
+        Připraví objekt pro serializaci/uložení hry. Odstraní neuložitelné objekty (např. audio kanály).
+        """
+        state = self.__dict__.copy()
+        if 'audio_sources' in state:
+            del state['audio_sources']
+        return state
+
+    def __setstate__(self, state):
+        """
+        Obnoví stav objektu ze serializovaných dat (načtení hry).
+
+        Args:
+            state (dict): Uložený stav objektu.
+        """
+        self.__dict__.update(state)
+        self.audio_sources = None
+
     def serves_passengers(self):
+        """
+        Zjišťuje, zda vlak na své lince obsluhuje cestující (zastavuje alespoň na dvou osobních stanicích).
+        """
         count = 0
         for i, st in enumerate(self.route.stations):
             if self.route.stop_flags[i] and st.passenger_capacity > 0:
@@ -178,6 +204,9 @@ class ActiveTrain:
         return count >= 2
 
     def serves_cargo(self):
+        """
+        Zjišťuje, zda vlak na své lince obsluhuje náklad (zastavuje alespoň na dvou nákladních stanicích).
+        """
         count = 0
         for i, st in enumerate(self.route.stations):
             if self.route.stop_flags[i] and st.cargo_capacity > 0:
@@ -185,6 +214,9 @@ class ActiveTrain:
         return count >= 2
 
     def _setup_leg(self):
+        """
+        Připraví vlak na další úsek trasy. Určí směr pohybu po koleji a vynuluje ujetou vzdálenost v daném úseku.
+        """
         if len(self.route.railways) == 0:
             return
             
@@ -201,21 +233,27 @@ class ActiveTrain:
         self.leg_distance = 0.0
 
     def get_passenger_capacity(self):
-        """Vrátí celkovou kapacitu osobního vlaku."""
+        """
+        Vrátí celkovou kapacitu osobního vlaku.
+        """
         cap = self.train.locomotive.get_passenger_capacity()
         for wagon in self.train.wagons:
             cap += wagon.get_passenger_capacity()
         return cap
 
     def get_cargo_capacity(self):
-        """Vrátí celkovou kapacitu nákladního vlaku."""
+        """
+        Vrátí celkovou kapacitu nákladního vlaku.
+        """
         cap = self.train.locomotive.get_cargo_capacity()
         for wagon in self.train.wagons:
             cap += wagon.get_cargo_capacity()
         return cap
 
     def get_total_weight(self):
-        """Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících)."""
+        """
+        Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících).
+        """
         weight = self.train.locomotive.type.weight
         for wagon in self.train.wagons:
             weight += wagon.type.weight
@@ -293,6 +331,9 @@ class World:
                     free_space = capacity - at.passengers
                     if free_space > 0 and at.current_stop_station.passengers >= 1:
                         to_load = min(free_space, int(at.current_stop_station.passengers))
+                        if to_load > 0 and not at.gong_played_this_stop:
+                            at.just_stopped_for_passengers = True
+                            at.gong_played_this_stop = True
                         at.current_stop_station.passengers -= to_load
                         at.passengers += to_load
 
@@ -365,6 +406,7 @@ class World:
 
                     if target_station.passenger_capacity > 0:
                         at.passengers = 0
+                        at.gong_played_this_stop = False
                     if target_station.cargo_capacity > 0:
                         at.cargo = 0.0
                     at.current_stop_station = target_station

@@ -4,6 +4,14 @@ TerminusEngine package
 Submodules
 ----------
 
+TerminusEngine.Audio module
+---------------------------
+
+.. automodule:: TerminusEngine.Audio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 TerminusEngine.Economy module
 -----------------------------
 

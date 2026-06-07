@@ -3,3 +3,5 @@
 **/build/
 **/_build/
 */game.json
+**/dist/
+*.spec

@@ -226,13 +226,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">railway_dir</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait_timer</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_stop_station</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_stopped_for_passengers</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gong_played_this_stop</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">audio_sources</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_leg</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Připraví objekt pro serializaci/uložení hry. Odstraní neuložitelné objekty (např. audio kanály).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;audio_sources&#39;</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;audio_sources&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obnoví stav objektu ze serializovaných dat (načtení hry).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state (dict): Uložený stav objektu.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">audio_sources</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ActiveTrain.serves_passengers">
 <a class="viewcode-back" href="../../TerminusEngine.html#TerminusEngine.World.ActiveTrain.serves_passengers">[dokumentace]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">serves_passengers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Zjišťuje, zda vlak na své lince obsluhuje cestující (zastavuje alespoň na dvou osobních stanicích).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">route</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">route</span><span class="o">.</span><span class="n">stop_flags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">passenger_capacity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -243,6 +269,9 @@
 <div class="viewcode-block" id="ActiveTrain.serves_cargo">
 <a class="viewcode-back" href="../../TerminusEngine.html#TerminusEngine.World.ActiveTrain.serves_cargo">[dokumentace]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">serves_cargo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Zjišťuje, zda vlak na své lince obsluhuje náklad (zastavuje alespoň na dvou nákladních stanicích).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">route</span><span class="o">.</span><span class="n">stations</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">route</span><span class="o">.</span><span class="n">stop_flags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">cargo_capacity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -251,6 +280,9 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_setup_leg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Připraví vlak na další úsek trasy. Určí směr pohybu po koleji a vynuluje ujetou vzdálenost v daném úseku.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">route</span><span class="o">.</span><span class="n">railways</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
             
@@ -269,7 +301,9 @@
 <div class="viewcode-block" id="ActiveTrain.get_passenger_capacity">
 <a class="viewcode-back" href="../../TerminusEngine.html#TerminusEngine.World.ActiveTrain.get_passenger_capacity">[dokumentace]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_passenger_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Vrátí celkovou kapacitu osobního vlaku.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrátí celkovou kapacitu osobního vlaku.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="o">.</span><span class="n">get_passenger_capacity</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">:</span>
             <span class="n">cap</span> <span class="o">+=</span> <span class="n">wagon</span><span class="o">.</span><span class="n">get_passenger_capacity</span><span class="p">()</span>
@@ -279,7 +313,9 @@
 <div class="viewcode-block" id="ActiveTrain.get_cargo_capacity">
 <a class="viewcode-back" href="../../TerminusEngine.html#TerminusEngine.World.ActiveTrain.get_cargo_capacity">[dokumentace]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_cargo_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Vrátí celkovou kapacitu nákladního vlaku.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrátí celkovou kapacitu nákladního vlaku.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="o">.</span><span class="n">get_cargo_capacity</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">:</span>
             <span class="n">cap</span> <span class="o">+=</span> <span class="n">wagon</span><span class="o">.</span><span class="n">get_cargo_capacity</span><span class="p">()</span>
@@ -289,7 +325,9 @@
 <div class="viewcode-block" id="ActiveTrain.get_total_weight">
 <a class="viewcode-back" href="../../TerminusEngine.html#TerminusEngine.World.ActiveTrain.get_total_weight">[dokumentace]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_total_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Vrátí celkovou hmotnost vlaku v tunách (včetně nákladu a cestujících).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">weight</span>
         <span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">:</span>
             <span class="n">weight</span> <span class="o">+=</span> <span class="n">wagon</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">weight</span>
@@ -373,6 +411,9 @@
                     <span class="n">free_space</span> <span class="o">=</span> <span class="n">capacity</span> <span class="o">-</span> <span class="n">at</span><span class="o">.</span><span class="n">passengers</span>
                     <span class="k">if</span> <span class="n">free_space</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">at</span><span class="o">.</span><span class="n">current_stop_station</span><span class="o">.</span><span class="n">passengers</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">to_load</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">free_space</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">current_stop_station</span><span class="o">.</span><span class="n">passengers</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">to_load</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">at</span><span class="o">.</span><span class="n">gong_played_this_stop</span><span class="p">:</span>
+                            <span class="n">at</span><span class="o">.</span><span class="n">just_stopped_for_passengers</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">at</span><span class="o">.</span><span class="n">gong_played_this_stop</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="n">at</span><span class="o">.</span><span class="n">current_stop_station</span><span class="o">.</span><span class="n">passengers</span> <span class="o">-=</span> <span class="n">to_load</span>
                         <span class="n">at</span><span class="o">.</span><span class="n">passengers</span> <span class="o">+=</span> <span class="n">to_load</span>
 
@@ -445,6 +486,7 @@
 
                     <span class="k">if</span> <span class="n">target_station</span><span class="o">.</span><span class="n">passenger_capacity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">at</span><span class="o">.</span><span class="n">passengers</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">at</span><span class="o">.</span><span class="n">gong_played_this_stop</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">if</span> <span class="n">target_station</span><span class="o">.</span><span class="n">cargo_capacity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">at</span><span class="o">.</span><span class="n">cargo</span> <span class="o">=</span> <span class="mf">0.0</span>
                     <span class="n">at</span><span class="o">.</span><span class="n">current_stop_station</span> <span class="o">=</span> <span class="n">target_station</span>

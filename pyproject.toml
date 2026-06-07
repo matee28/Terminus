@@ -1,10 +1,10 @@
 [project]
 name = "Terminus"
 authors = [
-  { name="Matěj Šindelář", email="102618601+matee28@users.noreply.github.com" },
+  { name="matee28", email="102618601+matee28@users.noreply.github.com" },
 ]
 
-description = "Pygame simulátor železničního magnáta"
+description = "Simulátor železničního magnáta"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [

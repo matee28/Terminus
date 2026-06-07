@@ -54,7 +54,11 @@ def save_game(filename, economy, game, world, owned_locos, owned_wagons, assembl
             "balance": economy.balance
         },
         "game": {
-            "time": game.time
+            "time": game.time,
+            "camera": {
+                "position": game.camera.position,
+                "zoom": game.camera.zoom
+            }
         },
         "world": {
             "cities": [],
@@ -171,6 +175,9 @@ def load_game(filename, economy, game, world, owned_locos, owned_wagons, assembl
         
     economy.balance = data["economy"]["balance"]
     game.time = data["game"]["time"]
+    if "camera" in data["game"]:
+        game.camera.position = tuple(data["game"]["camera"]["position"])
+        game.camera.zoom = data["game"]["camera"]["zoom"]
     
     owned_locos.clear()
     owned_wagons.clear()
