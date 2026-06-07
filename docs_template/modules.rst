@@ -5,4 +5,4 @@ src
    :maxdepth: 4
 
    TerminusEngine
-   terminus_test
+   terminus

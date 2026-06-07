@@ -209,7 +209,7 @@ class Game:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-        pygame.display.set_caption("TerminusEngine")
+        pygame.display.set_caption("Terminus")
 
     def __abs_path(self, relative_path: str):
         """
