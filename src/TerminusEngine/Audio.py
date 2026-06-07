@@ -1,6 +1,22 @@
 import pygame
 import math
 import os
+from dataclasses import dataclass
+from typing import Callable, Optional, Any
+
+@dataclass
+class AudioSource:
+    """
+    Reprezentuje aktivní zdroj zvuku.
+    """
+    channel: pygame.mixer.Channel
+    sound_name: str
+    get_position: Callable[[], Optional[tuple[float, float]]]
+    base_volume: float
+    panning: bool
+    max_distance: float
+    loop: bool
+    get_volume_multiplier: Callable[[], float]
 
 class AudioManager:
     def __init__(self, game):
@@ -43,7 +59,7 @@ class AudioManager:
             get_volume_multiplier (callable; default = lambda: 1.0): funkce/lambda vracející násobič hlasitosti pro daný frame
 
         Returns:
-            dict: zdroj zvuku
+            AudioSource: zdroj zvuku
         """
         if name not in self.sounds:
             return None
@@ -55,16 +71,16 @@ class AudioManager:
         sound = self.sounds[name]
         channel.play(sound, loops=-1 if loop else 0)
         
-        source = {
-            "channel": channel,
-            "sound_name": name,
-            "get_position": get_position,
-            "base_volume": base_volume,
-            "panning": panning,
-            "max_distance": max_distance,
-            "loop": loop,
-            "get_volume_multiplier": get_volume_multiplier
-        }
+        source = AudioSource(
+            channel=channel,
+            sound_name=name,
+            get_position=get_position,
+            base_volume=base_volume,
+            panning=panning,
+            max_distance=max_distance,
+            loop=loop,
+            get_volume_multiplier=get_volume_multiplier
+        )
         self.active_sources.append(source)
         self._update_source(source)
         return source
@@ -82,36 +98,36 @@ class AudioManager:
         """
         self.play_sound(name, lambda: position, loop=False, base_volume=base_volume, panning=panning, max_distance=max_distance)
 
-    def stop_source(self, source):
+    def stop_source(self, source: AudioSource):
         """
         Zastaví přehrávání konkrétního aktivního zdroje zvuku a odstraní jej ze sledování.
 
         Args:
-            source (dict): aktivní zdroj zvuku
+            source (AudioSource): aktivní zdroj zvuku
         """
         if source and source in self.active_sources:
-            source["channel"].stop()
+            source.channel.stop()
             self.active_sources.remove(source)
 
     def update(self):
         """
         Aktualizuje hlasitosti všech aktivních zvuků.
         """
-        self.active_sources = [s for s in self.active_sources if s["channel"].get_busy()] # odstranění dohraných zdrojů
+        self.active_sources = [s for s in self.active_sources if s.channel.get_busy()] # odstranění dohraných zdrojů
         
         for source in self.active_sources:
             self._update_source(source)
             
-    def _update_source(self, source):
+    def _update_source(self, source: AudioSource):
         """
         Přepočítá hlasitost a panning jednoho aktivního zdroje podle kamery.
 
         Args:
-            source (dict): aktivní zdroj zvuku
+            source (AudioSource): aktivní zdroj zvuku
         """
-        pos = source["get_position"]()
+        pos = source.get_position()
         if pos is None:
-            source["channel"].set_volume(0)
+            source.channel.set_volume(0)
             return
 
         screen_pos = self.game.screen_position(pos)
@@ -141,19 +157,19 @@ class AudioManager:
         world_dist = math.hypot(pos[0] - self.game.camera.position[0], pos[1] - self.game.camera.position[1])
         
         # útlum kvůli vzdálenosti (lineánrí)
-        dist_multiplier = max(0.0, 1.0 - (world_dist / source["max_distance"]))
+        dist_multiplier = max(0.0, 1.0 - (world_dist / source.max_distance))
         
-        dynamic_vol = source.get("get_volume_multiplier", lambda: 1.0)()
+        dynamic_vol = source.get_volume_multiplier()
         
-        final_volume = source["base_volume"] * dynamic_vol * dist_multiplier * zoom_factor
+        final_volume = source.base_volume * dynamic_vol * dist_multiplier * zoom_factor
         
-        if source["panning"]:
+        if source.panning:
             # panning
             pan_val = (screen_pos[0] - cx) / cx # -1 (vlevo) <-> 1 (vpravo)
             pan_val = max(-1.0, min(1.0, pan_val))
             
             left_vol = final_volume * min(1.0, 1.0 - pan_val)
             right_vol = final_volume * min(1.0, 1.0 + pan_val)
-            source["channel"].set_volume(left_vol, right_vol)
+            source.channel.set_volume(left_vol, right_vol)
         else:
-            source["channel"].set_volume(final_volume, final_volume)
+            source.channel.set_volume(final_volume, final_volume)
