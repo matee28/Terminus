@@ -209,7 +209,10 @@ class Game:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-        pygame.display.set_caption("TerminusEngine")
+        pygame.display.set_caption("Terminus")
+
+        icon = pygame.image.load(self.__abs_path("assets/icon.png"))
+        pygame.display.set_icon(icon)
 
     def __abs_path(self, relative_path: str):
         """

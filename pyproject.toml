@@ -25,7 +25,7 @@ version = {file = "VERSION"}
 
 
 [project.scripts]
-terminus-test = "terminus_test:main"
+terminus = "terminus:main"
 
 
 [project.urls]
