@@ -464,15 +464,25 @@ def main():
                             world.railways[-1].add_point(closest_station.position) # dvakrát, aby se trať aktualizovala při pohybu myši
                     else:
                         if closest_station and game.screen_distance(distance) < RAILWAY_MODE_SNAP_DIST_PX and closest_station != world.railways[-1].station_a:
-                            temp_points = world.railways[-1].points[:-1] + [closest_station.position]
-                            total_cost = sum(math.dist(temp_points[i-1], temp_points[i]) for i in range(1, len(temp_points))) * RAILWAY_COST_PER_METER
-                            if economy.can_afford(total_cost):
-                                economy.deduct(total_cost)
-                                world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
-                                world.railways[-1].station_b = closest_station 
-                                world.railways[-1].add_point(closest_station.position)
-                                
-                                RAILWAY_MODE = False
+                            route_exists = False
+                            for rw in world.railways[:-1]:
+                                if (rw.station_a == world.railways[-1].station_a and rw.station_b == closest_station) or (rw.station_b == world.railways[-1].station_a and rw.station_a == closest_station):
+                                    route_exists = True
+                                    break
+
+                            if route_exists:
+                                notification_text = "trať mezi těmito stanicemi už existuje"
+                                notification_timer = 3.0
+                            else:
+                                temp_points = world.railways[-1].points[:-1] + [closest_station.position]
+                                total_cost = sum(math.dist(temp_points[i-1], temp_points[i]) for i in range(1, len(temp_points))) * RAILWAY_COST_PER_METER
+                                if economy.can_afford(total_cost):
+                                    economy.deduct(total_cost)
+                                    world.railways[-1].remove_last_point() # odstranění posledního bodu (z pohybu myši)
+                                    world.railways[-1].station_b = closest_station 
+                                    world.railways[-1].add_point(closest_station.position)
+                                    
+                                    RAILWAY_MODE = False
                         else:
                             world.railways[-1].points.append(point_position)
             if len(world.railways) > 0:
