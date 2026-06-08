@@ -321,7 +321,7 @@ def main():
                 game.time_paused = not game.time_paused
 
         # demolice a rušení spoju
-        if DEMOLISH_MODE and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and menu_state["mode"] == "closed":
+        if DEMOLISH_MODE and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and menu_state["mode"] == "closed" and event.pos[1] > 60:
             mpos = event.pos
             action_taken = False
             
@@ -386,7 +386,7 @@ def main():
 
         # ROUTE_MODE click handling
         if ROUTE_MODE:
-            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5 and event.pos[1] > 60:
                 if event.button == 1: # levé tlačítko = přidání stanice
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
@@ -421,7 +421,7 @@ def main():
 
         # přidávání kolejí
         if RAILWAY_MODE:
-            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5:
+            if event.type == pygame.MOUSEBUTTONUP and math.dist(mouse_down_pos, event.pos) < 5 and event.pos[1] > 60:
                 if event.button == 1: # levé tlačítko
                     point_position = game.world_position(event.pos)
                     closest_station, distance = world.get_closest_station(point_position)
