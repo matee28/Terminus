@@ -26,6 +26,8 @@ notification_timer = 0.0
 current_route_stations = []
 current_route_stop_flags = []
 current_route_railways = []
+mouse_down_pos = (0, 0)
+followed_train = None
 
 INITIAL_BALANCE = 5000000.0
 
@@ -141,7 +143,6 @@ def main():
     assembled_trains = [] # {"name": str, "loco": loco, "wagons": list}
     
     menu_state = {"mode": "closed", "last_mode": "closed", "temp_loco": None, "temp_wagons": [], "temp_route": None, "scroll_y": 0, "max_scroll": 0}
-    mouse_down_pos = (0, 0)
 
 
     game.camera.position = (0, 0)
@@ -173,8 +174,7 @@ def main():
             if len(current_route_railways) > 0:
                 current_route_railways.pop()
     def event_handler(event: pygame.event.Event):
-        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE, notification_text, notification_timer
-        nonlocal mouse_down_pos
+        global RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE, notification_text, notification_timer, mouse_down_pos, followed_train
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_down_pos = event.pos
@@ -198,6 +198,7 @@ def main():
         if event.type == pygame.MOUSEMOTION:
             if event.buttons[0] and menu_state["mode"] == "closed":
                 camera.move((-event.rel[0], +event.rel[1]))
+                followed_train = None
 
         def find_railway_path(start_station, end_station):
             counter = 0
@@ -319,6 +320,18 @@ def main():
             # pozastavení času = P
             if event.key == pygame.K_p:
                 game.time_paused = not game.time_paused
+
+        # sledování lokomotivy
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and menu_state["mode"] == "closed" and event.pos[1] > 60:
+            if math.dist(mouse_down_pos, event.pos) < 5:
+                mpos = event.pos
+                for at in world.active_trains:
+                    if hasattr(at, 'position') and at.position is not None:
+                        screen_pos = game.screen_position(at.position)
+                        loco_width = game.images[at.train.locomotive.type.texture_name].get_width() * camera.zoom
+                        if math.dist(mpos, screen_pos) < max(20, loco_width / 2):
+                            followed_train = at
+                            break
 
         # demolice a rušení spoju
         if DEMOLISH_MODE and event.type == pygame.MOUSEBUTTONUP and event.button == 1 and menu_state["mode"] == "closed" and event.pos[1] > 60:
@@ -459,13 +472,19 @@ def main():
 
 
     def loop():
-        global notification_text, notification_timer, RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE
+        global notification_text, notification_timer, RAILWAY_MODE, ROUTE_MODE, SHOW_ROUTES, DEMOLISH_MODE, followed_train
         dt_seconds = game.clock.get_time() / 1000.0
         if notification_timer > 0:
             notification_timer -= dt_seconds
         
         if not game.time_paused:
             world.update(dt_seconds, game.time_scale, game.train_speed_multiplier, game.passenger_generation_rate, game.cargo_generation_rate, game.get_point_on_path, economy, PASSENGER_REWARD, CARGO_REWARD)
+
+        if followed_train is not None:
+            if followed_train in world.active_trains and hasattr(followed_train, 'position') and followed_train.position is not None:
+                camera.position = [followed_train.position[0], followed_train.position[1]]
+            else:
+                followed_train = None
 
         hovered_route_idx = -1
         hovered_rw_idx = -1

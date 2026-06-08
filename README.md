@@ -15,6 +15,12 @@ terminus
 
 ## Ovládání
 
+### Pohyb kamery
+
+- **kolečko myši** přibližuje a oddaluje pohled
+- **tažení levým tlačítkem myši** posouvá kameru po mapě
+- **kliknutím levým tlačítkem myši na jedoucí lokomotivu** kamera začne vlak sledovat, sledování se zruší ručním posunutím kamery
+
 ### Stavba tratí
 
 - **klávesa `T`** aktivuje režim stavby, opětovný stisk zruší rozpracovanou trať
