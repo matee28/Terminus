@@ -602,7 +602,8 @@ def main():
 
         for city in world.cities:
             for station in city.stations:
-                game.render_image("station", station.position)
+                station_rot = (station.position[0] * 12.34 + station.position[1] * 56.78) % 360
+                game.render_image("station", station.position, rotation=station_rot)
                 if camera.zoom <= 0.01:
                     game.render_station(station.position)
 
