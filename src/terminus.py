@@ -771,6 +771,16 @@ def main():
                 if ui.button((710, 10, 100, 40), "Zpět (Z)", color=(180, 60, 60), hover_color=(200, 80, 80)):
                     undo_action()
 
+            if ROUTE_MODE and len(current_route_stations) >= 2:
+                if ui.button((820, 10, 100, 40), "Dokončit", color=(50, 180, 50), hover_color=(70, 200, 70)):
+                    route = TerminusEngine.World.Route("Nový Spoj", current_route_stations.copy(), current_route_stop_flags.copy(), current_route_railways.copy())
+                    menu_state["mode"] = "assign_train"
+                    menu_state["temp_route"] = route
+                    ROUTE_MODE = False
+                    current_route_stations.clear()
+                    current_route_stop_flags.clear()
+                    current_route_railways.clear()
+
             if ui.button((screen_w - 120, 10, 110, 40), "Menu (M)", color=(50, 50, 50)):
                 menu_state["mode"] = "main"
 
