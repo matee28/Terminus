@@ -3,6 +3,7 @@ import math
 import os
 import numpy as np
 import random
+import sys
 
 from shapely.geometry import LineString, Point
 
@@ -264,6 +265,7 @@ class Game:
             # self.clock.tick(60) # na zacatku loopu kvuli mereni casu
 
         pygame.quit()
+        sys.exit()
 
     def get_time_string(self):
         """
