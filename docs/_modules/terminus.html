@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>terminus &#8212; Dokumentace pro Terminus </title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <script src="../_static/documentation_options.js?v=9a9e823d"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/translations.js?v=22e1c300"></script>
     <link rel="index" title="Rejstřík" href="../genindex.html" />
     <link rel="search" title="Vyhledávání" href="../search.html" />
@@ -60,6 +60,8 @@
 <span class="n">current_route_stations</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">current_route_stop_flags</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">current_route_railways</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">mouse_down_pos</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">followed_train</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="n">INITIAL_BALANCE</span> <span class="o">=</span> <span class="mf">5000000.0</span>
 
@@ -177,7 +179,6 @@
     <span class="n">assembled_trains</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># {&quot;name&quot;: str, &quot;loco&quot;: loco, &quot;wagons&quot;: list}</span>
     
     <span class="n">menu_state</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;closed&quot;</span><span class="p">,</span> <span class="s2">&quot;last_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;closed&quot;</span><span class="p">,</span> <span class="s2">&quot;temp_loco&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;temp_wagons&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;temp_route&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;scroll_y&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;max_scroll&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-    <span class="n">mouse_down_pos</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
     <span class="n">game</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -209,8 +210,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_route_railways</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">current_route_railways</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">event_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
-        <span class="k">global</span> <span class="n">RAILWAY_MODE</span><span class="p">,</span> <span class="n">ROUTE_MODE</span><span class="p">,</span> <span class="n">SHOW_ROUTES</span><span class="p">,</span> <span class="n">DEMOLISH_MODE</span><span class="p">,</span> <span class="n">notification_text</span><span class="p">,</span> <span class="n">notification_timer</span>
-        <span class="k">nonlocal</span> <span class="n">mouse_down_pos</span>
+        <span class="k">global</span> <span class="n">RAILWAY_MODE</span><span class="p">,</span> <span class="n">ROUTE_MODE</span><span class="p">,</span> <span class="n">SHOW_ROUTES</span><span class="p">,</span> <span class="n">DEMOLISH_MODE</span><span class="p">,</span> <span class="n">notification_text</span><span class="p">,</span> <span class="n">notification_timer</span><span class="p">,</span> <span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">followed_train</span>
 
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONDOWN</span><span class="p">:</span>
             <span class="n">mouse_down_pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span>
@@ -234,6 +234,7 @@
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEMOTION</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
                 <span class="n">camera</span><span class="o">.</span><span class="n">move</span><span class="p">((</span><span class="o">-</span><span class="n">event</span><span class="o">.</span><span class="n">rel</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">+</span><span class="n">event</span><span class="o">.</span><span class="n">rel</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">followed_train</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">find_railway_path</span><span class="p">(</span><span class="n">start_station</span><span class="p">,</span> <span class="n">end_station</span><span class="p">):</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -356,8 +357,20 @@
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_p</span><span class="p">:</span>
                 <span class="n">game</span><span class="o">.</span><span class="n">time_paused</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">game</span><span class="o">.</span><span class="n">time_paused</span>
 
+        <span class="c1"># sledování lokomotivy</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">mpos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">world</span><span class="o">.</span><span class="n">active_trains</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">at</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">screen_pos</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">screen_position</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+                        <span class="n">loco_width</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">texture_name</span><span class="p">]</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">*</span> <span class="n">camera</span><span class="o">.</span><span class="n">zoom</span>
+                        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mpos</span><span class="p">,</span> <span class="n">screen_pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">loco_width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                            <span class="n">followed_train</span> <span class="o">=</span> <span class="n">at</span>
+                            <span class="k">break</span>
+
         <span class="c1"># demolice a rušení spoju</span>
-        <span class="k">if</span> <span class="n">DEMOLISH_MODE</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DEMOLISH_MODE</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;closed&quot;</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
             <span class="n">mpos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span>
             <span class="n">action_taken</span> <span class="o">=</span> <span class="kc">False</span>
             
@@ -422,7 +435,7 @@
 
         <span class="c1"># ROUTE_MODE click handling</span>
         <span class="k">if</span> <span class="n">ROUTE_MODE</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># levé tlačítko = přidání stanice</span>
                     <span class="n">point_position</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">world_position</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
                     <span class="n">closest_station</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">get_closest_station</span><span class="p">(</span><span class="n">point_position</span><span class="p">)</span>
@@ -457,7 +470,7 @@
 
         <span class="c1"># přidávání kolejí</span>
         <span class="k">if</span> <span class="n">RAILWAY_MODE</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mouse_down_pos</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># levé tlačítko</span>
                     <span class="n">point_position</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">world_position</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
                     <span class="n">closest_station</span><span class="p">,</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">get_closest_station</span><span class="p">(</span><span class="n">point_position</span><span class="p">)</span>
@@ -495,13 +508,19 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">loop</span><span class="p">():</span>
-        <span class="k">global</span> <span class="n">notification_text</span><span class="p">,</span> <span class="n">notification_timer</span><span class="p">,</span> <span class="n">RAILWAY_MODE</span><span class="p">,</span> <span class="n">ROUTE_MODE</span><span class="p">,</span> <span class="n">SHOW_ROUTES</span><span class="p">,</span> <span class="n">DEMOLISH_MODE</span>
+        <span class="k">global</span> <span class="n">notification_text</span><span class="p">,</span> <span class="n">notification_timer</span><span class="p">,</span> <span class="n">RAILWAY_MODE</span><span class="p">,</span> <span class="n">ROUTE_MODE</span><span class="p">,</span> <span class="n">SHOW_ROUTES</span><span class="p">,</span> <span class="n">DEMOLISH_MODE</span><span class="p">,</span> <span class="n">followed_train</span>
         <span class="n">dt_seconds</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">clock</span><span class="o">.</span><span class="n">get_time</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1000.0</span>
         <span class="k">if</span> <span class="n">notification_timer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">notification_timer</span> <span class="o">-=</span> <span class="n">dt_seconds</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="n">game</span><span class="o">.</span><span class="n">time_paused</span><span class="p">:</span>
             <span class="n">world</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dt_seconds</span><span class="p">,</span> <span class="n">game</span><span class="o">.</span><span class="n">time_scale</span><span class="p">,</span> <span class="n">game</span><span class="o">.</span><span class="n">train_speed_multiplier</span><span class="p">,</span> <span class="n">game</span><span class="o">.</span><span class="n">passenger_generation_rate</span><span class="p">,</span> <span class="n">game</span><span class="o">.</span><span class="n">cargo_generation_rate</span><span class="p">,</span> <span class="n">game</span><span class="o">.</span><span class="n">get_point_on_path</span><span class="p">,</span> <span class="n">economy</span><span class="p">,</span> <span class="n">PASSENGER_REWARD</span><span class="p">,</span> <span class="n">CARGO_REWARD</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">followed_train</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">followed_train</span> <span class="ow">in</span> <span class="n">world</span><span class="o">.</span><span class="n">active_trains</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">followed_train</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">followed_train</span><span class="o">.</span><span class="n">position</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">camera</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="n">followed_train</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">followed_train</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">followed_train</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">hovered_route_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">hovered_rw_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -599,7 +618,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">continue</span>
             
-            <span class="n">all_parts</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span> <span class="o">+</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="p">]</span> <span class="c1"># zkombinování částí</span>
+            <span class="n">all_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive</span><span class="p">]</span> <span class="o">+</span> <span class="n">at</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span> <span class="c1"># zkombinování částí</span>
             <span class="n">current_offset</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">prev_len</span> <span class="o">=</span> <span class="mf">0.0</span>
             
@@ -638,7 +657,8 @@
 
         <span class="k">for</span> <span class="n">city</span> <span class="ow">in</span> <span class="n">world</span><span class="o">.</span><span class="n">cities</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">city</span><span class="o">.</span><span class="n">stations</span><span class="p">:</span>
-                <span class="n">game</span><span class="o">.</span><span class="n">render_image</span><span class="p">(</span><span class="s2">&quot;station&quot;</span><span class="p">,</span> <span class="n">station</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+                <span class="n">station_rot</span> <span class="o">=</span> <span class="p">(</span><span class="n">station</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">12.34</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">56.78</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span>
+                <span class="n">game</span><span class="o">.</span><span class="n">render_image</span><span class="p">(</span><span class="s2">&quot;station&quot;</span><span class="p">,</span> <span class="n">station</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">station_rot</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">camera</span><span class="o">.</span><span class="n">zoom</span> <span class="o">&lt;=</span> <span class="mf">0.01</span><span class="p">:</span>
                     <span class="n">game</span><span class="o">.</span><span class="n">render_station</span><span class="p">(</span><span class="n">station</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
 
@@ -806,6 +826,16 @@
             <span class="k">if</span> <span class="n">show_undo</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ui</span><span class="o">.</span><span class="n">button</span><span class="p">((</span><span class="mi">710</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s2">&quot;Zpět (Z)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="n">hover_color</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">80</span><span class="p">)):</span>
                     <span class="n">undo_action</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">ROUTE_MODE</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_route_stations</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ui</span><span class="o">.</span><span class="n">button</span><span class="p">((</span><span class="mi">820</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s2">&quot;Dokončit&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">hover_color</span><span class="o">=</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">70</span><span class="p">)):</span>
+                    <span class="n">route</span> <span class="o">=</span> <span class="n">TerminusEngine</span><span class="o">.</span><span class="n">World</span><span class="o">.</span><span class="n">Route</span><span class="p">(</span><span class="s2">&quot;Nový Spoj&quot;</span><span class="p">,</span> <span class="n">current_route_stations</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">current_route_stop_flags</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">current_route_railways</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                    <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;assign_train&quot;</span>
+                    <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;temp_route&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">route</span>
+                    <span class="n">ROUTE_MODE</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">current_route_stations</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="n">current_route_stop_flags</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="n">current_route_railways</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">ui</span><span class="o">.</span><span class="n">button</span><span class="p">((</span><span class="n">screen_w</span> <span class="o">-</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="s2">&quot;Menu (M)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)):</span>
                 <span class="n">menu_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span>
@@ -1118,7 +1148,6 @@
 <p class="caption" role="heading"><span class="caption-text">Obsah:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../TerminusEngine.html">TerminusEngine package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../terminus_test.html">terminus_test module</a></li>
 </ul>
 
 <div class="relations">
@@ -1146,7 +1175,7 @@
       &#169;2026, matee28.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
     </div>
