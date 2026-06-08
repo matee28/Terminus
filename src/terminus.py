@@ -563,7 +563,7 @@ def main():
             if len(pts) < 2:
                 continue
             
-            all_parts = at.train.wagons + [at.train.locomotive] # zkombinování částí
+            all_parts = [at.train.locomotive] + at.train.wagons # zkombinování částí
             current_offset = 0.0
             prev_len = 0.0
             
